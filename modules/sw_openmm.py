@@ -11,6 +11,9 @@ import csv
 import itertools
 import matplotlib.pyplot as plt
 
+from openmm import *
+from openmm.app import *
+from openmm.unit import *
 from openmm.app.topology import *
 #from openmmml import MLPotential
 
@@ -587,10 +590,10 @@ class BuildSimulation():
         Returns:
             minimized_simulation_object
         """
-        integrator = mm.LangevinIntegrator(self.temp*unit.kelvin, self.friction_coeff/unit.picoseconds, self.timestep*unit.femtoseconds)
+        integrator = LangevinIntegrator(self.temp*kelvin, self.friction_coeff/picoseconds, self.timestep*femtoseconds)
         
         if BuildSimulation.type_of_simulation(self) == "AMB":
-            system = self.amb_topology.createSystem(nonbondedMethod=app.PME, nonbondedCutoff=1.0*unit.nanometers, constraints=app.HBonds)
+            system = self.amb_topology.createSystem(nonbondedMethod=app.PME, nonbondedCutoff=1.0*nanometers, constraints=HBonds)
             simulation = app.Simulation(self.amb_topology.topology, system, integrator)
             simulation.context.setPositions(self.amb_coordinates.positions)
             
@@ -669,14 +672,14 @@ class BuildSimulation():
         vx, vy, vz = state.getPeriodicBoxVectors() # Obtain periodc box vectors of the previous step
         
         # Set up integrator
-        integrator = mm.LangevinIntegrator(start_temp*unit.kelvin, self.friction_coeff/unit.picoseconds, self.timestep*unit.femtoseconds)
+        integrator = LangevinIntegrator(start_temp*kelvin, self.friction_coeff/picoseconds, self.timestep*femtoseconds)
         
         if BuildSimulation.type_of_simulation(self) == "AMB":
-            system = self.amb_topology.createSystem(nonbondedMethod=app.PME, nonbondedCutoff=1.0*unit.nanometers, constraints=app.HBonds)
+            system = self.amb_topology.createSystem(nonbondedMethod=app.PME, nonbondedCutoff=1.0*nanometers, constraints=app.HBonds)
             simulation = app.Simulation(self.amb_topology.topology, system, integrator)
         
         if BuildSimulation.type_of_simulation(self) == "ANI":
-            system = self.potential.createSystem(self.ani_topology, nonbondedMethod=app.PME, nonbondedCutoff=1.0*unit.nanometers, constraints=app.HBonds)
+            system = self.potential.createSystem(self.ani_topology, nonbondedMethod=app.PME, nonbondedCutoff=1.0*nanometers, constraints=app.HBonds)
             platform = PLatform.getPlatformByName('CUDA')
             simulation = app.Simulation(self.ani_topology, system, integrator, platform)
         
@@ -778,11 +781,11 @@ class BuildSimulation():
         vx, vy, vz = state.getPeriodicBoxVectors()
         
         # Set up integrator and barostat
-        barostat = mm.MonteCarloBarostat((pressure*unit.atmosphere), (temp*unit.kelvin)) # Define barostat (pressure, temp)
-        integrator = mm.LangevinIntegrator(temp*unit.kelvin, self.friction_coeff/unit.picoseconds, self.timestep*unit.femtoseconds)
+        barostat = MonteCarloBarostat((pressure*atmosphere), (temp*kelvin)) # Define barostat (pressure, temp)
+        integrator = LangevinIntegrator(temp*kelvin, self.friction_coeff/picoseconds, self.timestep*femtoseconds)
         
         if BuildSimulation.type_of_simulation(self) == "AMB":
-            system = self.amb_topology.createSystem(nonbondedMethod=app.PME, nonbondedCutoff=1.0*unit.nanometers, constraints=app.HBonds)
+            system = self.amb_topology.createSystem(nonbondedMethod=app.PME, nonbondedCutoff=1.0*nanometers, constraints=app.HBonds)
             system.addForce(barostat)
             simulation = app.Simulation(self.amb_topology.topology, system, integrator)
         
@@ -797,7 +800,7 @@ class BuildSimulation():
         simulation.context.setPeriodicBoxVectors(vx, vy, vz)
         
         # Set initial velocities
-        simulation.context.setVelocitiesToTemperature(temp*unit.kelvin)
+        simulation.context.setVelocitiesToTemperature(temp*kelvin)
         
         # Set up reporters
         output_pdbname = self.filename + "_" + str(pressure) + "_atm_traj.pdb"
@@ -867,14 +870,14 @@ class BuildSimulation():
         vx, vy, vz = state.getPeriodicBoxVectors() # Obtain periodc box vectors of the previous step
         
         # Set up integrator
-        integrator = mm.LangevinIntegrator(temp*unit.kelvin, self.friction_coeff/unit.picoseconds, self.timestep*unit.femtoseconds)
+        integrator = LangevinIntegrator(temp*kelvin, self.friction_coeff/picoseconds, self.timestep*femtoseconds)
         
         if BuildSimulation.type_of_simulation(self) == "AMB":
-            system = self.amb_topology.createSystem(nonbondedMethod=app.PME, nonbondedCutoff=1.0*unit.nanometers, constraints=app.HBonds)
+            system = self.amb_topology.createSystem(nonbondedMethod=app.PME, nonbondedCutoff=1.0*nanometers, constraints=app.HBonds)
             simulation = app.Simulation(self.amb_topology.topology, system, integrator)
         
         if BuildSimulation.type_of_simulation(self) == "ANI":
-            system = self.potential.createSystem(self.ani_topology, nonbondedMethod=app.PME, nonbondedCutoff=1.0*unit.nanometers, constraints=app.HBonds)
+            system = self.potential.createSystem(self.ani_topology, nonbondedMethod=app.PME, nonbondedCutoff=1.0*nanometers, constraints=app.HBonds)
             platform = PLatform.getPlatformByName('CUDA')
             simulation = app.Simulation(self.ani_topology, system, integrator, platform)  
         
