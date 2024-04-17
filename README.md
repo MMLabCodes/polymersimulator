@@ -195,6 +195,19 @@ These can be found in the cloned repository and are labelled appropriately.
 
 There are a series of tutorials recommeded to follow and these are numbered as so.
 
+1. **Tutorial_1.ipynb**
+
+    This notebook contains information on how to begin building systems using some python modules that can be found in the github.
+    
+    The sections in this notebook are: <br>
+        1. Generating PDB file from a SMILES string with a unique residue code for that molecule. <br>
+        2. Parameterizing this PDB file so we can use it in MD simulations. <br>
+        3. Generating systems of arrays with their associated topology and coordinate files for MD simulations. <br>
+
+2. **Tutorial_2.ipynb**
+
+    
+
 #### 2.2.2.2 Module guides
 
 There are a series of guides that give a detailed over of what each module does - some of this information may also be included within the tutorials.
