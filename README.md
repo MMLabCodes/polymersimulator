@@ -193,11 +193,11 @@ These can be found in the cloned repository and are labelled appropriately.
 
 #### 2.2.2.1 Tutorials
 
-There are a series of tutorials recommeded to follow and these are numbered as so.
+There are a series of tutorials recommended to follow and these are numbered as so.
 
 1. **Tutorial_1.ipynb**
 
-    This notebook contains information on how to begin building systems using some python modules that can be found in the github.
+    This notebook contains information on how to begin building systems using some python modules that can be found in the github. <br>
     
     The sections in this notebook are: <br>
         1. Generating PDB file from a SMILES string with a unique residue code for that molecule. <br>
@@ -209,7 +209,7 @@ There are a series of tutorials recommeded to follow and these are numbered as s
     This notebook contains information on how to run openmm simulations from parameterized systems - the generation of these systems can be found in **Tutorial_1**. <br>
 
     This notebook uses python classes from the sw_openmm python module to intialize and set up simulations from either: <br>
-        1. Amber topology files and coordinates
+        1. Amber topology files and coordinates <br>
         2. PDB files for use with ANI forcefield (currently no description for this - **coming soon**)
     
 #### 2.2.2.2 Module guides
