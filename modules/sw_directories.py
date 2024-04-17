@@ -141,7 +141,33 @@ class PolymerSimulatorDirs:
             print("Remember you need both .prmtop and .rst7 files to run a simulation")               
         if a == False:
             print("No parametrized molecules.")
+
+    def retrieve_top_crds(self, directories, system_name):
+        a = [False, False]
+        for root, dirs, files in os.walk(directories.systems_dir):
+            # Check each file in the current directory
+            for file in files:
+                # Check if the file has a .pdb extension
+                if file.endswith(".prmtop"):                    
+                    # Construct the full path to the .pdb file
+                    prmtop_file_path = os.path.join(root, file)
+                    # Extract molecule name
+                    prmtop_file = prmtop_file_path.split("/")[-1]
+                    a[0] == True
+                if file.endswith(".rst7"):
+                    # Construct the full path to the .pdb file
+                    coord_file_path = os.path.join(root, file)
+                    # Extract molecule name
+                    coord_file = coord_file_path.split("/")[-1]
+                    a[1] == True
+        if a[0] == True:
+            return(prmtop_file, coord_file)
+        if False in a:
+            print("Some files required do not exist.", )
+            return(None, None)
         
+                    
+    
     def bash_submission(self):
         pass
         # Need an if instance for whether its amber or ani
