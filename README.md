@@ -206,8 +206,12 @@ There are a series of tutorials recommeded to follow and these are numbered as s
 
 2. **Tutorial_2.ipynb**
 
-    
+    This notebook contains information on how to run openmm simulations from parameterized systems - the generation of these systems can be found in **Tutorial_1**. <br>
 
+    This notebook uses python classes from the sw_openmm python module to intialize and set up simulations from either: <br>
+        1. Amber topology files and coordinates
+        2. PDB files for use with ANI forcefield (currently no description for this - **coming soon**)
+    
 #### 2.2.2.2 Module guides
 
 There are a series of guides that give a detailed over of what each module does - some of this information may also be included within the tutorials.
