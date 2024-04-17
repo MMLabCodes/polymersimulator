@@ -12,7 +12,7 @@ import itertools
 import matplotlib.pyplot as plt
 
 from openmm.app.topology import *
-from openmmml import MLPotential
+#from openmmml import MLPotential
 
 from openbabel import openbabel, pybel
 
