@@ -216,26 +216,33 @@ There are a series of tutorials recommended to follow and these are numbered as 
 
 There are a series of guides that give a detailed over of what each module does - some of this information may also be included within the tutorials.
 
+1. **openmm_simulation_guide.ipynb** <br>
+
+    This notebook contains detailed explanations and examples of how to use the functions found in the **sw_openmm.py** module. This guide is essential to using this python module and should be read and referred to when running openmm simulations. This module functions as wrapper for openmm scripts and no experience with openmm is required to use this module. <br>
+
+2. **openmm_simulation_script_guide.ipynb** <br>
+
+    This notebook contains details on how to set up openmm python scripts. All of the scripts shown are included in the **sw_openmm.py** module - it is recommended to look through the **openmm_simulation_guide.ipynb** notebook first and then refer to this notebook if you would like more information. However, this ntoebook is not essential to using any of the python modules and does not expand on anything included in the jupyter notebook tutorials. This notebook is **no longer being updated**. <br>
+
+3. **parameterization_guide.ipynb** <br>
+
+   This notebook includes details on parameterizing molecules for MD simulations using tleap and antechamber. All of methods shown here are included in the **sw_build_systems.py** module - it is recommend to look through the **building_systems_guide.ipynb** notebook first and then refer to this notebook if you would like more information. <br>
+
+4. **building_systems_guide.ipynb** <br>
+
+    Notebook and associated description coming soon...
+
+5. **filepath_manager_guide.ipynb** <br>
+
+    Notebook and associated description coming soon...
+
 #### 2.2.2.3 Other notebooks
 
 These are other notebooks that are useful to further understand the capabiltity of this code workflow. You will not need to read these unless you want to understand other methods of running the code.
 
-1. **parametrization.ipynb**
-
-    This notebook contains information on how to parametrize molecules from pdb files and uses the 3HB monomer as an example. 
-    The inputs folder contains the 3HB.pdb file.
-
-2. **python_parametrization.ipynb**
+1. **python_parametrization.ipynb**
 
     Description coming soon - needs to be integrated with build_simulation functions (i.e. directory creation and generation of filepaths)
-
-3. **openmm_simulations.ipynb**
-
-    This notebook contains examples and explanations of steps to take in openmm to run simulations.
-    This includes information about different simulations:
-        1. Simple MD simulation (production run)
-        2. Equilibration of a system followed by a production run
-            (Equilibration is where a system reaches a stable state at the correct density)
 
 ## 3. Python scripts 
 
@@ -256,7 +263,7 @@ The python modules created here aim to provide easier handling of a range of dif
     This module defines the PolymerSimulatorDirs class, which is used for initializing
     and organizing directories for polymer simulation setup. It creates specific
     directories such as 'python_scripts', 'pdb_files', 'molecules', 'systems', and manages
-    files like 'residue_codes.csv'.
+    files like 'residue_codes.csv'. More information can be found in the **filepath_manager_guide.ipynb** notebook.
 
     Attributes:
         main_dir (str): The main directory for polymer simulation setup.
@@ -271,6 +278,19 @@ The python modules created here aim to provide easier handling of a range of dif
 
     Note:
         The main_dir must be provided as a valid path and must already exist.
+
+2. **sw_openmm.py**
+
+   This module defines the following classes:
+   - BuildSimulation
+   - AmberSimulation
+   - ANISimulation <br>
+
+   Functions for carrying MD simulations with openmm are contrained here; such as - annealing, equilibration and production runs. The jupyer notebook **openmm_simulation_guide.ipynb** contains examples and decriptions on how to use this module.
+
+3. **sw_build_systems.py**
+
+   Description coming soon...
 
 ### 3.2 Python scripts - pdb file generation
 
