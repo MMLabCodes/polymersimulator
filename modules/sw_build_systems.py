@@ -371,7 +371,7 @@ class BuildAmberSystems(BuildSystems):
         
         pdb_filepath = os.path.join(directories.molecules_dir, molecule_name, (molecule_name + ".pdb"))
         mol2_filepath = os.path.join(directories.molecules_dir, molecule_name, (molecule_name + ".mol2"))
-        output_dir = os.path.join(directories.systems_dir, molecule_name)
+        output_dir = os.path.join(directories.systems_dir, (molecule_name + file_subtype))
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
             
@@ -472,7 +472,7 @@ class BuildAmberSystems(BuildSystems):
         
         pdb_filepath = os.path.join(directories.molecules_dir, molecule_name, (molecule_name + ".pdb"))
         mol2_filepath = os.path.join(directories.molecules_dir, molecule_name, (molecule_name + ".mol2"))
-        output_dir = os.path.join(directories.systems_dir, molecule_name)
+        output_dir = os.path.join(directories.systems_dir, (molecule_name + file_subtype))
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
         
