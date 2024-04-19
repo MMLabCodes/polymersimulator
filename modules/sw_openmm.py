@@ -10,6 +10,8 @@ import pandas as pd
 import csv
 import itertools
 import matplotlib.pyplot as plt
+import shutil
+import datetime
 
 from openmm import *
 from openmm.app import *
@@ -550,7 +552,7 @@ class BuildSimulation():
     friction_coeff = 1.0
     total_steps = 1000
     reporter_freq = 1000
-    
+    timestamp = datetime.datetime.now().strftime('%Y-%m-%d_%H%M%S')
     # Start temp, max temp, cycles, holding_steps, steps at each temp
     anneal_parameters = [300, 700, 5, 3000, 100]
     
@@ -611,7 +613,7 @@ class BuildSimulation():
         """Display help information for the minimize_energy method."""
         print(cls.minimize_energy.__doc__)    
      
-    def anneal(self, simulation, start_temp=None, max_temp=None, cycles=None, holding_steps=None, steps_at_temp=None):
+    def anneal(self, directories, simulation, start_temp=None, max_temp=None, cycles=None, holding_steps=None, steps_at_temp=None):
         """
         Function to perform simulated annealing on the provided simulation system.
         
@@ -692,16 +694,19 @@ class BuildSimulation():
         
         # Set up reporters
         # PDB trajectory - this is slighlty redundant with the addition of the DCD trajectory, but it is still useful for        
-        output_pdbname = self.filename + "_anneal.pdb"
+        #output_pdbname = os.path.join(directories.systems_dir, self.filename, (self.filename + "_anneal.pdb"))
+        output_pdbname = self.filename + "_anneal_" + str(self.timestamp) + ".pdb" 
         simulation.reporters.append(app.PDBReporter(output_pdbname, self.reporter_freq))
         
         # DCD trajectory
-        output_dcdname = self.filename + "_anneal"
+        #output_dcdname = os.path.join(directories.systems_dir, self.filename, (self.filename + "_anneal"))
+        output_dcdname = self.filename + "_anneal_traj_" + str(self.timestamp)
         dcdWriter = DcdWriter(output_dcdname, self.reporter_freq)
         simulation.reporters.append(dcdWriter.dcdReporter)
     
         # Datawriter - This is a more complete data writer than previously used, the file generated is a comma delimited text file
-        output_dataname = self.filename + "_anneal_data"
+        #output_dataname = os.path.join(directories.systems_dir, self.filename, (self.filename + "_anneal_data"))
+        output_dataname = self.filename + "_anneal_data_" + str(self.timestamp)
         dataWriter = DataWriter(output_dataname, self.reporter_freq, total_steps)
         simulation.reporters.append(dataWriter.stateDataReporter)
         
@@ -721,14 +726,22 @@ class BuildSimulation():
                 
             integrator.setTemperature(start_temp)
             simulation.step(holding_steps)
-        return(simulation, (output_dataname + ".txt"))
+
+        # Now copy all the files into the system directory
+        destination_dir = os.path.join(directories.systems_dir, self.filename)
+        shutil.move(output_pdbname, destination_dir)
+        output_dcdname = self.filename +  "_anneal_traj_" + self.timestamp + ".dcd"
+        shutil.move(output_dcdname, destination_dir)
+        output_dataname = self.filename +  "_anneal_data_" + self.timestamp + ".txt"
+        shutil.move(output_dataname, destination_dir)
+        return(simulation, os.path.join(destination_dir, output_dataname))
       
     @classmethod
     def anneal_help(cls):
         """Display help information for the anneal method."""
         print(cls.anneal.__doc__)    
     
-    def equilibrate(self, simulation, total_steps=None, temp=None, pressure=None):
+    def equilibrate(self, directories, simulation, total_steps=None, temp=None, pressure=None):
         """
         Function to equilibrate the provided simulation to reach a specified temperature and pressure.
         
@@ -803,27 +816,38 @@ class BuildSimulation():
         simulation.context.setVelocitiesToTemperature(temp*kelvin)
         
         # Set up reporters
-        output_pdbname = self.filename + "_" + str(pressure) + "_atm_traj.pdb"
+        #output_pdbname = os.path.join(directories.systems_dir, self.filename, (self.filename +  "_" + str(pressure) + "_atm_traj.pdb"))
+        output_pdbname = self.filename +  "_" + str(pressure) + "_atm_traj_" + str(self.timestamp) + ".pdb"
         simulation.reporters.append(app.PDBReporter(output_pdbname, self.reporter_freq))
     
         # DCD trajectory
-        output_dcdname = self.filename + "_" + str(pressure) + "_atm_traj"
+        #output_dcdname = os.path.join(directories.systems_dir, self.filename, (self.filename +  "_" + str(pressure) + "_atm_traj.dcd"))
+        output_dcdname = self.filename +  "_" + str(pressure) + "_atm_traj_" + str(self.timestamp)
         dcdWriter = DcdWriter(output_dcdname, self.reporter_freq)
         simulation.reporters.append(dcdWriter.dcdReporter)
     
         # Datawriter - This is a more complete data writer than previously used, the file generated is a comma delimited text file
-        output_dataname = self.filename + "_" + str(pressure) + "_atm_data"
+        #output_dataname = os.path.join(directories.systems_dir, self.filename, (self.filename +  "_" + str(pressure) + "_atm_data"))
+        output_dataname = self.filename +  "_" + str(pressure) + "_atm_data_" + str(self.timestamp)
         dataWriter = DataWriter(output_dataname, self.reporter_freq, total_steps)
         simulation.reporters.append(dataWriter.stateDataReporter)
-        simulation.step(total_steps)        
-        return(simulation, (output_dataname + ".txt"))
+        simulation.step(total_steps)       
+
+        # Now copy all the files into the system directory
+        destination_dir = os.path.join(directories.systems_dir, self.filename)
+        shutil.move(output_pdbname, destination_dir)
+        output_dcdname = self.filename +  "_" + str(pressure) + "_atm_traj_" + str(self.timestamp) + ".dcd"
+        shutil.move(output_dcdname, destination_dir)
+        output_dataname = self.filename +  "_" + str(pressure) + "_atm_data_" + str(self.timestamp) + ".txt"
+        shutil.move(output_dataname, destination_dir)
+        return(simulation, os.path.join(destination_dir, output_dataname))
     
     @classmethod
     def equilibrate_help(cls):
         """Display help information for the equilibrate method."""
         print(cls.equilibrate.__doc__) 
         
-    def production_run(self, simulation, total_steps=None, temp=None):
+    def production_run(self, directories, simulation, total_steps=None, temp=None):
         """
         Function to perform a production run simulation with the provided parameters.
         
@@ -888,20 +912,31 @@ class BuildSimulation():
         # Set up reporters
         # PDB trajectory - this is slighlty redundant with the addition of the DCD trajectory, but it is still useful for 
         #   visualisation of the system and coloring specific residues 
-        output_pdbname = self.filename + "_prod_traj.pdb"
+        #output_pdbname = os.path.join(directories.systems_dir, self.filename, (self.filename + "_prod_traj.pdb"))
+        output_pdbname = self.filename + "_prod_traj_" + str(self.timestamp) + ".pdb"
         simulation.reporters.append(app.PDBReporter(output_pdbname, self.reporter_freq))
         
         # DCD trajectory
-        output_dcdname = self.filename + "_prod_traj"
+        #output_dcdname = os.path.join(directories.systems_dir, self.filename, (self.filename + "_prod_traj"))
+        output_dcdname = self.filename + "_prod_traj_" + str(self.timestamp)
         dcdWriter = DcdWriter(output_dcdname, self.reporter_freq)
         simulation.reporters.append(dcdWriter.dcdReporter)
     
         # Datawriter - This is a more complete data writer than previously used, the file generated is a comma delimited text file
-        output_dataname = self.filename + "_prod_data"
+        #output_dataname = os.path.join(directories.systems_dir, self.filename, (self.filename + "_prod_data"))
+        output_dataname = self.filename + "_prod_data_" + str(self.timestamp)
         dataWriter = DataWriter(output_dataname, self.reporter_freq, total_steps)
         simulation.reporters.append(dataWriter.stateDataReporter) 
         simulation.step(total_steps)
-        return(simulation, (output_dataname + ".txt"))
+
+        # Now copy all the files into the system directory
+        destination_dir = os.path.join(directories.systems_dir, self.filename)
+        shutil.move(output_pdbname, destination_dir)
+        output_dcdname = self.filename +  "_prod_traj_" + str(self.timestamp) + ".dcd"
+        shutil.move(output_dcdname, destination_dir)
+        output_dataname = self.filename +  "_prod_data_" + str(self.timestamp) + ".txt"
+        shutil.move(output_dataname, destination_dir)
+        return(simulation, os.path.join(destination_dir, output_dataname))
      
     @classmethod
     def production_run_help(cls):
@@ -918,6 +953,11 @@ class BuildSimulation():
     # All class methods here change a variable in the following way
     # AmberSimulation.set_temperature(400)
     # AmberSimulation.temp
+
+    @classmethod
+    def display_start_time(cls):
+        print("Simulation initiated at: ", cls.timestamp)
+    
     @classmethod
     def set_temperature(cls, temp): 
         cls.temp = temp
@@ -962,7 +1002,12 @@ class BuildSimulation():
             print("Number of annealing cycles is: ", str(new_anneal_parameters[2]))
             print("Steps at target/start temperature is: ", str(new_anneal_parameters[3]))
             print("Steps at each incremental temperature is: ", str(new_anneal_parameters[4]))
-        
+
+    @classmethod
+    def set_anneal_parameters_help(cls):
+        """Display help information for setting annealing parameters."""
+        print(cls.set_anneal_parameters.__doc__)
+           
     @staticmethod  # Dont take instance or class - can run this without an instance
     def graph_state_data(data_file):
         """
