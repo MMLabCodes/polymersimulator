@@ -173,6 +173,46 @@ class BuildSystems():
 
         return new_code
 
+    def PolymerUnits_GenerateRescode(self, directories, name):
+        # Name should be of a trimer
+        if "trimer" not in name:
+            print("Polymeric unit generation requires trimers. Please consult the build systems guide for information on how to do this")
+            return()
+    
+        forbidden_codes = ["AAA", "BBB", "CCC", "UNL", "ALA", "ARG", "ASN", "ASP", "ASX", "CYS", "GLU", "GLN", "GLX", "HIS", "ILE", "LEU", "LYS", "MET", "PHE", "PRO", "SER", "THR", "SEC", "TRP", "TYR", "VAL"]
+   
+        # Load existing residue codes from the CSV file
+        residue_codes = self.load_residue_codes(directories.residue_code_csv)
+    
+        # Check if the name or smiles is already in the database
+        existing_entry = self.find_existing_entry(residue_codes, name)
+        if existing_entry:
+            # Use existing residue code
+            residue_code = existing_entry[2]  # Assuming code is the third column  
+            residue_smiles = existing_entry[1] # Assuming SMILES is the second column
+
+        if not existing_entry:
+            print("Please parameterize the initial trimer unit and generate a residue code for it using it's SMILES string")
+            return()
+
+        # New codes and names for residue code csv are specified here.
+        head_code = "h" + residue_code
+        mainchain_code = "m" + residue_code
+        tail_code = "t" + residue_code
+
+        head_name = "head_" + name
+        mainchain_name = "mainchain_" + name
+        tail_name = "tail_" + name
+
+        # A tag is also placed in front of the SMILES. Note, this should not be required, but the residue code file will not update unless a new SMILES AND molecule name are passed to it. In this case, the SMILES for each unit are simply the same SMILES as the trimer but with a h,m,t tag in front of the SMILES.
+        head_smiles = "h" + residue_smiles
+        mainchain_smiles = "m" + residue_smiles
+        tail_smiles = "t" + residue_smiles
+    
+        self.update_residue_codes_csv(head_name, head_smiles, head_code, directories.residue_code_csv)
+        self.update_residue_codes_csv(mainchain_name, mainchain_smiles, mainchain_code, directories.residue_code_csv)
+        self.update_residue_codes_csv(tail_name, tail_smiles, tail_code, directories.residue_code_csv)
+    
     def update_residue_codes_csv(self, name, smiles, residue_code, residue_code_csv):
         """
         Updates a CSV file with a new entry if the entry does not already exist.
@@ -204,7 +244,7 @@ class BuildSystems():
                 # Add a new entry to the CSV file
                 writer.writerow([name, smiles, residue_code])
 
-    def find_existing_entry(self, residue_codes, name, smiles):
+    def find_existing_entry(self, residue_codes, name, smiles=None):
         """
         Finds an existing entry in a list of residue codes based on molecule name or SMILES representation.
         Used by SmilesToPDB_GenerateRescode function.
@@ -224,9 +264,14 @@ class BuildSystems():
         molecule name or SMILES representation. If a match is found, the corresponding entry is returned.
         If no match is found, None is returned.
         """
-        for entry in residue_codes:
-            if len(entry) >= 2 and (entry[0] == name or entry[1] == smiles):
-                return entry
+        if smiles == None:
+            for entry in residue_codes:
+                if len(entry) >= 2 and entry[0] == name:
+                    return entry
+        else:
+            for entry in residue_codes:
+                if len(entry) >= 2 and (entry[0] == name or entry[1] == smiles):
+                    return entry
         return None
 
     def max_pairwise_distance(self, mol):
@@ -345,6 +390,14 @@ class BuildAmberSystems(BuildSystems):
         pdb_filepath = os.path.join(param_mol_dir, (molecule_name + ".pdb"))
         mol2_filepath = os.path.join(param_mol_dir, (molecule_name + ".mol2"))
         files_exist = os.path.exists(pdb_filepath) and os.path.exists(mol2_filepath)
+        return(files_exist) # This will be true or false
+
+    def is_poly_prepped(self, directories, molecule_name):
+        poly_prepped_dir = os.path.join(directories.molecules_dir, molecule_name)
+        head_prepi_filepath = os.path.join(poly_prepped_dir, ("head_" + molecule_name + ".prepi"))
+        mainchain_prepi_filepath = os.path.join(poly_prepped_dir, ("mainchain_" + molecule_name + ".prepi"))
+        tail_prepi_filepath = os.path.join(poly_prepped_dir, ("tail_" + molecule_name + ".prepi"))
+        files_exist = os.path.exists(head_prepi_filepath) and os.path.exists(mainchain_prepi_filepath) and os.path.exists(tail_prepi_filepath)
         return(files_exist) # This will be true or false
     
     def gen_3_3_array(self, directories, molecule_name):
@@ -534,3 +587,127 @@ class BuildAmberSystems(BuildSystems):
         #print("The command that would be run in the shell is: ")
         #print(leap_command)
         subprocess.run(leap_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+
+    def build_3_3_polymer_array(self, build, directories, molecule_name, number_of_mainchain_units):
+        if build.is_poly_prepped(directories, molecule_name) == True:
+            pass
+        if build.is_poly_prepped(directories, molecule_name) == False:
+            print("Please prepare prepin files for so polymers can be generated.")
+            return()
+        
+        file_subtype = "_3_3_array" + str(number_of_mainchain_units) + "polymer"
+        output_dir = os.path.join(directories.systems_dir, (molecule_name + file_subtype))
+        head_prepi_filepath = os.path.join(directories.molecules_dir, molecule_name, ("head_" + molecule_name + ".prepi"))
+        mainchain_prepi_filepath = os.path.join(directories.molecules_dir, molecule_name, ("mainchain_" + molecule_name + ".prepi"))
+        tail_prepi_filepath = os.path.join(directories.molecules_dir, molecule_name, ("tail_" + molecule_name + ".prepi"))
+        output_dir = os.path.join(directories.systems_dir, (molecule_name.split("_")[0] + file_subtype))
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
+        # Also need the pdb_file for pairwise distance (box_size distance), and the pdb_file of the monomer (for x,y distance)
+        pdb_filepath = os.path.join(directories.molecules_dir, molecule_name, (molecule_name + ".pdb"))
+        monomer_name = molecule_name.split("_")[0] + "_monomer"
+        monomer_pdb_filepath = os.path.join(directories.molecules_dir, monomer_name, (monomer_name + ".pdb"))
+    
+        Mol = MolFromPDBFile(pdb_filepath)
+        monomer = MolFromPDBFile(monomer_pdb_filepath)
+        max_dist = self.max_pairwise_distance(monomer)
+        translate_distance = float((int(max_dist)+1))
+    
+        max_dist_box = self.max_pairwise_distance(Mol)
+        box_dist = float((int(max_dist_box)+1)*1.5)
+
+        polymer_name = molecule_name.split("_")[0] + "_" + str(number_of_mainchain_units) + "_polymer"
+        molecule_name_1 = polymer_name + "_1"
+        molecule_name_2 = polymer_name + "_2"
+        molecule_name_3 = polymer_name + "_3"
+        molecule_name_4 = polymer_name + "_4"
+        molecule_name_5 = polymer_name + "_5"
+        molecule_name_6 = polymer_name + "_6"
+        molecule_name_7 = polymer_name + "_7"
+        molecule_name_8 = polymer_name + "_8"
+        molecule_name_9 = polymer_name + "_9"
+
+        translate_line_1 = "{0.0 0.0 0.0}"
+        translate_line_2 = "{0.0 0.0 " + str(translate_distance) + "}"
+        translate_line_3 = "{0.0 0.0 " + str(-translate_distance) + "}"
+
+        translate_line_4 = "{0.0 " + str(translate_distance) + " " + str(translate_distance) + "}"
+        translate_line_5 = "{0.0 " + str(translate_distance) + " " + str(-translate_distance) + "}"
+        translate_line_6 = "{0.0 " + str(translate_distance) + " 0.0}"
+
+        translate_line_7 = "{0.0 " + str(-translate_distance) + " " + str(translate_distance) + "}"
+        translate_line_8 = "{0.0 " + str(-translate_distance) + " " + str(-translate_distance) + "}"
+        translate_line_9 = "{0.0 " + str(-translate_distance) + " 0.0}"
+
+        combine_line = "{" + molecule_name_1 + " " + molecule_name_2 + " " + molecule_name_3 + " " + molecule_name_4 + " " + molecule_name_5 + " " + molecule_name_6 + " " + molecule_name_7 + " " + molecule_name_8 + " " + molecule_name_9 + "}"
+
+        base_mol_name = molecule_name.split("_")[0]
+        intleap_path = os.path.join(output_dir, (base_mol_name + file_subtype + ".intleap"))
+        prmtop_filepath =  os.path.join(output_dir, base_mol_name + file_subtype + ".prmtop")
+        rst_filepath = os.path.join(output_dir, base_mol_name + file_subtype + ".rst7")
+        three_three_array_pdb_filepath = os.path.join(output_dir, base_mol_name + file_subtype + ".pdb")
+        unsolved_three_three_array_pdb_filepath = "unsolved_" + three_three_array_pdb_filepath 
+    
+        head_rescode, mainchain_rescode, tail_rescode = directories.retrieve_polymeric_rescodes(directories, "3HB_trimer")
+
+        polymer_code = " ".join([tail_rescode] + [mainchain_rescode] * (number_of_mainchain_units - 1) + [head_rescode])
+        polymer_command = "{" + polymer_code + "}"
+
+        file_content = f"""source leaprc.protein.ff14SB
+        source leaprc.gaff
+        source leaprc.water.fb3
+
+        loadamberprep {head_prepi_filepath}
+        loadamberprep {mainchain_prepi_filepath}
+        loadamberprep {tail_prepi_filepath}
+    
+        {molecule_name_1} = sequence {polymer_command}
+        {molecule_name_2} = sequence {polymer_command}
+        {molecule_name_3} = sequence {polymer_command}
+        {molecule_name_4} = sequence {polymer_command}
+        {molecule_name_5} = sequence {polymer_command}
+        {molecule_name_6} = sequence {polymer_command}
+        {molecule_name_7} = sequence {polymer_command}
+        {molecule_name_8} = sequence {polymer_command}
+        {molecule_name_9} = sequence {polymer_command}
+    
+        translate {molecule_name_1} {translate_line_1}
+        translate {molecule_name_2} {translate_line_2}
+        translate {molecule_name_3} {translate_line_3}
+        translate {molecule_name_4} {translate_line_4}
+        translate {molecule_name_5} {translate_line_5}
+        translate {molecule_name_6} {translate_line_6}
+        translate {molecule_name_7} {translate_line_7}
+        translate {molecule_name_8} {translate_line_8}
+        translate {molecule_name_9} {translate_line_9}
+         
+        system = combine {combine_line}
+
+        savepdb system {unsolved_three_three_array_pdb_filepath}
+    
+        solvateBox system TIP3PBOX {box_dist}
+
+        saveamberparm system {prmtop_filepath} {rst_filepath}
+        savepdb system {three_three_array_pdb_filepath}
+        quit
+        """
+        with open(intleap_path, 'w') as file:
+            file.write(file_content)
+            
+        leap_command = "tleap -f " + intleap_path
+        #print("The command that would be run in the shell is: ")
+        #print(leap_command)
+        print(intleap_path)
+        try:
+            result = subprocess.run(leap_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            if result.returncode == 0:
+                # Command executed successfully
+                print("Output:", result.stdout)
+            else:
+                # Command failed, print error message
+                print("Error:", result.stderr)
+        except Exception as e:
+            # Exception occurred during subprocess execution
+            print("Exception:", e)
+        return()
