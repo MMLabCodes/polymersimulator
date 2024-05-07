@@ -37,6 +37,7 @@ The following commands create an environment called "AmberTools23" and activate 
    conda install -c conda-forge ambertools=23
    conda install -c conda-forge openmm
    conda install -c conda-forge rdkit
+   conda install -c conda-forge openbabel
    ```
    
 3.1 Install jupyter **notebook**
