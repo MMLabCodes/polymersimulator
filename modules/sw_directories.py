@@ -75,10 +75,34 @@ class PolymerSimulatorDirs:
         self.systems_dir = os.path.join(self.pdb_file_dir, 'systems')   
         if not os.path.exists(self.systems_dir):
             os.makedirs(self.systems_dir)
-            
-    def pdb_files_avail(self, directories):
+
+    def mol2_files_avail(self, directories):
         # Walk through the directory tree recursively
         for root, dirs, files in os.walk(directories.pdb_file_dir):
+            # Check each file in the current directory
+            for file in files:
+                # Check if the file has a .pdb extension
+                if file.endswith(".mol2"):
+                    # Construct the full path to the .pdb file
+                    mol2_file_path = os.path.join(root, file)
+                    # Extract molecule name
+                    mol2_file = mol2_file_path.split("/")[-1]
+                    print(mol2_file)
+
+    def load_mol2_filepath(self, directories, molecule_name):
+        # Walk through the directory tree recursively
+        for root, dirs, files in os.walk(directories.pdb_file_dir):
+            # Check each file in the current directory
+            for file in files:
+                # Check if the file has a .pdb extension
+                if file.endswith(".mol2"):
+                    if molecule_name in file:
+                        mol2_file_path = os.path.join(root, file)
+                        return mol2_file_path 
+    
+    def pdb_files_avail(self):
+        # Walk through the directory tree recursively
+        for root, dirs, files in os.walk(self.pdb_file_dir):
             # Check each file in the current directory
             for file in files:
                 # Check if the file has a .pdb extension
@@ -89,9 +113,9 @@ class PolymerSimulatorDirs:
                     pdb_file = pdb_file_path.split("/")[-1]
                     print(pdb_file)
     
-    def load_pdb_filepath(self, directories, molecule_name):
+    def load_pdb_filepath(self, molecule_name):
         # Walk through the directory tree recursively
-        for root, dirs, files in os.walk(directories.pdb_file_dir):
+        for root, dirs, files in os.walk(self.pdb_file_dir):
             # Check each file in the current directory
             for file in files:
                 # Check if the file has a .pdb extension
@@ -116,9 +140,9 @@ class PolymerSimulatorDirs:
         if a == False:
             print("No parametrized molecules.")
             
-    def systems_avail(self, directories):
+    def systems_avail(self):
         a = False
-        for root, dirs, files in os.walk(directories.systems_dir):
+        for root, dirs, files in os.walk(self.systems_dir):
             # Check each file in the current directory
             for file in files:
                 # Check if the file has a .pdb extension
@@ -172,7 +196,19 @@ class PolymerSimulatorDirs:
                     smiles.append(row[1])
 
         return names, smiles
-            
+        
+    def retrieve_polymeric_rescodes(self, directories, molecule_name):
+        with open(directories.residue_code_csv, 'r') as file:
+            head_code, mainchain_code, tail_code = None, None, None
+            for line in file:
+                parts = (line.strip().split('\t'))[0]
+                if len(parts.split(",")) >= 3 and parts.split(",")[0] == ("head_" + molecule_name):
+                    head_code = parts.split(",")[2]
+                if len(parts.split(",")) >= 3 and parts.split(",")[0] == ("mainchain_" + molecule_name):
+                    mainchain_code = parts.split(",")[2]
+                if len(parts.split(",")) >= 3 and parts.split(",")[0] == ("tail_" + molecule_name):
+                    tail_code = parts.split(",")[2]    
+        return(head_code, mainchain_code, tail_code)
     # Need to add stuff for md results and the like
     # Need to add a way to import the bash submission scripts - will get to this at some point
     
