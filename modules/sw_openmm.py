@@ -608,6 +608,7 @@ class BuildSimulation():
         simulation.minimizeEnergy()
 
         state = simulation.context.getState(getPositions=True, getEnergy=True) 
+        
         self.min_pdbname = "min_" + self.filename
         with open(self.min_pdbname, 'w') as output:
             PDBFile.writeFile(simulation.topology, state.getPositions(), output)
