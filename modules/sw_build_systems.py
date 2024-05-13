@@ -705,7 +705,7 @@ class BuildAmberSystems(BuildSystems):
                # Exception occurred during subprocess execution
               #print("Exception:", e)
          
-         file_subtype = "_3_3_array" + str(number_of_mainchain_units) + "polymer"
+         file_subtype = "_3_3_array_" + str(number_of_mainchain_units) + "_polymer"
          #head_prepi_filepath = os.path.join(directories.molecules_dir, molecule_name, ("head_" + molecule_name + ".prepi"))
          head_prepi_filepath = "head_" + molecule_name + ".prepi"
     
