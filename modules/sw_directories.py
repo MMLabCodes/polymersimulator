@@ -112,6 +112,19 @@ class PolymerSimulatorDirs:
                     # Extract molecule name
                     pdb_file = pdb_file_path.split("/")[-1]
                     print(pdb_file)
+
+    def ac_files_avail(self):
+        # Walk through the directory tree recursively
+        for root, dirs, files in os.walk(self.pdb_file_dir):
+            # Check each file in the current directory
+            for file in files:
+                # Check if the file has a .pdb extension
+                if file.endswith(".ac"):
+                    # Construct the full path to the .pdb file
+                    pdb_file_path = os.path.join(root, file)
+                    # Extract molecule name
+                    pdb_file = pdb_file_path.split("/")[-1]
+                    print(pdb_file)
     
     def load_pdb_filepath(self, molecule_name):
         # Walk through the directory tree recursively
