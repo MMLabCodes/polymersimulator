@@ -196,9 +196,9 @@ class BuildSystems():
             return()
 
         # New codes and names for residue code csv are specified here.
-        head_code = "h" + residue_code
-        mainchain_code = "m" + residue_code
-        tail_code = "t" + residue_code
+        head_code = "h" + residue_code[1:]
+        mainchain_code = "m" + residue_code[1:]
+        tail_code = "t" + residue_code[1:]
 
         head_name = "head_" + name
         mainchain_name = "mainchain_" + name
@@ -212,6 +212,9 @@ class BuildSystems():
         self.update_residue_codes_csv(head_name, head_smiles, head_code, directories.residue_code_csv)
         self.update_residue_codes_csv(mainchain_name, mainchain_smiles, mainchain_code, directories.residue_code_csv)
         self.update_residue_codes_csv(tail_name, tail_smiles, tail_code, directories.residue_code_csv)
+        print("Head code assigned: ", head_code)
+        print("Mainchain code assigned: ", mainchain_code)
+        print("Tail code assigned: ", tail_code)
     
     def update_residue_codes_csv(self, name, smiles, residue_code, residue_code_csv):
         """
@@ -388,7 +391,82 @@ class BuildAmberSystems(BuildSystems):
         #print("The leap command that will run is:")
         #print(leap_command)
         subprocess.run(leap_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-   
+
+    def gen_ac_file(self, directories=None, molecule_name=None):
+        if directories == None or molecule_name == None:
+            print("Please provide 2 arguments as follows: gen_ac_file(directories, molecule_name)")
+            print("Directories: A python object generated with the PolymerSimulatorDirs(filepath) method imported from sw_directories")
+            print("Molecule name: A string of the molecule name, i.e. 'Ethane'")
+            return(None)
+        mol2_name = os.path.join(directories.molecules_dir, molecule_name, molecule_name) + ".mol2"
+        ac_name = os.path.join(directories.molecules_dir, molecule_name, molecule_name) + ".ac"
+        antechamber_command = "antechamber -fi mol2 -fo ac -i " + mol2_name + " -o " + ac_name + " -c bcc -s 2"
+        subprocess.run(antechamber_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        return(None)
+
+    def gen_prepin_files(self, directories, molecule_name):
+        if directories == None or molecule_name == None:
+            print("Please provide 2 arguments as follows: gen_prepin_files(directories, molecule_name)")
+            print("Directories: A python object generated with the PolymerSimulatorDirs(filepath) method imported from sw_directories")
+            print("Molecule name: A string of the molecule name, i.e. 'Ethane'")
+            return(None)
+        
+        # Find the path of the molecule directory (where all the required files are required)
+        molecule_dir = os.path.join(directories.molecules_dir, molecule_name)
+        if os.path.exists(molecule_dir):
+            pass
+        else:
+            print("Please parameterize molecule.")
+            return()  
+    
+        # Define file names required for prepgen
+        # Could have an additional function that generates these files
+        head_file = "head_" + molecule_name + ".txt"
+        head_prepin_file = os.path.join(molecule_dir, "head_" + molecule_name + ".prepi")
+        mainchain_file = "mainchain_" + molecule_name + ".txt"
+        mainchain_prepin_file = os.path.join(molecule_dir, "mainchain_" + molecule_name + ".prepi")
+        tail_file = "tail_" + molecule_name + ".txt"
+        tail_prepin_file = os.path.join(molecule_dir, "tail_" + molecule_name + ".prepi")
+        ac_name = os.path.join(molecule_dir, molecule_name + ".ac")
+    
+        # Check if the required files exist
+        segment_files = [head_file, mainchain_file, tail_file]
+        for file_path in segment_files:
+            if os.path.exists(os.path.join(molecule_dir, file_path)):
+                pass
+            else:
+                print("Please prepare files defining each segment of the trimer. Head, mainchain and tail. Call build_systems.prepin_help() for more information.")
+                return() 
+
+        # Retrieve the residue codes from the database
+        head_rescode, mainchain_rescode, tail_rescode = directories.retrieve_polymeric_rescodes(directories, "3HB_trimer")
+        print(head_rescode, mainchain_rescode, tail_rescode)
+        if head_rescode == None or mainchain_rescode == None or tail_rescode == None:
+            print("Residue codes for polymeric units not generated. Please generate them with 'build.PolymerUnits_GenerateRescode(directories, 'ethane')'")
+            return()
+
+        # Define the prepgen commands with the collated information
+        head_command = "prepgen -i " + ac_name + " -o " + head_prepin_file + " -f prepi -m " + head_file + " -rn " + head_rescode + " -rf " + head_rescode + ".res"
+        mainchain_command = "prepgen -i " + ac_name + " -o " + mainchain_prepin_file + " -f prepi -m " + mainchain_file + " -rn " + mainchain_rescode + " -rf " + mainchain_rescode + ".res"
+        tail_command = "prepgen -i " + ac_name + " -o " + tail_prepin_file + " -f prepi -m " + tail_file + " -rn " + tail_rescode + " -rf " + tail_rescode + ".res"
+        commands = [head_command, mainchain_command, tail_command]
+        print(head_command)
+        os.chdir(molecule_dir)
+        for command in commands:
+            try:
+                result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                if result.returncode == 0:
+                    # Command executed successfully
+                    print("Output:", result.stdout)
+                else:
+                    # Command failed, print error message
+                    print("Error:", result.stderr)
+            except Exception as e:
+                # Exception occurred during subprocess execution
+                print("Exception:", e)
+        os.chdir(directories.main_dir)
+        return(None)
+    
     def is_mol_parametrized(self, directories, molecule_name):
         param_mol_dir = os.path.join(directories.molecules_dir, molecule_name)
         molecule_dir = os.path.join(directories.pdb_file_dir, molecule_name)
