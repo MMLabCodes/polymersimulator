@@ -604,7 +604,7 @@ class BuildSimulation():
             platform = PLatform.getPlatformByName('CUDA')
             simulation = app.Simulation(self.ani_topology, system, integrator, platform)
             simulation.context.setPositions(self.ani_coordinates)
-           
+        
         simulation.minimizeEnergy()
 
         state = simulation.context.getState(getPositions=True, getEnergy=True) 
@@ -799,6 +799,7 @@ class BuildSimulation():
         state = simulation.context.getState(getPositions=True, getEnergy=True) # Define state object 
         xyz = state.getPositions() # Obtain positions of the particles from previous step
         vx, vy, vz = state.getPeriodicBoxVectors()
+        #print(xyz)
         
         # Set up integrator and barostat
         barostat = MonteCarloBarostat((pressure*atmosphere), (temp*kelvin)) # Define barostat (pressure, temp)
@@ -817,8 +818,10 @@ class BuildSimulation():
         
         # Update positional info
         simulation.context.setPositions(xyz)
-        simulation.context.setPeriodicBoxVectors(vx, vy, vz)
-        
+        #simulation.context.setPeriodicBoxVectors(vx, vy, vz)
+        state = simulation.context.getState(getPositions=True, getEnergy=True) # Define state object 
+        xyz = state.getPositions()
+        print(xyz)
         # Set initial velocities
         simulation.context.setVelocitiesToTemperature(temp*kelvin)
         
@@ -1090,10 +1093,15 @@ class BuildSimulation():
         
 class AmberSimulation(BuildSimulation):
     
-    def __init__(self, topology_file, coordinates_file):
+    def __init__(self, topology_file, coordinates_file, pdb_file):
         self.amb_topology = app.AmberPrmtopFile(topology_file)
-        self.amb_coordinates = app.AmberInpcrdFile(coordinates_file )
+        self.amb_coordinates = app.AmberInpcrdFile(coordinates_file)
         self.filename = os.path.basename(topology_file).split('.')[0]
+
+        # Set pbc into topology
+        self.positionsML = PositionsML(pdb_file)
+        self.pbc = self.positionsML.get_pbc()
+        self.amb_topology.topology.setPeriodicBoxVectors(self.pbc)
 
     def __str__(self):
         return 'Amber simulation object of - {}'.format( self.filename)
