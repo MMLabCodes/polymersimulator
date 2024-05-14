@@ -132,10 +132,11 @@ class PolymerSimulatorDirs:
             # Check each file in the current directory
             for file in files:
                 # Check if the file has a .pdb extension
-                if file.endswith(".pdb"):
-                    if molecule_name in file:
-                        pdb_file_path = os.path.join(root, file)
-                        return pdb_file_path             
+                #if file.endswith(".pdb"):
+                if file == (molecule_name + ".pdb"):
+                    #if molecule_name in file:
+                    pdb_file_path = os.path.join(root, file)
+                    return pdb_file_path             
     
     def parametrized_mols_avail(self, directories):
         a = False
@@ -179,15 +180,22 @@ class PolymerSimulatorDirs:
         if a == False:
             print("No parametrized molecules.")
 
-    def retrieve_top_crds(self, directories, system_name):
-        for root, dirs, files in os.walk(directories.systems_dir):
+    def retrieve_top_crds(self, system_name=None):
+        if system_name == None:
+            print("Please provide the name of the system you are retrieving files as follows: 'topology_file, coordinate_file = directories.retrieve_top_crds('ethane')")
+            print("Change ethane for the name of the desired system")
+            print("NOTE: Amber files must be generated using tleap prior to this step")
+            return(None)
+        for root, dirs, files in os.walk(self.systems_dir):
             # Check each file in the current directory
             for file in files:
                 # Check if the file has a .pdb extension
-                if file.endswith(".prmtop") and system_name in file:                    
+                #if file.endswith(".prmtop") and system_name in file: 
+                if file == (system_name + ".prmtop"):
                     # Construct the full path to the .pdb file
                     prmtop_file_path = os.path.join(root, file)
-                if file.endswith(".rst7") and system_name in file:
+                #if file.endswith(".rst7") and system_name in file:
+                if file == (system_name + ".rst7"):
                     # Construct the full path to the .pdb file
                     coord_file_path = os.path.join(root, file)   
         return(prmtop_file_path, coord_file_path)
