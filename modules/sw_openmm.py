@@ -12,6 +12,7 @@ import itertools
 import matplotlib.pyplot as plt
 import shutil
 import datetime
+import time
 
 from openmm import *
 from openmm.app import *
@@ -555,10 +556,20 @@ class BuildSimulation():
     timestamp = datetime.datetime.now().strftime('%Y-%m-%d_%H%M%S')
     # Start temp, max temp, cycles, holding_steps, steps at each temp
     anneal_parameters = [300, 700, 5, 3000, 100]
+    minimized_only = None # This will change to True/False and will determine how periodic box vectors are set
     
-    def __init__(self):
-        pass   
-              
+    def __init__(self, directories, filename):
+        self.filename = filename
+        self.directories = directories
+        self.output_dir = os.path.join(self.directories.systems_dir, self.filename, self.timestamp)
+        if not os.path.exists(self.output_dir):
+            os.makedirs(self.output_dir)
+        self.log_info = {'Minimization': {'Temperature':None,'Time taken': None},
+                            'Annealing': {'Time taken': None, 'Simulation time': None, 'Start temp': None, 'Target temp': None, 'Cycles': None, 'Steps at plateaus': None, 'Steps at incremental temps': None, 'Timestep': None},
+                            'Equilibration': {'Time taken': None, 'Simulation time': None, 'Temperature': None, 'Pressure': None, 'Timestep': None},
+                            'Production': {'Time taken': None, 'Simulation time': None, 'Temperature': None, 'Timestep': None}}
+        self.log_csv = os.path.join(self.output_dir, (self.filename + "_" + self.timestamp + "_log.csv"))
+                             
     def type_of_simulation(self):
         """
         Determine the type of simulation.
@@ -592,6 +603,8 @@ class BuildSimulation():
         Returns:
             minimized_simulation_object
         """
+        min_start_time = time.time()
+        
         integrator = LangevinIntegrator(self.temp*kelvin, self.friction_coeff/picoseconds, self.timestep*femtoseconds)
         
         if BuildSimulation.type_of_simulation(self) == "AMB":
@@ -609,10 +622,14 @@ class BuildSimulation():
 
         state = simulation.context.getState(getPositions=True, getEnergy=True) 
         
-        self.min_pdbname = "min_" + self.filename
+        self.min_pdbname = os.path.join(self.output_dir, ("min_" + self.filename + ".pdb"))
         with open(self.min_pdbname, 'w') as output:
             PDBFile.writeFile(simulation.topology, state.getPositions(), output)
-            
+        
+        min_end_time = time.time()  
+        time_taken = min_end_time - min_start_time
+        self.log_info['Minimization']['Time taken'] = time_taken
+        self.log_info['Minimization']['Temperature'] = self.temp
         return(simulation)
      
     @classmethod
@@ -664,6 +681,8 @@ class BuildSimulation():
         The system's state is updated throughout the annealing process, and reporters are set up to record trajectory and 
         simulation data.
         """
+        anneal_start_time = time.time()
+        
         if start_temp is None:
             start_temp = self.anneal_parameters[0]
         if max_temp is None:
@@ -676,7 +695,7 @@ class BuildSimulation():
             steps_at_temp = self.anneal_parameters[4]
          
         # Extract positional info
-        state = simulation.context.getState(getPositions=True, getEnergy=True) # Define state object 
+        state = simulation.context.getState(getPositions=True, getEnergy=True, enforcePeriodicBox=True) # Define state object 
         xyz = state.getPositions() # Obtain positions of the particles from previous step
         vx, vy, vz = state.getPeriodicBoxVectors() # Obtain periodc box vectors of the previous step
         
@@ -691,10 +710,10 @@ class BuildSimulation():
             system = self.potential.createSystem(self.ani_topology, nonbondedMethod=app.PME, nonbondedCutoff=1.0*nanometers, constraints=app.HBonds)
             platform = PLatform.getPlatformByName('CUDA')
             simulation = app.Simulation(self.ani_topology, system, integrator, platform)
-        
-        # Update positional info     
-        simulation.context.setPositions(xyz)
+
+        # Update the xyz of each atom
         simulation.context.setPeriodicBoxVectors(vx, vy, vz)
+        simulation.context.setPositions(xyz)
         
         # Total up all steps of the equilibration so the rpeorters record properly
         total_steps = (((max_temp-start_temp)*1000 + holding_steps)*2)*cycles
@@ -702,18 +721,18 @@ class BuildSimulation():
         # Set up reporters
         # PDB trajectory - this is slighlty redundant with the addition of the DCD trajectory, but it is still useful for        
         #output_pdbname = os.path.join(directories.systems_dir, self.filename, (self.filename + "_anneal.pdb"))
-        output_pdbname = self.filename + "_anneal_" + str(self.timestamp) + ".pdb" 
+        output_pdbname = os.path.join(self.output_dir, (self.filename + "_anneal_" + str(self.timestamp) + ".pdb" ))
         simulation.reporters.append(app.PDBReporter(output_pdbname, self.reporter_freq))
         
         # DCD trajectory
         #output_dcdname = os.path.join(directories.systems_dir, self.filename, (self.filename + "_anneal"))
-        output_dcdname = self.filename + "_anneal_traj_" + str(self.timestamp)
+        output_dcdname = os.path.join(self.output_dir, (self.filename + "_anneal_traj_" + str(self.timestamp)))
         dcdWriter = DcdWriter(output_dcdname, self.reporter_freq)
         simulation.reporters.append(dcdWriter.dcdReporter)
     
         # Datawriter - This is a more complete data writer than previously used, the file generated is a comma delimited text file
         #output_dataname = os.path.join(directories.systems_dir, self.filename, (self.filename + "_anneal_data"))
-        output_dataname = self.filename + "_anneal_data_" + str(self.timestamp)
+        output_dataname = os.path.join(self.output_dir, (self.filename + "_anneal_data_" + str(self.timestamp)))
         dataWriter = DataWriter(output_dataname, self.reporter_freq, total_steps)
         simulation.reporters.append(dataWriter.stateDataReporter)
         
@@ -735,14 +754,27 @@ class BuildSimulation():
             simulation.step(holding_steps)
 
         # Now copy all the files into the system directory
-        destination_dir = os.path.join(directories.systems_dir, self.filename)
-        shutil.move(output_pdbname, destination_dir)
-        output_dcdname = self.filename +  "_anneal_traj_" + self.timestamp + ".dcd"
-        shutil.move(output_dcdname, destination_dir)
-        output_dataname = self.filename +  "_anneal_data_" + self.timestamp + ".txt"
-        shutil.move(output_dataname, destination_dir)
-        return(simulation, os.path.join(destination_dir, output_dataname))
-      
+        #destination_dir = os.path.join(directories.systems_dir, self.filename)
+        #shutil.move(output_pdbname, destination_dir)
+        #output_dcdname = self.filename +  "_anneal_traj_" + self.timestamp + ".dcd"
+        #shutil.move(output_dcdname, destination_dir)
+        #output_dataname = self.filename +  "_anneal_data_" + self.timestamp + ".txt"
+        #shutil.move(output_dataname, destination_dir)
+        #return(simulation, os.path.join(destination_dir, output_dataname))
+
+        anneal_end_time = time.time()  
+        time_taken = anneal_end_time - anneal_start_time
+
+        self.log_info['Annealing']['Time taken'] = time_taken
+        self.log_info['Annealing']['Simulation time'] = total_steps*self.timestep
+        self.log_info['Annealing']['Start temp'] = start_temp
+        self.log_info['Annealing']['Target temp'] = max_temp
+        self.log_info['Annealing']['Cycles'] = cycles
+        self.log_info['Annealing']['Steps at plateaus'] = holding_steps
+        self.log_info['Annealing']['Steps at incremental temps'] = steps_at_temp
+        self.log_info['Annealing']['Timestep'] = self.timestep
+        return(simulation, (output_dataname + ".txt"))
+    
     @classmethod
     def anneal_help(cls):
         """Display help information for the anneal method."""
@@ -788,6 +820,8 @@ class BuildSimulation():
             of steps. The system's state is updated throughout the equilibration process, and reporters are set up to record 
             trajectory and simulation data.
         """
+        equili_start_time = time.time()
+        
         if total_steps is None:
             total_steps = self.total_steps
         if temp is None:
@@ -799,7 +833,6 @@ class BuildSimulation():
         state = simulation.context.getState(getPositions=True, getEnergy=True) # Define state object 
         xyz = state.getPositions() # Obtain positions of the particles from previous step
         vx, vy, vz = state.getPeriodicBoxVectors()
-        #print(xyz)
         
         # Set up integrator and barostat
         barostat = MonteCarloBarostat((pressure*atmosphere), (temp*kelvin)) # Define barostat (pressure, temp)
@@ -815,42 +848,51 @@ class BuildSimulation():
             system.addForce(barostat)
             platform = PLatform.getPlatformByName('CUDA')
             simulation = app.Simulation(self.ani_topology, system, integrator, platform)
+
+        # We set the box vectors with the output from the the previous simulation
+        #if self.minimized_only == False:       
+        simulation.context.setPeriodicBoxVectors(vx, vy, vz)
         
         # Update positional info
         simulation.context.setPositions(xyz)
-        #simulation.context.setPeriodicBoxVectors(vx, vy, vz)
-        state = simulation.context.getState(getPositions=True, getEnergy=True) # Define state object 
-        xyz = state.getPositions()
-        print(xyz)
+             
         # Set initial velocities
         simulation.context.setVelocitiesToTemperature(temp*kelvin)
         
         # Set up reporters
         #output_pdbname = os.path.join(directories.systems_dir, self.filename, (self.filename +  "_" + str(pressure) + "_atm_traj.pdb"))
-        output_pdbname = self.filename +  "_" + str(pressure) + "_atm_traj_" + str(self.timestamp) + ".pdb"
+        output_pdbname = os.path.join(self.output_dir, (self.filename +  "_" + str(pressure) + "_atm_traj_" + str(self.timestamp) + ".pdb"))
         simulation.reporters.append(app.PDBReporter(output_pdbname, self.reporter_freq))
     
         # DCD trajectory
         #output_dcdname = os.path.join(directories.systems_dir, self.filename, (self.filename +  "_" + str(pressure) + "_atm_traj.dcd"))
-        output_dcdname = self.filename +  "_" + str(pressure) + "_atm_traj_" + str(self.timestamp)
+        output_dcdname = os.path.join(self.output_dir, (self.filename +  "_" + str(pressure) + "_atm_traj_" + str(self.timestamp)))
         dcdWriter = DcdWriter(output_dcdname, self.reporter_freq)
         simulation.reporters.append(dcdWriter.dcdReporter)
     
         # Datawriter - This is a more complete data writer than previously used, the file generated is a comma delimited text file
         #output_dataname = os.path.join(directories.systems_dir, self.filename, (self.filename +  "_" + str(pressure) + "_atm_data"))
-        output_dataname = self.filename +  "_" + str(pressure) + "_atm_data_" + str(self.timestamp)
+        output_dataname = os.path.join(self.output_dir, (self.filename +  "_" + str(pressure) + "_atm_data_" + str(self.timestamp)))
         dataWriter = DataWriter(output_dataname, self.reporter_freq, total_steps)
         simulation.reporters.append(dataWriter.stateDataReporter)
         simulation.step(total_steps)       
 
         # Now copy all the files into the system directory
-        destination_dir = os.path.join(directories.systems_dir, self.filename)
-        shutil.move(output_pdbname, destination_dir)
-        output_dcdname = self.filename +  "_" + str(pressure) + "_atm_traj_" + str(self.timestamp) + ".dcd"
-        shutil.move(output_dcdname, destination_dir)
-        output_dataname = self.filename +  "_" + str(pressure) + "_atm_data_" + str(self.timestamp) + ".txt"
-        shutil.move(output_dataname, destination_dir)
-        return(simulation, os.path.join(destination_dir, output_dataname))
+        #destination_dir = os.path.join(directories.systems_dir, self.filename)
+        #shutil.move(output_pdbname, destination_dir)
+        #output_dcdname = self.filename +  "_" + str(pressure) + "_atm_traj_" + str(self.timestamp) + ".dcd"
+        #shutil.move(output_dcdname, destination_dir)
+        #output_dataname = self.filename +  "_" + str(pressure) + "_atm_data_" + str(self.timestamp) + ".txt"
+        #shutil.move(output_dataname, destination_dir)
+        equili_end_time = time.time()  
+        time_taken = equili_end_time - equili_start_time
+
+        self.log_info['Equilibration']['Time taken'] = time_taken
+        self.log_info['Equilibration']['Simulation time'] = total_steps * self.timestep
+        self.log_info['Equilibration']['Temperature'] = temp
+        self.log_info['Equilibration']['Pressure'] = pressure
+        self.log_info['Equilibration']['Timestep'] = self.timestep
+        return(simulation, (output_dataname + ".txt"))
     
     @classmethod
     def equilibrate_help(cls):
@@ -893,6 +935,7 @@ class BuildSimulation():
             number of steps. The system's state is updated throughout the production run, and reporters are set up to 
             record trajectory and simulation data.
         """
+        prod_start_time = time.time()
         if total_steps is None:
             total_steps = self.total_steps
         if temp is None:
@@ -923,30 +966,37 @@ class BuildSimulation():
         # PDB trajectory - this is slighlty redundant with the addition of the DCD trajectory, but it is still useful for 
         #   visualisation of the system and coloring specific residues 
         #output_pdbname = os.path.join(directories.systems_dir, self.filename, (self.filename + "_prod_traj.pdb"))
-        output_pdbname = self.filename + "_prod_traj_" + str(self.timestamp) + ".pdb"
+        output_pdbname = os.path.join(self.output_dir, (self.filename + "_prod_traj_" + str(self.timestamp) + ".pdb"))
         simulation.reporters.append(app.PDBReporter(output_pdbname, self.reporter_freq))
         
         # DCD trajectory
         #output_dcdname = os.path.join(directories.systems_dir, self.filename, (self.filename + "_prod_traj"))
-        output_dcdname = self.filename + "_prod_traj_" + str(self.timestamp)
+        output_dcdname = os.path.join(self.output_dir(self.filename + "_prod_traj_" + str(self.timestamp)))
         dcdWriter = DcdWriter(output_dcdname, self.reporter_freq)
         simulation.reporters.append(dcdWriter.dcdReporter)
     
         # Datawriter - This is a more complete data writer than previously used, the file generated is a comma delimited text file
         #output_dataname = os.path.join(directories.systems_dir, self.filename, (self.filename + "_prod_data"))
-        output_dataname = self.filename + "_prod_data_" + str(self.timestamp)
+        output_dataname = os.path.join(self.output_dir(self.filename + "_prod_data_" + str(self.timestamp)))
         dataWriter = DataWriter(output_dataname, self.reporter_freq, total_steps)
         simulation.reporters.append(dataWriter.stateDataReporter) 
         simulation.step(total_steps)
 
         # Now copy all the files into the system directory
-        destination_dir = os.path.join(directories.systems_dir, self.filename)
-        shutil.move(output_pdbname, destination_dir)
-        output_dcdname = self.filename +  "_prod_traj_" + str(self.timestamp) + ".dcd"
-        shutil.move(output_dcdname, destination_dir)
-        output_dataname = self.filename +  "_prod_data_" + str(self.timestamp) + ".txt"
-        shutil.move(output_dataname, destination_dir)
-        return(simulation, os.path.join(destination_dir, output_dataname))
+        #destination_dir = os.path.join(directories.systems_dir, self.filename)
+        #shutil.move(output_pdbname, destination_dir)
+        #output_dcdname = self.filename +  "_prod_traj_" + str(self.timestamp) + ".dcd"
+        #shutil.move(output_dcdname, destination_dir)
+        #output_dataname = self.filename +  "_prod_data_" + str(self.timestamp) + ".txt"
+        #shutil.move(output_dataname, destination_dir)
+        prod_end_time = time.time()
+        time_taken = prod_end_time - prod_start_time
+        self.log_info['Equilibration']['Time taken'] = time_taken
+        self.log_info['Equilibration']['Simulation time'] = total_steps * self.timestep
+        self.log_info['Equilibration']['Temperature'] = temp
+        self.log_info['Equilibration']['Pressure'] = pressure
+        self.log_info['Equilibration']['Timestep'] = self.timestep
+        return(simulation, (output_dataname + ".txt"))
      
     @classmethod
     def production_run_help(cls):
@@ -1090,33 +1140,55 @@ class BuildSimulation():
     def graph_state_data_help(cls):
         """Display help information for the method to plot state data."""
         print(cls.graph_state_data.__doc__)
+
+    def write_log_csv(self):
+        # Get all unique keys across all sections
+        all_keys = set()
+        for info in self.log_info.values():
+            all_keys.update(info.keys())
+
+        # Write log_info to a CSV file
+        with open(self.log_csv, 'w', newline='') as file:
+            writer = csv.DictWriter(file, fieldnames=['Section'] + list(all_keys))
+            writer.writeheader()
+            for section, info in self.log_info.items():
+                writer.writerow({'Section': section, **info})
         
 class AmberSimulation(BuildSimulation):
     
-    def __init__(self, topology_file, coordinates_file, pdb_file):
-        self.amb_topology = app.AmberPrmtopFile(topology_file)
-        self.amb_coordinates = app.AmberInpcrdFile(coordinates_file)
+    def __init__(self, directories, topology_file, coordinates_file):     
         self.filename = os.path.basename(topology_file).split('.')[0]
-
+        
+        # Inherit attributes defined in the parent class and pass directories to the BuildSimulation constructor
+        super().__init__(directories, self.filename)
+        
+        self.amb_coordinates = app.AmberInpcrdFile(coordinates_file)
+        self.amb_topology = app.AmberPrmtopFile(topology_file, periodicBoxVectors=self.amb_coordinates.boxVectors)
+        
         # Set pbc into topology
-        self.positionsML = PositionsML(pdb_file)
-        self.pbc = self.positionsML.get_pbc()
-        self.amb_topology.topology.setPeriodicBoxVectors(self.pbc)
+        #self.positionsML = PositionsML(pdb_file)
+        #self.pbc = self.positionsML.get_pbc()
+        #self.amb_topology.topology.setPeriodicBoxVectors(self.pbc)
 
     def __str__(self):
-        return 'Amber simulation object of - {}'.format( self.filename)
+        return 'Amber simulation object of - {}'.format(self.filename)
 
 class ANISimulation(BuildSimulation):
     
     potential = 'ani2x'
     
-    def __init__(self, input_file):
+    def __init__(self, directories, input_file):
+        self.filename = os.path.basename(input_file).split('.')[0]
+        
+        # Inherit attributes defined in the parent class and pass directories to the BuildSimulation constructor
+        super().__init__(directories, self.filename)
+        
         self.positionsML = PositionsML(input_file)
         self.ani_coordinates = self.positionsML.coords
         self.pbc = self.positionsML.get_pbc()
         self.potential = MLPotential(self.potential)
-        self.filename = os.path.basename(input_file).split('.')[0]
         self.ani_topology = ((TopologyML(input_file)).create_topo()).setPeriodicBoxVectors(self.pbc)
+
     
     def __str__(self):
         return 'ANI simulation object of - {}'.format(self.filename)
