@@ -971,13 +971,13 @@ class BuildSimulation():
         
         # DCD trajectory
         #output_dcdname = os.path.join(directories.systems_dir, self.filename, (self.filename + "_prod_traj"))
-        output_dcdname = os.path.join(self.output_dir(self.filename + "_prod_traj_" + str(self.timestamp)))
+        output_dcdname = os.path.join(self.output_dir, (self.filename + "_prod_traj_" + str(self.timestamp)))
         dcdWriter = DcdWriter(output_dcdname, self.reporter_freq)
         simulation.reporters.append(dcdWriter.dcdReporter)
     
         # Datawriter - This is a more complete data writer than previously used, the file generated is a comma delimited text file
         #output_dataname = os.path.join(directories.systems_dir, self.filename, (self.filename + "_prod_data"))
-        output_dataname = os.path.join(self.output_dir(self.filename + "_prod_data_" + str(self.timestamp)))
+        output_dataname = os.path.join(self.output_dir, (self.filename + "_prod_data_" + str(self.timestamp)))
         dataWriter = DataWriter(output_dataname, self.reporter_freq, total_steps)
         simulation.reporters.append(dataWriter.stateDataReporter) 
         simulation.step(total_steps)
@@ -991,11 +991,10 @@ class BuildSimulation():
         #shutil.move(output_dataname, destination_dir)
         prod_end_time = time.time()
         time_taken = prod_end_time - prod_start_time
-        self.log_info['Equilibration']['Time taken'] = time_taken
-        self.log_info['Equilibration']['Simulation time'] = total_steps * self.timestep
-        self.log_info['Equilibration']['Temperature'] = temp
-        self.log_info['Equilibration']['Pressure'] = pressure
-        self.log_info['Equilibration']['Timestep'] = self.timestep
+        self.log_info['Production']['Time taken'] = time_taken
+        self.log_info['Production']['Simulation time'] = total_steps * self.timestep
+        self.log_info['Production']['Temperature'] = temp
+        self.log_info['Production']['Timestep'] = self.timestep
         return(simulation, (output_dataname + ".txt"))
      
     @classmethod
@@ -1155,6 +1154,20 @@ class BuildSimulation():
                 writer.writerow({'Section': section, **info})
         
 class AmberSimulation(BuildSimulation):
+    """
+    A class representing an AMBER molecular dynamics simulation.
+
+    Attributes:
+        directories (str): A directories obejct generated with sw_directories which manages filepaths during simulations.
+        topology_file (str): A string representing the path to the topology file.
+        coordinates_file (str): A string representing the path to the coordinates file.
+
+    Methods:
+        __init__(directories, topology_file, coordinates_file): 
+            Initializes an AmberSimulation object with specified directories, topology file, and coordinates file.
+        __str__():
+            Returns a string representation of the AmberSimulation object.
+    """
     
     def __init__(self, directories, topology_file, coordinates_file):     
         self.filename = os.path.basename(topology_file).split('.')[0]
@@ -1174,7 +1187,22 @@ class AmberSimulation(BuildSimulation):
         return 'Amber simulation object of - {}'.format(self.filename)
 
 class ANISimulation(BuildSimulation):
-    
+    """
+    A class representing an ANI (Atomic Neural Network Interaction) molecular dynamics simulation.
+
+    Attributes:
+        potential (str): A string representing the ANI potential used in the simulation.
+        directories (str): A string representing the directories where simulation files are stored.
+        input_file (str): A string representing the path to the input file.
+
+    Methods:
+        __init__(directories, input_file): 
+            Initializes an ANISimulation object with specified directories and input file, sets up ANI coordinates, potential, and topology.
+        __str__():
+            Returns a string representation of the ANISimulation object.
+        set_potential(potential):
+            Class method to set the ANI potential for all instances of the class.
+    """
     potential = 'ani2x'
     
     def __init__(self, directories, input_file):
