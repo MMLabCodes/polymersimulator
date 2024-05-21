@@ -546,6 +546,10 @@ class BuildSimulation():
     Notes:
         This class provides a comprehensive interface for setting up, running, and managing molecular simulations.
         It includes methods for energy minimization, simulated annealing, equilibration, production runs, and visualization of data.
+
+    Child Classes (this class is used through these child classes, do not try to call BuildSimulaiton on its own unless you plan to only utilise static methods):
+        - ANISimulation: A class representing ANI (Atomic Neural Network Interaction) molecular dynamics simulations.
+        - AmberSimulation: A class representing AMBER molecular dynamics simulations.
     """ 
     pressure = 1
     temp = 300
@@ -559,6 +563,23 @@ class BuildSimulation():
     minimized_only = None # This will change to True/False and will determine how periodic box vectors are set
     
     def __init__(self, directories, filename):
+        """
+        Initializes a BuildSimulation object with specified directories and filename 
+
+        Args:
+            directories (str): The directories where simulation files are stored.
+            filename (str): The name of the simulation file.
+
+        Attributes:
+            filename (str): The name of the simulation file.
+            directories (str): The directories where simulation files are stored.
+            output_dir (str): The directory for simulation output.
+            log_info (dict): Information log for different stages of the simulation.
+            log_csv (str): The path to the CSV log file.
+
+        Notes:
+            If the output directory does not exist, it will be created.
+        """
         self.filename = filename
         self.directories = directories
         self.output_dir = os.path.join(self.directories.systems_dir, self.filename, self.timestamp)
