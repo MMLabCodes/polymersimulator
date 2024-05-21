@@ -1040,36 +1040,131 @@ class BuildSimulation():
     
     @classmethod
     def set_temperature(cls, temp): 
+        """
+        Class method to set the temperature for simulations.
+
+        Args:
+            cls: The class itself.
+            temp (float): The temperature to set, in Kelvin.
+
+        Returns:
+            None
+
+        Notes:
+            This method sets the temperature class attribute to the specified value and prints a confirmation message.
+        """
         cls.temp = temp
         print("Temperature set to: ", str(temp), "kelvin")
              
     @classmethod
-    def set_pressure(cls, pressure): 
+    def set_pressure(cls, pressure):
+        """
+        Class method to set the pressure for simulations.
+
+        Args:
+            cls: The class itself.
+            pressure (float): The pressure to set, in Atmospheres.
+
+        Returns:
+            None
+
+        Notes:
+            This method sets the pressure class attribute to the specified value and prints a confirmation message.
+        """
         cls.raise_pressure = pressure
         print("Pressure set to: ", str(pressure), " atmospheres")
         
     @classmethod
     def set_timestep(cls, timestep): 
+        """
+        Class method to set the timestep for simulations.
+
+        Args:
+            cls: The class itself.
+            timestep (float): The timestep to set, in Femtoseconds.
+
+        Returns:
+            None
+
+        Notes:
+            This method sets the timestep class attribute to the specified value and prints a confirmation message.
+        """
         cls.timestep = timestep
         print("Timestep set to: ", str(timestep))
         
     @classmethod
     def set_friction_coeff(cls, friction_coeff):
+        """
+        Class method to set the friction_coeff for simulations.
+
+        Args:
+            cls: The class itself.
+            friction_coeff (float): The friction_coeff to set, in Picoseconds.
+
+        Returns:
+            None
+
+        Notes:
+            This method sets the friction_coeff class attribute to the specified value and prints a confirmation message.
+        """
         cls.friction_coeff = friction_coeff
         print("Friction coeffiecent set to: ", str(friction_coeff))
     
     @classmethod
     def set_total_steps(cls, total_steps):
+        """
+        Class method to set the total_steps for simulations.
+
+        Args:
+            cls: The class itself.
+            total_steps (int): The total_steps to set, as an integer.
+
+        Returns:
+            None
+
+        Notes:
+            This method sets the total_steps class attribute to the specified value and prints a confirmation message.
+        """
         cls.total_steps = total_steps
         print("Total steps for simulation set to: ", str(total_steps))
         
     @classmethod
-    def set_reporter_freq(cls, reporter_freq): 
+    def set_reporter_freq(cls, reporter_freq):
+        """
+        Class method to set the reporter_freq for simulations.
+
+        Args:
+            cls: The class itself.
+            reporter_freq (int): The reporter_freq to set, as an integer.
+
+        Returns:
+            None
+
+        Notes:
+            This method sets the reporter_freq class attribute to the specified value and prints a confirmation message.
+        """
         cls.reporter_freq = reporter_freq
         print("Reporter frequency set to every: ", reporter_freq, " steps")
         
     @classmethod
     def set_anneal_parameters(cls, new_anneal_parameters): 
+        """
+        Class method to set annealing parameters.
+
+        Args:
+            cls: The class itself.
+            new_anneal_parameters (list): List of annealing parameters in the format [start_temp, max_temp, cycles, holding_steps, steps_at_temp].
+
+        Returns:
+            None
+
+        Raises:
+            ValueError: If the length of new_anneal_parameters does not match the expected length.
+
+        Notes:
+            This method sets the annealing parameters class attribute to the specified list. 
+            It prints a confirmation message with the provided parameters.
+        """
         if len(new_anneal_parameters) != len(cls.anneal_parameters):
             format_str = "Expected format: [start_temp, max_temp, cycles, holding_steps, steps_at_temp]"
             raise ValueError(f"Invalid parameters provided. {format_str}")
@@ -1162,6 +1257,16 @@ class BuildSimulation():
         print(cls.graph_state_data.__doc__)
 
     def write_log_csv(self):
+        """
+        Write the log information to a CSV file.
+
+        Returns:
+            None
+
+        Notes:
+            This method collects all unique keys across all sections of log_info.
+            It then writes the log_info to a CSV file with each section as a row and the keys as columns.
+        """
         # Get all unique keys across all sections
         all_keys = set()
         for info in self.log_info.values():
