@@ -322,7 +322,7 @@ class BuildSystems():
             return()
         system_dir = os.path.join(directories.systems_dir, input_file_name)
         packmol_command = self.packmol_path + " < " + packmol_filepath
-        result = subprocess.run(cd_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        result = subprocess.run(packmol_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         return()
 
 
