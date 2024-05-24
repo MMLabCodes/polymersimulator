@@ -870,7 +870,7 @@ class BuildAmberSystems(BuildSystems):
          result = subprocess.run(cd_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
          return()
 
-    def run_packmol(self.packmol_path=None, directories, input_file_name):
+    def run_packmol(directories, input_file_name):
         if os.path.exists(self.packmol_path):
             print(f"Packmol executable exists at '{path}'.")
         else:
