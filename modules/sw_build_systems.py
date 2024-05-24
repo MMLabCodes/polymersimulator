@@ -886,7 +886,7 @@ class BuildAmberSystems(BuildSystems):
             print("Packmol input file not found.")
             print("")
             return()
-        system_dir = os.path.join(directories.systems_dirm input_file_name)
+        system_dir = os.path.join(directories.systems_dir, input_file_name)
         packmol_command = self.packmol_path + " < " + packmol_filepath
         result = subprocess.run(cd_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         return()
