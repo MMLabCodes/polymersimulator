@@ -89,9 +89,14 @@ class PolymerSimulatorDirs:
                     mol2_file = mol2_file_path.split("/")[-1]
                     print(mol2_file)
 
-    def load_mol2_filepath(self, directories, molecule_name):
+    def load_mol2_filepath(self, molecule_name=None):
+        if molecule_name == None:
+            print("Please provide the name of the system you are retrieving files as follows: 'mol2_file = directories.load_mol2_filepath('ethane')")
+            print("Change ethane for the name of the desired system")
+            print("NOTE: The mol2 file of the requested molecule must be generated with tleap prior to use of this function")
+            return(None)
         # Walk through the directory tree recursively
-        for root, dirs, files in os.walk(directories.pdb_file_dir):
+        for root, dirs, files in os.walk(self.pdb_file_dir):
             # Check each file in the current directory
             for file in files:
                 # Check if the file has a .pdb extension
@@ -99,7 +104,35 @@ class PolymerSimulatorDirs:
                     if molecule_name in file:
                         mol2_file_path = os.path.join(root, file)
                         return mol2_file_path 
-    
+
+    def load_pckml_filepath(self, molecule_name=None):
+        if molecule_name == None:
+            print("Please provide the name of the system you are retrieving files as follows: 'pckml_file = directories.load_pckml_filepath('pb_ph_41')")
+            print("NOTE: Packmol input files must be written manually.")
+            return(None)
+        # Walk through the directory tree recursively
+        for root, dirs, files in os.walk(self.pdb_file_dir):
+            # Check each file in the current directory
+            for file in files:
+                # Check if the file has a .pdb extension
+                if file.endswith(".pckml"):
+                    if molecule_name in file:
+                        pckml_file_path = os.path.join(root, file)
+                        return pckml_file_path 
+                        
+    def pckml_files_avail(self):
+        # Walk through the directory tree recursively
+        for root, dirs, files in os.walk(self.pdb_file_dir):
+            # Check each file in the current directory
+            for file in files:
+                # Check if the file has a .pdb extension
+                if file.endswith(".pckml"):
+                    # Construct the full path to the .pdb file
+                    pckml_file_path = os.path.join(root, file)
+                    # Extract molecule name
+                    pckml_file = pckml_file_path.split("/")[-1]
+                    print(pckml_file)
+                    
     def pdb_files_avail(self):
         # Walk through the directory tree recursively
         for root, dirs, files in os.walk(self.pdb_file_dir):
@@ -126,7 +159,12 @@ class PolymerSimulatorDirs:
                     pdb_file = pdb_file_path.split("/")[-1]
                     print(pdb_file)
     
-    def load_pdb_filepath(self, molecule_name):
+    def load_pdb_filepath(self, molecule_name=None):
+        if molecule_name == None:
+            print("Please provide the name of the system you are retrieving files as follows: 'pdb_file = directories.load_pdb_filepath('ethane')")
+            print("Change ethane for the name of the desired system")
+            print("NOTE: If requesting a system for molecular dynamics - PDB files of a system must be generated using tleap prior to this step")
+            return(None)
         # Walk through the directory tree recursively
         for root, dirs, files in os.walk(self.pdb_file_dir):
             # Check each file in the current directory
@@ -138,9 +176,9 @@ class PolymerSimulatorDirs:
                     pdb_file_path = os.path.join(root, file)
                     return pdb_file_path             
     
-    def parametrized_mols_avail(self, directories):
+    def parametrized_mols_avail(self):
         a = False
-        for root, dirs, files in os.walk(directories.molecules_dir):
+        for root, dirs, files in os.walk(self.molecules_dir):
             # Check each file in the current directory
             for file in files:
                 # Check if the file has a .pdb extension
@@ -218,8 +256,8 @@ class PolymerSimulatorDirs:
 
         return names, smiles
         
-    def retrieve_polymeric_rescodes(self, directories, molecule_name):
-        with open(directories.residue_code_csv, 'r') as file:
+    def retrieve_polymeric_rescodes(self, molecule_name):
+        with open(self.residue_code_csv, 'r') as file:
             head_code, mainchain_code, tail_code = None, None, None
             for line in file:
                 parts = (line.strip().split('\t'))[0]
