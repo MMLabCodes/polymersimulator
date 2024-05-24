@@ -306,16 +306,16 @@ class BuildSystems():
 
     def run_packmol(self, directories, input_file_name):
         if os.path.exists(self.packmol_path):
-            print(f"Packmol executable exists at '{path}'.")
+            print(f"Packmol executable exists at '{self.packmol_path}'.")
         else:
-            print(f"Packmol executable not found at '{path}'.")
+            print(f"Packmol executable not found at '{self.packmol_path}'.")
             print("Please update the class variable for the packmol path using 'update_packmol_path(new_packmol_path)'")
             print("")
             print("Call packmol_help() for more information")
             return()
         packmol_filepath = directories.load_pckml_filepath(input_file_name)
         if os.path.exists(packmol_filepath):
-            print(f"Packmol input file exists at '{path}'.")
+            print(f"Packmol input file exists at '{packmol_filepath}'.")
         else:
             print("Packmol input file not found.")
             print("")
