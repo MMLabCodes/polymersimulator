@@ -305,6 +305,25 @@ class BuildSystems():
         return max_distance
 
     def run_packmol(self, directories, input_file_name):
+        """
+        Run Packmol with the specified input file and directories.
+
+        Args:
+            directories: An object with methods to load Packmol file paths and access system directories.
+            input_file_name: The name of the Packmol input file.
+
+        The 'directories' object should have the following methods:
+            - load_pckml_filepath(input_file_name): Returns the full path to the Packmol input file.
+            - systems_dir: A directory where the Packmol output will be stored.
+
+        Example:
+            from modules.sw_directories import *
+            directories = PolymerSimulatorDirs("path/to/project/directory")
+
+            from modules.sw_build_systems import *
+            build = BuildSystems()
+            build.run_packmol(directories, 'input_file_name')
+        """
         if os.path.exists(self.packmol_path):
             print(f"Packmol executable exists at '{self.packmol_path}'.")
         else:
@@ -325,11 +344,23 @@ class BuildSystems():
         result = subprocess.run(packmol_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         return()
 
+    def update_packmol_path(self, new_packmol_path):
+        """
+        Update the path to the Packmol executable.
 
+        Args:
+            new_packmol_path: The new path to the Packmol executable.
 
-    
-    def update_packmol_path(self):
-        pass
+        Example:
+            from modules.sw_build_systems import *
+            build = BuildSystems()
+            build.update_packmol_path('/new/path/to/packmol/ececutable')
+        """
+        if os.path.exists(new_packmol_path):
+            self.packmol_path = new_packmol_path
+            print(f"Packmol path updated to '{self.packmol_path}'.")
+        else:
+            print(f"The provided path '{new_packmol_path}' does not exist. Please provide a valid path.")
 
 class BuildAmberSystems(BuildSystems):
     
