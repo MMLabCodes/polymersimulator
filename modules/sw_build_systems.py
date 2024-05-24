@@ -289,6 +289,9 @@ class BuildSystems():
 
         Returns:
             - float: Maximum pairwise distance between 2 atoms in the molecule.
+
+        Notes:
+            This function will no longer be updated.
         """
         warnings.warn(
             "The max_pairwise_distance method is deprecated and will be removed in a future version. "
@@ -369,7 +372,7 @@ class BuildSystems():
             print(f"The provided path '{new_packmol_path}' does not exist. Please provide a valid path.")
 
     @staticmethod
-    def get_xyz_dists(self, input_file=None):
+    def get_xyz_dists(input_file):
         """
         Calculates the maximum distance between the largest and smallest xyz coordinates.
 
@@ -389,13 +392,14 @@ class BuildSystems():
             print("Please provide a valid input file.")
             print("Supported formats are: '.pdb' and '.xyz'")
             print("")
-            self.get_xyz_dists_help()
+            #self.get_xyz_dists_help()
+            return()
         
         if ".pdb" in input_file:
             obConversion = openbabel.OBConversion()
             obConversion.SetInFormat("pdb")
             mol = openbabel.OBMol()
-            obConversion.ReadFile(mol, pdb_file)
+            obConversion.ReadFile(mol, input_file)
             # Extract atom coordinates
             coords = []
             for atom in openbabel.OBMolAtomIter(mol):
