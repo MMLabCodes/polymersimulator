@@ -304,6 +304,33 @@ class BuildSystems():
         max_distance = np.max(distances)
         return max_distance
 
+    def run_packmol(directories, input_file_name):
+        if os.path.exists(self.packmol_path):
+            print(f"Packmol executable exists at '{path}'.")
+        else:
+            print(f"Packmol executable not found at '{path}'.")
+            print("Please update the class variable for the packmol path using 'update_packmol_path(new_packmol_path)'")
+            print("")
+            print("Call packmol_help() for more information")
+            return()
+        packmol_filepath = directories.load_pckml_filepath(input_file_name)
+        if os.path.exists(packmol_filepath):
+            print(f"Packmol input file exists at '{path}'.")
+        else:
+            print("Packmol input file not found.")
+            print("")
+            return()
+        system_dir = os.path.join(directories.systems_dir, input_file_name)
+        packmol_command = self.packmol_path + " < " + packmol_filepath
+        result = subprocess.run(cd_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        return()
+
+
+
+    
+    def update_packmol_path(self):
+        pass
+
 class BuildAmberSystems(BuildSystems):
     
     error_param = "Molecule not parametrized. Please parametrize pdb_file."
@@ -870,30 +897,5 @@ class BuildAmberSystems(BuildSystems):
          result = subprocess.run(cd_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
          return()
 
-    def run_packmol(directories, input_file_name):
-        if os.path.exists(self.packmol_path):
-            print(f"Packmol executable exists at '{path}'.")
-        else:
-            print(f"Packmol executable not found at '{path}'.")
-            print("Please update the class variable for the packmol path using 'update_packmol_path(new_packmol_path)'")
-            print("")
-            print("Call packmol_help() for more information")
-            return()
-        packmol_filepath = directories.load_pckml_filepath(input_file_name)
-        if os.path.exists(packmol_filepath):
-            print(f"Packmol input file exists at '{path}'.")
-        else:
-            print("Packmol input file not found.")
-            print("")
-            return()
-        system_dir = os.path.join(directories.systems_dir, input_file_name)
-        packmol_command = self.packmol_path + " < " + packmol_filepath
-        result = subprocess.run(cd_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-        return()
-
-
-
     
-    def update_packmol_path(None):
-        pass
         
