@@ -192,7 +192,7 @@ class PolymerSimulatorDirs:
         if a == False:
             print("No parametrized molecules.")
             
-    def systems_avail(self):
+    def amber_systems_avail(self):
         a = False
         for root, dirs, files in os.walk(self.systems_dir):
             # Check each file in the current directory
