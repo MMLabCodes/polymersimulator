@@ -304,7 +304,7 @@ class BuildSystems():
         max_distance = np.max(distances)
         return max_distance
 
-    def run_packmol(directories, input_file_name):
+    def run_packmol(self, directories, input_file_name):
         if os.path.exists(self.packmol_path):
             print(f"Packmol executable exists at '{path}'.")
         else:
