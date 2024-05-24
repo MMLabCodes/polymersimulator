@@ -16,6 +16,9 @@ from rdkit.Chem import AllChem
 from rdkit.Chem.rdmolfiles import MolFromPDBFile
 
 class BuildSystems():
+
+    packmol_path = "/home/s.983045/bin/packmol/packmol-20.14.0/packmol"
+    
     def __init__(self):
         pass 
     
@@ -439,7 +442,7 @@ class BuildAmberSystems(BuildSystems):
                 return() 
 
         # Retrieve the residue codes from the database
-        head_rescode, mainchain_rescode, tail_rescode = directories.retrieve_polymeric_rescodes(directories, "3HB_trimer")
+        head_rescode, mainchain_rescode, tail_rescode = directories.retrieve_polymeric_rescodes("3HB_trimer")
         print(head_rescode, mainchain_rescode, tail_rescode)
         if head_rescode == None or mainchain_rescode == None or tail_rescode == None:
             print("Residue codes for polymeric units not generated. Please generate them with 'build.PolymerUnits_GenerateRescode(directories, 'ethane')'")
@@ -450,7 +453,6 @@ class BuildAmberSystems(BuildSystems):
         mainchain_command = "prepgen -i " + ac_name + " -o " + mainchain_prepin_file + " -f prepi -m " + mainchain_file + " -rn " + mainchain_rescode + " -rf " + mainchain_rescode + ".res"
         tail_command = "prepgen -i " + ac_name + " -o " + tail_prepin_file + " -f prepi -m " + tail_file + " -rn " + tail_rescode + " -rf " + tail_rescode + ".res"
         commands = [head_command, mainchain_command, tail_command]
-        print(head_command)
         os.chdir(molecule_dir)
         for command in commands:
             try:
@@ -674,13 +676,24 @@ class BuildAmberSystems(BuildSystems):
         #print(leap_command)
         subprocess.run(leap_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
-    def build_3_3_polymer_array(self, build, directories, molecule_name, number_of_mainchain_units):
-         if build.is_poly_prepped(directories, molecule_name) == True:
+    def build_3_3_polymer_array(self, directories=None, molecule_name=None, number_of_units=None):
+         if directories == None or molecule_name == None or number_of_units == None:
+            print("Please provide 3 arguments as follows: build_3_3_polymer_array(directories, molecule_name, number_of_units)")
+            print("Directories: A python object generated with the PolymerSimulatorDirs(filepath) method imported from sw_directories")
+            print("Molecule name: A string of the molecule name, i.e. 'Ethane'")
+            print("Number of units: An integer denoting polymer length, i.e. 10. NOTE: number_of_units >= 3")
+            return(None)
+        
+         if self.is_poly_prepped(directories, molecule_name) == True:
             pass
-         if build.is_poly_prepped(directories, molecule_name) == False:
+         if self.is_poly_prepped(directories, molecule_name) == False:
             print("Please prepare prepin files for so polymers can be generated.")
-            return()
-             
+            return(None)
+
+         if number_of_units < 3:
+             print("A minimum number of 3 units is required to construct the polymer.")
+             return(None)
+        
          molecule_dir = os.path.join(directories.molecules_dir, molecule_name)
          cd_command = "cd " + molecule_dir
          print(cd_command)
@@ -705,7 +718,7 @@ class BuildAmberSystems(BuildSystems):
                # Exception occurred during subprocess execution
               #print("Exception:", e)
          
-         file_subtype = "_3_3_array_" + str(number_of_mainchain_units) + "_polymer"
+         file_subtype = "_3_3_array_" + str(number_of_units) + "_polymer"
          #head_prepi_filepath = os.path.join(directories.molecules_dir, molecule_name, ("head_" + molecule_name + ".prepi"))
          head_prepi_filepath = "head_" + molecule_name + ".prepi"
     
@@ -732,12 +745,13 @@ class BuildAmberSystems(BuildSystems):
          max_dist = self.max_pairwise_distance(monomer)
          print("monomer max dist is: ", max_dist)
          translate_distance = float((int(max_dist)*2))
+         polymer_length = max_dist * number_of_units
     
-         max_dist_box = max_dist*(number_of_mainchain_units+3) # +3 is because the number of mainchain units doesn't account for the head and tsil
-         print("polymer max dist is: ", max_dist_box)
-         box_dist = float((int(max_dist_box)+1))
+         #max_dist_box = max_dist*(number_of_units) # +1 to ensure box is bigger than the polymer
+         #print("polymer max dist is: ", max_dist_box)
+         box_dist = int(float(polymer_length*3))
 
-         polymer_name = molecule_name.split("_")[0] + "_" + str(number_of_mainchain_units) + "_polymer"
+         polymer_name = molecule_name.split("_")[0] + "_" + str(number_of_units) + "_polymer"
          molecule_name_1 = polymer_name + "_1"
          molecule_name_2 = polymer_name + "_2"
          molecule_name_3 = polymer_name + "_3"
@@ -773,30 +787,33 @@ class BuildAmberSystems(BuildSystems):
          #intleap_path = os.path.join(output_dir, (base_mol_name + file_subtype + ".intleap"))
          intleap_path = base_mol_name + file_subtype + ".intleap"
     
-         prmtop_filepath =  os.path.join(output_dir, base_mol_name + file_subtype + ".prmtop")
-         rst_filepath = os.path.join(output_dir, base_mol_name + file_subtype + ".rst7")
+         prmtop_filepath =  os.path.join(output_dir, base_mol_name + file_subtype + "_" + str(box_dist) + ".prmtop")
+         rst_filepath = os.path.join(output_dir, base_mol_name + file_subtype + "_" + str(box_dist) + ".rst7")
 
          unsolved_prmtop_filepath =  os.path.join(output_dir, "unsolved_" + base_mol_name + file_subtype + ".prmtop")
          unsolved_rst_filepath = os.path.join(output_dir, "unsolved_" + base_mol_name + file_subtype + ".rst7")
         
-         three_three_array_pdb_filepath = os.path.join(output_dir, base_mol_name + file_subtype + ".pdb")
+         three_three_array_pdb_filepath = os.path.join(output_dir, base_mol_name + file_subtype + "_" + str(box_dist) + ".pdb")
          unsolved_three_three_array_pdb_filepath = os.path.join(output_dir, "unsolved_" + base_mol_name + file_subtype + ".pdb")
     
-         head_rescode, mainchain_rescode, tail_rescode = directories.retrieve_polymeric_rescodes(directories, "3HB_trimer")
+         head_rescode, mainchain_rescode, tail_rescode = directories.retrieve_polymeric_rescodes("3HB_trimer")
 
          print("head_code ", head_rescode)
          print("tail code ", tail_rescode)
          print("mainchain_code ", mainchain_rescode)
-         polymer_code = " ".join([head_rescode] + [mainchain_rescode] * (number_of_mainchain_units - 1) + [tail_rescode])
+         polymer_code = " ".join([head_rescode] + [mainchain_rescode] * (number_of_units - 2) + [tail_rescode])
          polymer_command = "{" + polymer_code + "}"
 
          file_content = f"""source leaprc.gaff
          source leaprc.water.fb3
+         source leaprc.protein.ff14SB
 
          loadamberprep {head_prepi_filepath}
          loadamberprep {mainchain_prepi_filepath}
          loadamberprep {tail_prepi_filepath}
-    
+
+         list
+            
          {molecule_name_1} = sequence {polymer_command}
          {molecule_name_2} = sequence {polymer_command}
          {molecule_name_3} = sequence {polymer_command}
@@ -807,7 +824,7 @@ class BuildAmberSystems(BuildSystems):
          {molecule_name_8} = sequence {polymer_command}
          {molecule_name_9} = sequence {polymer_command}
 
-         check molecule_name_1
+         check {molecule_name_1}
          
          translate {molecule_name_1} {translate_line_1}
          translate {molecule_name_2} {translate_line_2}
@@ -823,7 +840,7 @@ class BuildAmberSystems(BuildSystems):
          saveamberparm system {unsolved_prmtop_filepath} {unsolved_rst_filepath}
          savepdb system {unsolved_three_three_array_pdb_filepath}
     
-         solvatebox system TIP3PBOX 30 iso
+         solvatebox system TIP3PBOX {box_dist}
 
          saveamberparm system {prmtop_filepath} {rst_filepath}
          savepdb system {three_three_array_pdb_filepath}
@@ -852,3 +869,31 @@ class BuildAmberSystems(BuildSystems):
          cd_command = "cd " + str(directories.main_dir)
          result = subprocess.run(cd_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
          return()
+
+    def run_packmol(self.packmol_path=None, directories, input_file_name):
+        if os.path.exists(self.packmol_path):
+            print(f"Packmol executable exists at '{path}'.")
+        else:
+            print(f"Packmol executable not found at '{path}'.")
+            print("Please update the class variable for the packmol path using 'update_packmol_path(new_packmol_path)'")
+            print("")
+            print("Call packmol_help() for more information")
+            return()
+        packmol_filepath = directories.load_pckml_filepath(input_file_name)
+        if os.path.exists(packmol_filepath):
+            print(f"Packmol input file exists at '{path}'.")
+        else:
+            print("Packmol input file not found.")
+            print("")
+            return()
+        system_dir = os.path.join(directories.systems_dirm input_file_name)
+        packmol_command = self.packmol_path + " < " + packmol_filepath
+        result = subprocess.run(cd_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        return()
+
+
+
+    
+    def update_packmol_path(None):
+        pass
+        
