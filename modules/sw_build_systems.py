@@ -290,6 +290,11 @@ class BuildSystems():
         Returns:
             - float: Maximum pairwise distance between 2 atoms in the molecule.
         """
+        warnings.warn(
+            "The max_pairwise_distance method is deprecated and will be removed in a future version. "
+            "Please use the get_xyz_dists method instead.",
+            DeprecationWarning
+        )
         conformer = mol.GetConformer()
         num_atoms = mol.GetNumAtoms()
         # Extract atom coordinates
@@ -344,7 +349,8 @@ class BuildSystems():
         result = subprocess.run(packmol_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         return()
 
-    def update_packmol_path(self, new_packmol_path):
+    @classmethod
+    def update_packmol_path(cls, new_packmol_path):
         """
         Update the path to the Packmol executable.
 
@@ -361,6 +367,69 @@ class BuildSystems():
             print(f"Packmol path updated to '{self.packmol_path}'.")
         else:
             print(f"The provided path '{new_packmol_path}' does not exist. Please provide a valid path.")
+
+    @staticmethod
+    def get_xyz_dists(self, input_file=None):
+        """
+        Calculates the maximum distance between the largest and smallest xyz coordinates.
+
+        Parameters:
+            - input_file: Currently supported formats are '.pdb' and '.xyz' files.
+
+        Returns:
+            - tuple: Maximum distances along x, y, and z axes between 2 atoms.
+
+        Example:
+            from modules.sw_build_systems import *
+            build = BuildSystems()
+            pdb_file = path/to/your/pdb/file
+            x, y, z = build.get_xyz_dists(pdb_file)
+        """
+        if input_file == None:
+            print("Please provide a valid input file.")
+            print("Supported formats are: '.pdb' and '.xyz'")
+            print("")
+            self.get_xyz_dists_help()
+        
+        if ".pdb" in input_file:
+            obConversion = openbabel.OBConversion()
+            obConversion.SetInFormat("pdb")
+            mol = openbabel.OBMol()
+            obConversion.ReadFile(mol, pdb_file)
+            # Extract atom coordinates
+            coords = []
+            for atom in openbabel.OBMolAtomIter(mol):
+                coords.append((atom.GetX(), atom.GetY(), atom.GetZ()))
+
+        if ".xyz" in input_file:
+            obConversion = openbabel.OBConversion()
+            obConversion.SetInFormat("xyz")
+            mol = openbabel.OBMol()
+            obConversion.ReadFile(mol, file_path)
+            coords = []
+            for atom in openbabel.OBMolAtomIter(mol):
+                coords.append((atom.GetX(), atom.GetY(), atom.GetZ()))
+    
+        # Convert to numpy array for easy manipulation
+        coords = np.array(coords)
+
+        # Calculate max and min for each axis
+        max_x, max_y, max_z = np.max(coords, axis=0)
+        min_x, min_y, min_z = np.min(coords, axis=0)
+
+        # Calculate the distances
+        dist_x = max_x - min_x
+        dist_y = max_y - min_y
+        dist_z = max_z - min_z
+
+        return(dist_x, dist_y, dist_z)
+
+        @classmethod
+        def get_xyz_dists_help(cls):
+            """Display help information for the get_xyz_dists method."""
+            print(cls.get_xyz_dists.__doc__)
+            print("This method calculates the maximum distance between the largest and smallest xyz coordinates")
+            print("from a PDB or XYZ file.")
 
 class BuildAmberSystems(BuildSystems):
     
