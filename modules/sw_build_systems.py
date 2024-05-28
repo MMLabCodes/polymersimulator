@@ -372,7 +372,7 @@ class BuildSystems():
             print(f"The provided path '{new_packmol_path}' does not exist. Please provide a valid path.")
 
     @staticmethod
-    def get_xyz_dists(input_file):
+    def get_xyz_dists(input_file=None):
         """
         Calculates the maximum distance between the largest and smallest xyz coordinates.
 
