@@ -651,6 +651,60 @@ class BuildAmberSystems(BuildSystems):
             writer.write(mol)
         
         return mol
+
+    def extract_coordinates_from_pdb(pdb_file):
+        """
+        Extracts coordinates from a PDB file.
+
+        Args:
+            pdb_file (str): Path to the PDB file.
+
+        Returns:
+            list of tuples: A list of (x, y, z) coordinates for each atom.
+        """
+        coordinates = []
+        with open(pdb_file, 'r') as file:
+            for line in file:
+                if line.startswith("ATOM") or line.startswith("HETATM"):
+                    x = float(line[30:38].strip())
+                    y = float(line[38:46].strip())
+                    z = float(line[46:54].strip())
+                    coordinates.append((x, y, z))
+        return coordinates
+
+    def replace_coordinates_in_pdb(original_pdb_file, pdb_file_with_new_coords):
+        """
+        Replaces the coordinates in the original PDB file with new coordinates and writes to a new file.
+
+        Args:
+            original_pdb_file (str): Path to the original PDB file.
+            pdb_file_with_new_coords (str): Path to the PDB file with the new coordinates.
+        """
+        new_coordinates = extract_coordinates_from_pdb(pdb_file_with_new_coords)
+    
+        with open(original_pdb_file, 'r') as infile:
+            lines = infile.readlines()
+
+        # Modify the lines with new coordinates
+        updated_lines = []
+        coord_index = 0
+        for line in lines:
+            if line.startswith("ATOM") or line.startswith("HETATM"):
+                if coord_index < len(new_coordinates):
+                    new_x = f"{new_coordinates[coord_index][0]:8.3f}"
+                    new_y = f"{new_coordinates[coord_index][1]:8.3f}"
+                    new_z = f"{new_coordinates[coord_index][2]:8.3f}"
+                    new_line = f"{line[:30]}{new_x:>8}{new_y:>8}{new_z:>8}{line[54:]}"
+                    coord_index += 1
+                else:
+                    new_line = line
+                    updated_lines.append(new_line)
+            else:
+                updated_lines.append(line)
+
+        # Write the updated content back to the original file
+        with open(original_pdb_file, 'w') as outfile:
+            outfile.writelines(updated_lines)
     
     def gen_polymer_pdb(self, dirs, molecule_name, number_of_units):
         """
