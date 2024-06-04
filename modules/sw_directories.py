@@ -237,6 +237,46 @@ class PolymerSimulatorDirs:
                     # Construct the full path to the .pdb file
                     coord_file_path = os.path.join(root, file)   
         return(prmtop_file_path, coord_file_path)
+
+    def retrieve_files_for_MDanalysis(self, system_name=None):
+        if system_name == None:
+            print("Please provide the name of the system you are retrieving files for.")
+            return(None)
+        for root, dirs, files in os.walk(self.systems_dir):
+            for file in files:
+                if file == (system_name + ".prmtop"):
+                    prmtop_file_path = os.path.join(root, file)
+                    
+        folders = os.listdir(self.systems_dir)
+        anneal_files, equili_files, prod_files = [], [], []
+        for folder in folders:
+            if folder == system_name:
+                print(folder)
+                folder_path = os.path.join(self.systems_dir, folder)
+                folder_contents = os.listdir(folder_path)
+                for item in folder_contents:
+                        item_path = os.path.join(folder_path, item)
+                        if os.path.isdir(item_path):
+                            output_contents = os.listdir(item_path)
+                            for file in output_contents:
+                                if ".dcd" in file:
+                                    if "anneal" in file:
+                                        anneal_files.append(file)
+                                    if "atm" in file:
+                                        equili_files.append(file)
+                                    if "prod" in file:
+                                        prod_files.append(file)
+                                if ".pdb" in file:
+                                    if "anneal" in file:
+                                        anneal_files.append(file)
+                                    if "atm" in file:
+                                        equili_files.append(file)
+                                    if "prod" in file:
+                                        prod_files.append(file)
+            
+        
+        return(prmtop_file_path, anneal_files, equili_files, prod_files)
+        
     
     def bash_submission(self):
         pass
