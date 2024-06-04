@@ -616,7 +616,7 @@ class BuildAmberSystems(BuildSystems):
         files_exist = os.path.exists(head_prepi_filepath) and os.path.exists(mainchain_prepi_filepath) and os.path.exists(tail_prepi_filepath)
         return(files_exist) # This will be true or false
 
-    def pdb_2_mol2(pdb_file):
+    def pdb_2_mol2(self, pdb_file):
         mol2_file = (pdb_file.split(".")[0]) + ".mol2"
         babel_command = "obabel -ipdb " + pdb_file + " -omol2 -O " + mol2_file + " --partialcharge gasteiger"
         try:
