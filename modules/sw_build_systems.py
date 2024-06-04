@@ -416,7 +416,7 @@ class BuildSystems():
     
         # Convert to numpy array for easy manipulation
         coords = np.array(coords)
-
+        
         # Calculate max and min for each axis
         max_x, max_y, max_z = np.max(coords, axis=0)
         min_x, min_y, min_z = np.min(coords, axis=0)
@@ -615,6 +615,105 @@ class BuildAmberSystems(BuildSystems):
         tail_prepi_filepath = os.path.join(poly_prepped_dir, ("tail_" + molecule_name + ".prepi"))
         files_exist = os.path.exists(head_prepi_filepath) and os.path.exists(mainchain_prepi_filepath) and os.path.exists(tail_prepi_filepath)
         return(files_exist) # This will be true or false
+
+    def gen_polymer_pdb(self, dirs, molecule_name, number_of_units):
+        """
+        Generates a polymer PDB file using `tleap` based on the specified molecule and number of units.
+
+        Args:
+            dirs (object): An object containing directory paths for the molecules and systems. Must have attributes
+                       `molecules_dir` and `systems_dir`.
+            molecule_name (str): The base name of the molecule to be used for generating the polymer.
+            number_of_units (int): The number of units in the polymer.
+
+        NOTE: The molecule name should be something like "3HB_trimer" and '.prepi' files should be available for that molecule.
+            (these are required for using tleap to make polymers)
+
+        Description:
+            This function performs the following steps:
+            1. Changes the working directory to the specified molecule's directory.
+            2. Constructs file paths for the required input files (`head`, `mainchain`, and `tail` prepi files) and the
+               output directory.
+            3. Creates the output directory if it does not already exist.
+            4. Constructs the polymer name and the paths for the output files (`prmtop`, `rst7`, and `pdb`).
+            5. Retrieves residue codes for the polymeric units from the `dirs` object.
+            6. Constructs the polymer sequence command for `tleap`.
+            7. Creates the `tleap` input script (`.intleap` file) with the appropriate commands to generate the polymer.
+            8. Executes the `tleap` command to generate the polymer, capturing and printing the output or errors.
+
+        Raises:
+            Exception: If there is an error changing the directory or executing the `tleap` command.
+
+        Example Usage:
+            dirs = DirectoryPaths('path/to/main/project/directory')
+            gen_polymer_pdb(dirs, "3HB_trimer", 10)
+        """
+        molecule_dir = os.path.join(dirs.molecules_dir, molecule_name)
+        try:
+            os.chdir(molecule_dir)
+            print("Current directory:", os.getcwd())
+        except Exception as e:
+            print("Exception:", e)
+        
+        file_subtype = "_" + str(number_of_units) + "_polymer"
+        head_prepi_filepath = "head_" + molecule_name + ".prepi"
+        tail_prepi_filepath = "tail_" + molecule_name + ".prepi"
+        mainchain_prepi_filepath = "mainchain_" + molecule_name + ".prepi"
+
+        output_dir = os.path.join(dirs.systems_dir, (molecule_name.split("_")[0] + file_subtype))
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
+        polymer_name = molecule_name.split("_")[0] + "_" + str(number_of_units) + "_polymer"
+
+        intleap_path = polymer_name + ".intleap"
+        prmtop_filepath = os.path.join(output_dir, polymer_name + ".prmtop")
+        rst_filepath = os.path.join(output_dir, polymer_name + ".rst7")
+        pdb_filepath = os.path.join(output_dir, polymer_name + ".pdb")
+
+        head_rescode, mainchain_rescode, tail_rescode = dirs.retrieve_polymeric_rescodes(molecule_name)
+
+        polymer_code = " ".join([head_rescode] + [mainchain_rescode] * (number_of_units - 2) + [tail_rescode])
+        polymer_command = "{" + polymer_code + "}"
+
+        file_content = f"""source leaprc.gaff
+             source leaprc.water.fb3
+             source leaprc.protein.ff14SB
+
+             loadamberprep {head_prepi_filepath}
+             loadamberprep {mainchain_prepi_filepath}
+             loadamberprep {tail_prepi_filepath}
+
+             list
+
+             polymer = sequence {polymer_command}
+             saveamberparm polymer {prmtop_filepath} {rst_filepath}
+             savepdb polymer {pdb_filepath}
+             quit
+             """
+        with open(intleap_path, 'w') as file:
+             file.write(file_content)
+
+        leap_command = "tleap -f " + intleap_path
+
+        try:
+            result = subprocess.run(leap_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            if result.returncode == 0:
+               # Command executed successfully
+               print("Output:", result.stdout)
+            else:
+                # Command failed, print error message
+                print("Error:", result.stderr)
+        except Exception as e:
+            # Exception occurred during subprocess execution
+            print("Exception:", e)
+        
+        try:
+            os.chdir(dirs.main_dir)
+            print("Current directory:", os.getcwd())
+        except Exception as e:
+            print("Exception:", e)
+        
     
     def gen_3_3_array(self, directories, molecule_name):
         """
