@@ -803,7 +803,84 @@ class BuildAmberSystems(BuildSystems):
             print("Current directory:", os.getcwd())
         except Exception as e:
             print("Exception:", e)
-        
+            
+    def solvate_polymer_pdb(self, dirs, base_molecule_name, polymer_name):
+        # Define directory where prepi files are found
+        molecule_dir = os.path.join(dirs.molecules_dir, molecule_name)
+
+        # Change to prepi file directory
+        cd_command = "cd " + molecule_dir
+        try:
+            os.chdir(molecule_dir)
+            print("Current directory:", os.getcwd())
+        except Exception as e:
+            print("Exception:", e)
+
+        # Define prepi filepaths
+        head_prepi_filepath = "head_" + molecule_name + ".prepi"
+        mainchain_prepi_filepath = "mainchain_" + molecule_name + ".prepi"
+        tail_prepi_filepath = "tail_" + molecule_name + ".prepi"
+
+        # Define output directory
+        output_dir = os.path.join(dirs.systems_dir, polymer_name)
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
+        # Redundant lol
+        mol_name_1 = polymer_name
+
+        # Get box size by taking x coord (its the length of the polymer) and adding a buffer
+        pdb_filepath = os.path.join(dirs.systems_dir, polymer_name, polymer_name + ".pdb")
+        x, y, z = build.get_xyz_dists(pdb_filepath)
+        box_dist = int(x) + 5
+
+        # Define required filepaths
+        file_subtype = "_single_chain"
+        intleap_path = polymer_name + file_subtype + ".intleap"
+        prmtop_filepath =  os.path.join(output_dir, polymer_name + file_subtype + "_" + str(box_dist) + ".prmtop")
+        rst_filepath = os.path.join(output_dir, polymer_name + file_subtype + "_" + str(box_dist) + ".rst7")
+        single_chain_pdb_filepath = os.path.join(output_dir, polymer_name + file_subtype + "_" + str(box_dist) + ".pdb")
+
+
+        # Define file content for leap file
+        file_content = f"""source leaprc.gaff
+             source leaprc.water.fb3
+             source leaprc.protein.ff14SB
+
+             loadamberprep {head_prepi_filepath}
+             loadamberprep {mainchain_prepi_filepath}
+             loadamberprep {tail_prepi_filepath}
+
+             {mol_name_1} = loadpdb {pdb_filepath}
+
+             check {mol_name_1}
+
+             solvatebox {mol_name_1} TIP3PBOX {box_dist}
+
+             saveamberparm {mol_name_1} {prmtop_filepath} {rst_filepath}
+             quit
+             """
+
+        with open(intleap_path, 'w') as file:
+            file.write(file_content)
+
+        leap_command = "tleap -f " + intleap_path
+
+        try:
+            result = subprocess.run(leap_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            if result.returncode == 0:
+                 # Command executed successfully
+                print("Output:", result.stdout)
+            else:
+                 # Command failed, print error message
+                print("Error:", result.stderr)
+        except Exception as e:
+             # Exception occurred during subprocess execution
+            print("Exception:", e)
+
+        cd_command = "cd " + str(dirs.main_dir)
+        result = subprocess.run(cd_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        return()
     
     def gen_3_3_array(self, directories, molecule_name):
         """
