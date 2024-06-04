@@ -631,6 +631,26 @@ class BuildAmberSystems(BuildSystems):
             # Exception occurred during subprocess execution
             print("Exception:", e)  
         return(None)
+
+    def relax_molecule(self, mol, pdb_file, forcefield=None, max_iters=200):
+        """
+        Relax the molecule using the specified force field.
+        """
+        AllChem.EmbedMolecule(mol)
+    
+        # Optimize the geometry
+        if forcefield == 'UFF':
+            AllChem.UFFOptimizeMolecule(mol, maxIters=max_iters)
+        elif forcefield == 'MMFF':
+            AllChem.MMFFOptimizeMolecule(mol, maxIters=max_iters)
+        else:
+            raise ValueError(f"Unknown force field: {forcefield}")
+    
+        # Write the relaxed molecule to the output PDB file
+        with Chem.PDBWriter(pdb_file) as writer:
+            writer.write(mol)
+        
+        return mol
     
     def gen_polymer_pdb(self, dirs, molecule_name, number_of_units):
         """
