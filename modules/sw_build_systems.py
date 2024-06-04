@@ -652,7 +652,7 @@ class BuildAmberSystems(BuildSystems):
         
         return mol
 
-    def extract_coordinates_from_pdb(pdb_file):
+    def extract_coordinates_from_pdb(self, pdb_file):
         """
         Extracts coordinates from a PDB file.
 
@@ -672,7 +672,7 @@ class BuildAmberSystems(BuildSystems):
                     coordinates.append((x, y, z))
         return coordinates
 
-    def replace_coordinates_in_pdb(original_pdb_file, pdb_file_with_new_coords):
+    def replace_coordinates_in_pdb(self, original_pdb_file, pdb_file_with_new_coords):
         """
         Replaces the coordinates in the original PDB file with new coordinates and writes to a new file.
 
