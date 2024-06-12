@@ -680,7 +680,7 @@ class BuildAmberSystems(BuildSystems):
             original_pdb_file (str): Path to the original PDB file.
             pdb_file_with_new_coords (str): Path to the PDB file with the new coordinates.
         """
-        new_coordinates = extract_coordinates_from_pdb(pdb_file_with_new_coords)
+        new_coordinates = self.extract_coordinates_from_pdb(pdb_file_with_new_coords)
     
         with open(original_pdb_file, 'r') as infile:
             lines = infile.readlines()
