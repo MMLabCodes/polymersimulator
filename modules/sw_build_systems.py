@@ -804,7 +804,7 @@ class BuildAmberSystems(BuildSystems):
         except Exception as e:
             print("Exception:", e)
             
-    def solvate_polymer_pdb(self, dirs, base_molecule_name, polymer_name):
+    def solvate_polymer_pdb(self, dirs, molecule_name, polymer_name):
         # Define directory where prepi files are found
         molecule_dir = os.path.join(dirs.molecules_dir, molecule_name)
 
@@ -831,7 +831,8 @@ class BuildAmberSystems(BuildSystems):
 
         # Get box size by taking x coord (its the length of the polymer) and adding a buffer
         pdb_filepath = os.path.join(dirs.systems_dir, polymer_name, polymer_name + ".pdb")
-        x, y, z = build.get_xyz_dists(pdb_filepath)
+        print(pdb_filepath)
+        x, y, z = self.get_xyz_dists(pdb_filepath)
         box_dist = int(x) + 5
 
         # Define required filepaths
