@@ -623,7 +623,7 @@ class BuildAmberSystems(BuildSystems):
             result = subprocess.run(babel_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
             if result.returncode == 0:
                # Command executed successfully
-               print("Output: ", mol2_file)
+               pass
             else:
                 # Command failed, print error message
                 print("Error:", result.stderr)
