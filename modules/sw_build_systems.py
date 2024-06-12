@@ -696,12 +696,13 @@ class BuildAmberSystems(BuildSystems):
                     new_z = f"{new_coordinates[coord_index][2]:8.3f}"
                     new_line = f"{line[:30]}{new_x:>8}{new_y:>8}{new_z:>8}{line[54:]}"
                     coord_index += 1
+                    #print(new_line)
                 else:
                     new_line = line
-                    updated_lines.append(new_line)
+                updated_lines.append(new_line)
             else:
                 updated_lines.append(line)
-
+       
         # Write the updated content back to the original file
         with open(original_pdb_file, 'w') as outfile:
             outfile.writelines(updated_lines)
