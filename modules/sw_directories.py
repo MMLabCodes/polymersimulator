@@ -70,6 +70,7 @@ class PolymerSimulatorDirs:
         self.molecules_dir = os.path.join(self.pdb_file_dir, 'molecules')     
         if not os.path.exists(self.molecules_dir):
             os.makedirs(self.molecules_dir)
+
         
         # Get path to systems directory and check if exists - this will contain the parameters and pdb for systems for md simulations
         self.systems_dir = os.path.join(self.pdb_file_dir, 'systems')   
