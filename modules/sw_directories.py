@@ -79,6 +79,7 @@ class PolymerSimulatorDirs:
     def mol2_files_avail(self, directories):
         # Walk through the directory tree recursively
         for root, dirs, files in os.walk(directories.pdb_file_dir):
+            dirs[:] = [d for d in dirs if d != 'deprecated']
             # Check each file in the current directory
             for file in files:
                 # Check if the file has a .pdb extension
@@ -97,6 +98,7 @@ class PolymerSimulatorDirs:
             return(None)
         # Walk through the directory tree recursively
         for root, dirs, files in os.walk(self.pdb_file_dir):
+            dirs[:] = [d for d in dirs if d != 'deprecated']
             # Check each file in the current directory
             for file in files:
                 # Check if the file has a .pdb extension
@@ -112,6 +114,7 @@ class PolymerSimulatorDirs:
             return(None)
         # Walk through the directory tree recursively
         for root, dirs, files in os.walk(self.pdb_file_dir):
+            dirs[:] = [d for d in dirs if d != 'deprecated']
             # Check each file in the current directory
             for file in files:
                 # Check if the file has a .pdb extension
@@ -123,6 +126,7 @@ class PolymerSimulatorDirs:
     def pckml_files_avail(self):
         # Walk through the directory tree recursively
         for root, dirs, files in os.walk(self.pdb_file_dir):
+            dirs[:] = [d for d in dirs if d != 'deprecated']
             # Check each file in the current directory
             for file in files:
                 # Check if the file has a .pdb extension
@@ -136,6 +140,7 @@ class PolymerSimulatorDirs:
     def pdb_files_avail(self):
         # Walk through the directory tree recursively
         for root, dirs, files in os.walk(self.pdb_file_dir):
+            dirs[:] = [d for d in dirs if d != 'deprecated']
             # Check each file in the current directory
             for file in files:
                 # Check if the file has a .pdb extension
@@ -149,6 +154,7 @@ class PolymerSimulatorDirs:
     def ac_files_avail(self):
         # Walk through the directory tree recursively
         for root, dirs, files in os.walk(self.pdb_file_dir):
+            dirs[:] = [d for d in dirs if d != 'deprecated']
             # Check each file in the current directory
             for file in files:
                 # Check if the file has a .pdb extension
@@ -167,6 +173,7 @@ class PolymerSimulatorDirs:
             return(None)
         # Walk through the directory tree recursively
         for root, dirs, files in os.walk(self.pdb_file_dir):
+            dirs[:] = [d for d in dirs if d != 'deprecated']
             # Check each file in the current directory
             for file in files:
                 # Check if the file has a .pdb extension
@@ -179,6 +186,7 @@ class PolymerSimulatorDirs:
     def parametrized_mols_avail(self):
         a = False
         for root, dirs, files in os.walk(self.molecules_dir):
+            dirs[:] = [d for d in dirs if d != 'deprecated']
             # Check each file in the current directory
             for file in files:
                 # Check if the file has a .pdb extension
@@ -195,6 +203,7 @@ class PolymerSimulatorDirs:
     def amber_systems_avail(self):
         a = False
         for root, dirs, files in os.walk(self.systems_dir):
+            dirs[:] = [d for d in dirs if d != 'deprecated']
             # Check each file in the current directory
             for file in files:
                 # Check if the file has a .pdb extension
@@ -225,6 +234,7 @@ class PolymerSimulatorDirs:
             print("NOTE: Amber files must be generated using tleap prior to this step")
             return(None)
         for root, dirs, files in os.walk(self.systems_dir):
+            dirs[:] = [d for d in dirs if d != 'deprecated']
             # Check each file in the current directory
             for file in files:
                 # Check if the file has a .pdb extension
@@ -243,6 +253,7 @@ class PolymerSimulatorDirs:
             print("Please provide the name of the system you are retrieving files for.")
             return(None)
         for root, dirs, files in os.walk(self.systems_dir):
+            dirs[:] = [d for d in dirs if d != 'deprecated']
             for file in files:
                 if file == (system_name + ".prmtop"):
                     prmtop_file_path = os.path.join(root, file)
@@ -259,20 +270,21 @@ class PolymerSimulatorDirs:
                         if os.path.isdir(item_path):
                             output_contents = os.listdir(item_path)
                             for file in output_contents:
+                                print(item_path)
                                 if ".dcd" in file:
                                     if "anneal" in file:
-                                        anneal_files.append(file)
+                                        anneal_files.append(os.path.join(item_path, file))
                                     if "atm" in file:
-                                        equili_files.append(file)
+                                        equili_files.append(os.path.join(item_path, file))
                                     if "prod" in file:
-                                        prod_files.append(file)
+                                        prod_files.append(os.path.join(item_path, file))
                                 if ".pdb" in file:
                                     if "anneal" in file:
-                                        anneal_files.append(file)
+                                        anneal_files.append(os.path.join(item_path, file))
                                     if "atm" in file:
-                                        equili_files.append(file)
+                                        equili_files.append(os.path.join(item_path, file))
                                     if "prod" in file:
-                                        prod_files.append(file)
+                                        prod_files.append(os.path.join(item_path, file))
             
         
         return(prmtop_file_path, anneal_files, equili_files, prod_files)
