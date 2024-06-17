@@ -79,7 +79,7 @@ class PolymerSimulatorDirs:
     def mol2_files_avail(self, directories):
         # Walk through the directory tree recursively
         for root, dirs, files in os.walk(directories.pdb_file_dir):
-            dirs[:] = [d for d in dirs if d != 'deprecated']
+            dirs[:] = [d for d in dirs if d != 'depreceated']
             # Check each file in the current directory
             for file in files:
                 # Check if the file has a .pdb extension
@@ -98,7 +98,7 @@ class PolymerSimulatorDirs:
             return(None)
         # Walk through the directory tree recursively
         for root, dirs, files in os.walk(self.pdb_file_dir):
-            dirs[:] = [d for d in dirs if d != 'deprecated']
+            dirs[:] = [d for d in dirs if d != 'depreceated']
             # Check each file in the current directory
             for file in files:
                 # Check if the file has a .pdb extension
@@ -114,7 +114,7 @@ class PolymerSimulatorDirs:
             return(None)
         # Walk through the directory tree recursively
         for root, dirs, files in os.walk(self.pdb_file_dir):
-            dirs[:] = [d for d in dirs if d != 'deprecated']
+            dirs[:] = [d for d in dirs if d != 'depreceated']
             # Check each file in the current directory
             for file in files:
                 # Check if the file has a .pdb extension
@@ -126,7 +126,7 @@ class PolymerSimulatorDirs:
     def pckml_files_avail(self):
         # Walk through the directory tree recursively
         for root, dirs, files in os.walk(self.pdb_file_dir):
-            dirs[:] = [d for d in dirs if d != 'deprecated']
+            dirs[:] = [d for d in dirs if d != 'depreceated']
             # Check each file in the current directory
             for file in files:
                 # Check if the file has a .pdb extension
@@ -140,7 +140,7 @@ class PolymerSimulatorDirs:
     def pdb_files_avail(self):
         # Walk through the directory tree recursively
         for root, dirs, files in os.walk(self.pdb_file_dir):
-            dirs[:] = [d for d in dirs if d != 'deprecated']
+            dirs[:] = [d for d in dirs if d != 'depreceated']
             # Check each file in the current directory
             for file in files:
                 # Check if the file has a .pdb extension
@@ -154,7 +154,7 @@ class PolymerSimulatorDirs:
     def ac_files_avail(self):
         # Walk through the directory tree recursively
         for root, dirs, files in os.walk(self.pdb_file_dir):
-            dirs[:] = [d for d in dirs if d != 'deprecated']
+            dirs[:] = [d for d in dirs if d != 'depreceated']
             # Check each file in the current directory
             for file in files:
                 # Check if the file has a .pdb extension
@@ -173,7 +173,7 @@ class PolymerSimulatorDirs:
             return(None)
         # Walk through the directory tree recursively
         for root, dirs, files in os.walk(self.pdb_file_dir):
-            dirs[:] = [d for d in dirs if d != 'deprecated']
+            dirs[:] = [d for d in dirs if d != 'depreceated']
             # Check each file in the current directory
             for file in files:
                 # Check if the file has a .pdb extension
@@ -186,7 +186,7 @@ class PolymerSimulatorDirs:
     def parametrized_mols_avail(self):
         a = False
         for root, dirs, files in os.walk(self.molecules_dir):
-            dirs[:] = [d for d in dirs if d != 'deprecated']
+            dirs[:] = [d for d in dirs if d != 'depreceated']
             # Check each file in the current directory
             for file in files:
                 # Check if the file has a .pdb extension
@@ -203,7 +203,7 @@ class PolymerSimulatorDirs:
     def amber_systems_avail(self):
         a = False
         for root, dirs, files in os.walk(self.systems_dir):
-            dirs[:] = [d for d in dirs if d != 'deprecated']
+            dirs[:] = [d for d in dirs if d != 'depreceated']
             # Check each file in the current directory
             for file in files:
                 # Check if the file has a .pdb extension
@@ -234,7 +234,7 @@ class PolymerSimulatorDirs:
             print("NOTE: Amber files must be generated using tleap prior to this step")
             return(None)
         for root, dirs, files in os.walk(self.systems_dir):
-            dirs[:] = [d for d in dirs if d != 'deprecated']
+            dirs[:] = [d for d in dirs if d != 'depreceated']
             # Check each file in the current directory
             for file in files:
                 # Check if the file has a .pdb extension
@@ -253,7 +253,7 @@ class PolymerSimulatorDirs:
             print("Please provide the name of the system you are retrieving files for.")
             return(None)
         for root, dirs, files in os.walk(self.systems_dir):
-            dirs[:] = [d for d in dirs if d != 'deprecated']
+            dirs[:] = [d for d in dirs if d != 'depreceated']
             for file in files:
                 if file == (system_name + ".prmtop"):
                     prmtop_file_path = os.path.join(root, file)
