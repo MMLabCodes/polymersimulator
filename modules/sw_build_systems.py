@@ -1149,7 +1149,7 @@ class BuildAmberSystems(BuildSystems):
             os.makedirs(output_dir)
         unsolved_array_pdb_name = "unsolved_" + molecule_name + file_subtype + ".pdb"
         unsolved_array_pdb = os.path.join(output_dir, unsolved_array_pdb_name)
-        x,y,z = build.get_xyz_dists(pdb_file)
+        x,y,z = self.get_xyz_dists(pdb_file)
         box_sizes = int((x*2)), int((y*2)), int((z*2))
         file_content=f"""tolerance 2.0
             output {unsolved_array_pdb}
@@ -1176,7 +1176,7 @@ class BuildAmberSystems(BuildSystems):
         # Exception occurred during subprocess execution
             print("Exception:", e)
         
-        add_ter_to_pckml_result(dirs, unsolved_array_pdb, base_molecule_name)
+        self.add_ter_to_pckml_result(dirs, unsolved_array_pdb, base_molecule_name)
         return(None)
 
     def solvate_pckml_3_3_array(self, dirs, molecule_name, base_molecule_name):
