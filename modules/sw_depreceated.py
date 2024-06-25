@@ -1,4 +1,6 @@
 # This file contains functions that are no longer used but can still be called as legacy functions.
+# Support will not be continued for these functions.
+
 def build_3_3_polymer_array_old(self, directories=None, molecule_name=None, number_of_units=None):
     # This is an old function that builds 3_3_arrays of polymers using tleap
     # Each polymer is generated in the tleap script
@@ -166,6 +168,192 @@ def build_3_3_polymer_array_old(self, directories=None, molecule_name=None, numb
     result = subprocess.run(cd_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     return()
 
+def gen_3_3_array(self, directories, molecule_name):
+    """
+    Generate a 3x3 array of molecules around a central molecule and solvate them in water.
+
+    Parameters:
+        - directories (object): Object containing directory paths.
+        - molecule_name (str): Name of the central molecule.
+
+    Returns:
+        None
+            
+    Note:
+        Nothing is returned - but a new set of files for an amber simulation array is generated
+    """
+    if self.is_mol_parametrized(directories, molecule_name) == True:
+        pass
+    if self.is_mol_parametrized(directories, molecule_name) == False:
+        print(self.error_param)
+        return()
+        
+    file_subtype = "_3_3_array"
+        
+    pdb_filepath = os.path.join(directories.molecules_dir, molecule_name, (molecule_name + ".pdb"))
+    mol2_filepath = os.path.join(directories.molecules_dir, molecule_name, (molecule_name + ".mol2"))
+    output_dir = os.path.join(directories.systems_dir, (molecule_name + file_subtype))
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+            
+    mol = MolFromPDBFile(pdb_filepath)
+    max_dist = self.max_pairwise_distance(mol)
+    translate_distance = float((int(max_dist)+1))
+    box_dist = float((int(max_dist)+1)*3)
+        
+    molecule_name_1 = molecule_name + "_1"
+    molecule_name_2 = molecule_name + "_2"
+    molecule_name_3 = molecule_name + "_3"
+    molecule_name_4 = molecule_name + "_4"
+    molecule_name_5 = molecule_name + "_5"
+    molecule_name_6 = molecule_name + "_6"
+    molecule_name_7 = molecule_name + "_7"
+    molecule_name_8 = molecule_name + "_8"
+    molecule_name_9 = molecule_name + "_9"
+
+    translate_line_1 = "{0.0 0.0 0.0}"
+    translate_line_2 = "{0.0 0.0 " + str(translate_distance) + "}"
+    translate_line_3 = "{0.0 0.0 " + str(-translate_distance) + "}"
+
+    translate_line_4 = "{0.0 " + str(translate_distance) + " " + str(translate_distance) + "}"
+    translate_line_5 = "{0.0 " + str(translate_distance) + " " + str(-translate_distance) + "}"
+    translate_line_6 = "{0.0 " + str(translate_distance) + " 0.0}"
+
+    translate_line_7 = "{0.0 " + str(-translate_distance) + " " + str(translate_distance) + "}"
+    translate_line_8 = "{0.0 " + str(-translate_distance) + " " + str(-translate_distance) + "}"
+    translate_line_9 = "{0.0 " + str(-translate_distance) + " 0.0}"
+
+    combine_line = "{" + molecule_name_1 + " " + molecule_name_2 + " " + molecule_name_3 + " " + molecule_name_4 + " " + molecule_name_5 + " " + molecule_name_6 + " " + molecule_name_7 + " " + molecule_name_8 + " " + molecule_name_9 + "}" 
+
+    intleap_path = os.path.join(output_dir, (molecule_name + file_subtype + ".intleap"))
+    prmtop_filepath =  os.path.join(output_dir, molecule_name + file_subtype + ".prmtop")
+    rst_filepath = os.path.join(output_dir, molecule_name + file_subtype + ".rst7")
+    three_three_array_pdb_filepath = os.path.join(output_dir, molecule_name + file_subtype + ".pdb")
+    unsolved_three_three_array_pdb_filepath = os.path.join(output_dir, "unsovled_" + molecule_name + file_subtype + ".pdb")
+
+    file_content = f"""source leaprc.protein.ff14SB
+    source leaprc.gaff
+    source leaprc.water.fb3
+    {molecule_name_1} = loadMol2 {mol2_filepath}
+    {molecule_name_2} = loadMol2 {mol2_filepath}
+    {molecule_name_3} = loadMol2 {mol2_filepath}
+    {molecule_name_4} = loadMol2 {mol2_filepath}
+    {molecule_name_5} = loadMol2 {mol2_filepath}
+    {molecule_name_6} = loadMol2 {mol2_filepath}
+    {molecule_name_7} = loadMol2 {mol2_filepath}
+    {molecule_name_8} = loadMol2 {mol2_filepath}
+    {molecule_name_9} = loadMol2 {mol2_filepath}
+
+    translate {molecule_name_1} {translate_line_1}
+    translate {molecule_name_2} {translate_line_2}
+    translate {molecule_name_3} {translate_line_3}
+    translate {molecule_name_4} {translate_line_4}
+    translate {molecule_name_5} {translate_line_5}
+    translate {molecule_name_6} {translate_line_6}
+    translate {molecule_name_7} {translate_line_7}
+    translate {molecule_name_8} {translate_line_8}
+    translate {molecule_name_9} {translate_line_9}
+         
+    system = combine {combine_line}
+
+    savePDB system {unsolved_three_three_array_pdb_filepath}
+        
+    solvateBox system TIP3PBOX {box_dist}
+
+    saveamberparm system {prmtop_filepath} {rst_filepath}
+    savepdb system {three_three_array_pdb_filepath}
+    quit
+    """
+    with open(intleap_path, 'w') as file:
+        file.write(file_content)
+            
+    leap_command = "tleap -f " + intleap_path   
+    subprocess.run(leap_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+
+def gen_2_2_array(self, directories, molecule_name):
+    """
+    Generate a 2x2 array of molecules and solvate them in water.
+
+    Parameters:
+        - directories (object): Object containing directory paths.
+        - molecule_name (str): Name of the central molecule.
+
+    Returns:
+        None
+            
+    Note:
+        Nothing is returned - but a new set of files for an amber simulation array is generated
+    """
+    if self.is_mol_parametrized(directories, molecule_name) == True:
+        pass
+    if self.is_mol_parametrized(directories, molecule_name) == False:
+        print(self.error_param)
+        return()
+        
+    file_subtype = "_2_2_array"
+        
+    pdb_filepath = os.path.join(directories.molecules_dir, molecule_name, (molecule_name + ".pdb"))
+    mol2_filepath = os.path.join(directories.molecules_dir, molecule_name, (molecule_name + ".mol2"))
+    output_dir = os.path.join(directories.systems_dir, (molecule_name + file_subtype))
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+        
+    mol = MolFromPDBFile(pdb_filepath)
+    max_dist = self.max_pairwise_distance(mol)
+
+    # We will translate the molecules from the centre by their max pariwise distance.
+    # This will give an overall distance of (2*max_pairwise_distance) between each molecule
+    translate_dist = float((int(max_dist)+1))
+
+    # The box_distance is (4*max_pairwise_distance) as we have 4 molecules
+    box_dist = float((int(max_dist)+1)*4) # the +1 is here as the "int" function converts a decimal to an integer but always rounds down
+    
+    # Need to load four instances of the same molecule
+    molecule_name_1 = molecule_name + "_1"
+    molecule_name_2 = molecule_name + "_2"
+    molecule_name_3 = molecule_name + "_3"
+    molecule_name_4 = molecule_name + "_4"
+
+    # Need four individual translate lines
+    translate_line_1 = "{0.0 " + str(translate_dist) + " " + str(translate_dist) + "}"
+    translate_line_2 = "{0.0 " + str(-translate_dist) + " " + str(translate_dist) + "}"
+    translate_line_3 = "{0.0 " + str(translate_dist) + " " + str(-translate_dist) + "}"
+    translate_line_4 = "{0.0 " + str(-translate_dist) + " " + str(-translate_dist) + "}"
+
+    # Need to create a system of our four instances of the molecules
+    combine_line = "{" + molecule_name_1 + " " + molecule_name_2 + " " + molecule_name_3 + " " + molecule_name_4 + "}" 
+
+    intleap_path = os.path.join(output_dir, (molecule_name + file_subtype + ".intleap"))
+    prmtop_filepath =  os.path.join(output_dir, molecule_name + file_subtype + ".prmtop")
+    rst_filepath = os.path.join(output_dir, molecule_name + file_subtype + ".rst7")
+    two_two_array_pdb_filepath = os.path.join(output_dir, molecule_name + file_subtype + ".pdb")
+        
+    # File content for the intleap file with all of the variables specified above
+    file_content = f"""source leaprc.protein.ff14SB
+    source leaprc.gaff
+    source leaprc.water.fb3
+    {molecule_name_1} = loadMol2 {mol2_filepath}
+    {molecule_name_2} = loadMol2 {mol2_filepath}
+    {molecule_name_3} = loadMol2 {mol2_filepath}
+    {molecule_name_4} = loadMol2 {mol2_filepath}
+
+    translate {molecule_name_1} {translate_line_1}
+    translate {molecule_name_2} {translate_line_2}
+    translate {molecule_name_3} {translate_line_3}
+    translate {molecule_name_4} {translate_line_4}
+         
+    system = combine {combine_line}
+
+    saveamberparm system {prmtop_filepath} {rst_filepath}
+    savepdb system {two_two_array_pdb_filepath}
+    quit
+    """
+    # Write content to the intleap filepath
+    with open(intleap_path, 'w') as file:
+        file.write(file_content)
+    
+    leap_command = "tleap -f " + intleap_path
+    subprocess.run(leap_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
 
 
