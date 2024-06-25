@@ -1214,7 +1214,7 @@ class BuildAmberSystems(BuildSystems):
             solvate_pckml_3_3_array(dirs, 'polymer_molecule', 'base_polymer')
         """
         pdb_file = dirs.load_pdb_filepath(molecule_name)
-        x,y,z = build.get_xyz_dists(pdb_file)
+        x,y,z = self.get_xyz_dists(pdb_file)
         base_molecule_dir = os.path.join(dirs.molecules_dir, base_molecule_name)
         cd_command = "cd " + base_molecule_dir
     
