@@ -1113,5 +1113,69 @@ class BuildAmberSystems(BuildSystems):
             file.writelines(modified_lines)
         return(None)
 
+    def generate_3_3_polymer_array_pckml(self, dirs, molecule_name, base_molecule_name):
+        """
+        Generates a 3x3 array of polymers using Packmol and adds 'TER' records after each polymer chain.
 
+        This function creates a 3x3 array of polymer molecules based on a given input molecule. It uses Packmol 
+        to arrange the molecules in the specified array and adds 'TER' records after each polymer chain to ensure 
+        proper formatting for subsequent simulations.
+
+        Parameters:
+        dirs (object): An object that provides methods for directory and file management.
+        molecule_name (str): The name of the molecule to be used for creating the polymer array. i.e. "3HB_10_polymer"
+        base_molecule_name (str): The base name of the molecule used to identify the polymeric residue codes. i.e. "3HB_trimer"
+
+        Returns:
+        None
+
+        The function performs the following steps:
+        1. Defines the file subtype and constructs the PDB file path.
+        2. Creates an output directory if it doesn't exist.
+        3. Constructs the output PDB file name for the unsolved array.
+        4. Calculates the dimensions of the box required to contain the 3x3 array of polymers.
+        5. Generates the Packmol input file content with the specified parameters.
+        6. Writes the Packmol input file to the output directory.
+        7. Executes the Packmol command to generate the unsolved array PDB file.
+        8. Adds 'TER' records to the generated PDB file using the `add_ter_to_pckml_result` function.
+
+        Example usage:
+            generate_3_3_polymer_array_pckml(dirs, 'polymer_molecule', 'base_polymer')
+        """
+        file_subtype = "_3_3_array"
+        pdb_file = dirs.load_pdb_filepath(molecule_name)
+        output_dir = os.path.join(dirs.systems_dir, (molecule_name + file_subtype))
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+        unsolved_array_pdb_name = "unsolved_" + molecule_name + file_subtype + ".pdb"
+        unsolved_array_pdb = os.path.join(output_dir, unsolved_array_pdb_name)
+        x,y,z = build.get_xyz_dists(pdb_file)
+        box_sizes = int((x*2)), int((y*2)), int((z*2))
+        file_content=f"""tolerance 2.0
+            output {unsolved_array_pdb}
+            filetype pdb
+            structure {pdb_file}
+            	number 9
+                inside box 0. 0. 0. {box_sizes[0]}. {box_sizes[1]}. {box_sizes[2]}.
+            end structure
+            """
+        packmol_input_file = molecule_name + file_subtype + ".pckml"
+        packmol_input_filepath = os.path.join(output_dir, packmol_input_file)
+        with open(packmol_input_filepath, 'w') as file:
+            file.write(file_content)
+        packmol_command = str(self.packmol_path) + " < " + packmol_input_filepath
+        try:
+            result = subprocess.run(packmol_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            if result.returncode == 0:
+            # Command executed successfully
+                print("Output:", result.stdout)
+            else:
+            # Command failed, print error message
+                print("Error:", result.stderr)
+        except Exception as e:
+        # Exception occurred during subprocess execution
+            print("Exception:", e)
+        
+        add_ter_to_pckml_result(dirs, unsolved_array_pdb, base_molecule_name)
+        return(None)
         
