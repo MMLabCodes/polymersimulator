@@ -528,6 +528,7 @@ class BuildAmberSystems(BuildSystems):
         self.gen_prepin_file_sing_mol(molecule_name)
 
     def gen_ac_file(self, molecule_name=None):
+        # This function isn't required so much - however it will generate .ac files 
         if directories == None or molecule_name == None:
             print("Please provide 1 argument as follows: gen_ac_file(molecule_name)")
             print("Molecule name: A string of the molecule name, i.e. 'Ethane'")
@@ -756,13 +757,11 @@ class BuildAmberSystems(BuildSystems):
         with open(original_pdb_file, 'w') as outfile:
             outfile.writelines(updated_lines)
     
-    def gen_polymer_pdb(self, dirs, molecule_name, number_of_units):
+    def gen_polymer_pdb(self, molecule_name, number_of_units):
         """
         Generates a polymer PDB file using `tleap` based on the specified molecule and number of units.
 
         Args:
-            dirs (object): An object containing directory paths for the molecules and systems. Must have attributes
-                       `molecules_dir` and `systems_dir`.
             molecule_name (str): The base name of the molecule to be used for generating the polymer.
             number_of_units (int): The number of units in the polymer.
 
@@ -788,7 +787,7 @@ class BuildAmberSystems(BuildSystems):
             dirs = DirectoryPaths('path/to/main/project/directory')
             gen_polymer_pdb(dirs, "3HB_trimer", 10)
         """
-        molecule_dir = os.path.join(dirs.molecules_dir, molecule_name)
+        molecule_dir = os.path.join(self.manager.molecules_dir, molecule_name)
         try:
             os.chdir(molecule_dir)
             print("Current directory:", os.getcwd())
@@ -800,7 +799,7 @@ class BuildAmberSystems(BuildSystems):
         tail_prepi_filepath = "tail_" + molecule_name + ".prepi"
         mainchain_prepi_filepath = "mainchain_" + molecule_name + ".prepi"
 
-        output_dir = os.path.join(dirs.systems_dir, (molecule_name.split("_")[0] + file_subtype))
+        output_dir = os.path.join(self.manager.systems_dir, (molecule_name.split("_")[0] + file_subtype))
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
@@ -811,7 +810,7 @@ class BuildAmberSystems(BuildSystems):
         rst_filepath = os.path.join(output_dir, polymer_name + ".rst7")
         pdb_filepath = os.path.join(output_dir, polymer_name + ".pdb")
 
-        head_rescode, mainchain_rescode, tail_rescode = dirs.retrieve_polymeric_rescodes(molecule_name)
+        head_rescode, mainchain_rescode, tail_rescode = self.manager.retrieve_polymeric_rescodes(molecule_name)
 
         polymer_code = " ".join([head_rescode] + [mainchain_rescode] * (number_of_units - 2) + [tail_rescode])
         polymer_command = "{" + polymer_code + "}"
@@ -849,10 +848,11 @@ class BuildAmberSystems(BuildSystems):
             print("Exception:", e)
         
         try:
-            os.chdir(dirs.main_dir)
+            os.chdir(self.manager.main_dir)
             print("Current directory:", os.getcwd())
         except Exception as e:
             print("Exception:", e)
+        return(pdb_filepath)
             
     def solvate_polymer_pdb(self, molecule_name, polymer_name):
         # This function will solvate a single polymer
