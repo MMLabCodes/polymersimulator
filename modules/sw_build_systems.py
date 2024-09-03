@@ -527,14 +527,13 @@ class BuildAmberSystems(BuildSystems):
         subprocess.run(leap_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         self.gen_prepin_file_sing_mol(molecule_name)
 
-    def gen_ac_file(self, directories=None, molecule_name=None):
+    def gen_ac_file(self, molecule_name=None):
         if directories == None or molecule_name == None:
-            print("Please provide 2 arguments as follows: gen_ac_file(directories, molecule_name)")
-            print("Directories: A python object generated with the PolymerSimulatorDirs(filepath) method imported from sw_directories")
+            print("Please provide 1 argument as follows: gen_ac_file(molecule_name)")
             print("Molecule name: A string of the molecule name, i.e. 'Ethane'")
             return(None)
-        mol2_name = os.path.join(directories.molecules_dir, molecule_name, molecule_name) + ".mol2"
-        ac_name = os.path.join(directories.molecules_dir, molecule_name, molecule_name) + ".ac"
+        mol2_name = os.path.join(self.manager.molecules_dir, molecule_name, molecule_name) + ".mol2"
+        ac_name = os.path.join(self.manager.molecules_dir, molecule_name, molecule_name) + ".ac"
         antechamber_command = "antechamber -fi mol2 -fo ac -i " + mol2_name + " -o " + ac_name + " -c bcc -s 2"
         subprocess.run(antechamber_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         return(None)
