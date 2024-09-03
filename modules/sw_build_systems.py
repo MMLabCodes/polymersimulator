@@ -19,8 +19,8 @@ class BuildSystems():
 
     packmol_path = "/home/dan/packmol-20.14.4-docs1/packmol-20.14.4-docs1/packmol"
     
-    def __init__(self):
-        pass 
+    def __init__(self, manager):
+        self.manager = manager
     
     def SmilesToPDB(self, smiles_string, output_file):
         """
@@ -51,7 +51,7 @@ class BuildSystems():
         with open(output_file, "w") as f:
             f.write(pdb_string)
 
-    def SmilesToPDB_GenerateRescode(self, smiles, name, directories):
+    def SmilesToPDB_GenResCode(self, smiles, name):
         """
         Converts a molecule specified by its SMILES representation to a PDB file.
 
@@ -81,7 +81,7 @@ class BuildSystems():
         """
         forbidden_codes = ["AAA", "BBB", "CCC", "UNL", "ALA", "ARG", "ASN", "ASP", "ASX", "CYS", "GLU", "GLN", "GLX", "HIS", "ILE", "LEU", "LYS", "MET", "PHE", "PRO", "SER", "THR", "SEC", "TRP", "TYR", "VAL"]
         # Load existing residue codes from the CSV file
-        residue_codes = self.load_residue_codes(directories.residue_code_csv)
+        residue_codes = self.load_residue_codes(self.manager.residue_code_csv)
         # Check if the name or smiles is already in the database
         existing_entry = self.find_existing_entry(residue_codes, name, smiles)
         if existing_entry:
@@ -91,9 +91,9 @@ class BuildSystems():
             # Generate a unique 3-letter residue code excluding forbidden codes
             residue_code = self.generate_unique_residue_code(residue_codes, forbidden_codes)
             # Update the CSV file with the new entry
-            self.update_residue_codes_csv(name, smiles, residue_code, directories.residue_code_csv)
+            self.update_residue_codes_csv(name, smiles, residue_code, self.manager.residue_code_csv)
         # Replace default "UNL" codes in the PDB content - NOTE, "UNL" is also a forbidden code as it is the default code.
-        pdb_filepath = os.path.join(directories.pdb_file_dir, (name + ".pdb"))
+        pdb_filepath = os.path.join(self.manager.pdb_file_dir, (name + ".pdb"))
         self.SmilesToPDB(smiles, pdb_filepath)    
         with open(pdb_filepath, "r") as pdb_file:
             lines = pdb_file.readlines()     
@@ -101,7 +101,7 @@ class BuildSystems():
                 lines[i] = line.replace(" UNL", f" {residue_code}")   
         with open(pdb_filepath, "w") as pdb_file:              
             pdb_file.writelines(lines)
-        return()
+        return(None)
 
     def load_residue_codes(self, residue_code_csv):
         """
@@ -176,7 +176,7 @@ class BuildSystems():
 
         return new_code
 
-    def PolymerUnits_GenerateRescode(self, directories, name):
+    def GenRescode_4_PolyUnits(self, name):
         # Name should be of a trimer
         if "trimer" not in name:
             print("Polymeric unit generation requires trimers. Please consult the build systems guide for information on how to do this")
@@ -185,7 +185,7 @@ class BuildSystems():
         forbidden_codes = ["AAA", "BBB", "CCC", "UNL", "ALA", "ARG", "ASN", "ASP", "ASX", "CYS", "GLU", "GLN", "GLX", "HIS", "ILE", "LEU", "LYS", "MET", "PHE", "PRO", "SER", "THR", "SEC", "TRP", "TYR", "VAL"]
    
         # Load existing residue codes from the CSV file
-        residue_codes = self.load_residue_codes(directories.residue_code_csv)
+        residue_codes = self.load_residue_codes(self.manager.residue_code_csv)
     
         # Check if the name or smiles is already in the database
         existing_entry = self.find_existing_entry(residue_codes, name)
@@ -212,9 +212,9 @@ class BuildSystems():
         mainchain_smiles = "m" + residue_smiles
         tail_smiles = "t" + residue_smiles
     
-        self.update_residue_codes_csv(head_name, head_smiles, head_code, directories.residue_code_csv)
-        self.update_residue_codes_csv(mainchain_name, mainchain_smiles, mainchain_code, directories.residue_code_csv)
-        self.update_residue_codes_csv(tail_name, tail_smiles, tail_code, directories.residue_code_csv)
+        self.update_residue_codes_csv(head_name, head_smiles, head_code, self.manager.residue_code_csv)
+        self.update_residue_codes_csv(mainchain_name, mainchain_smiles, mainchain_code, self.manager.residue_code_csv)
+        self.update_residue_codes_csv(tail_name, tail_smiles, tail_code, self.manager.residue_code_csv)
         print("Head code assigned: ", head_code)
         print("Mainchain code assigned: ", mainchain_code)
         print("Tail code assigned: ", tail_code)
@@ -439,8 +439,8 @@ class BuildAmberSystems(BuildSystems):
     
     error_param = "Molecule not parametrized. Please parametrize pdb_file."
     
-    def __init__(self):
-        pass
+    def __init__(self, manager):
+        self.manager = manager
     
     def mod_pdb_file(self, pdb_file): # pdb_file is the entire path to the pdb_file - see jupyter notebook
         """
@@ -480,16 +480,16 @@ class BuildAmberSystems(BuildSystems):
         with open(file_path, 'w') as file:
             file.writelines(modified_lines)
     
-    def parametrize_mol(self, directories=None, molecule_name=None):
-        if directories == None or molecule_name == None:
-            print("Please provide 2 arguments as follows: parametrize_mol(directories, molecule_name)")
+    def parameterize_mol(self, molecule_name=None):
+        if  molecule_name == None:
+            print("Please provide 1 argument as follows: parametrize_mol(molecule_name)")
             print("Directories: A python object generated with the PolymerSimulatorDirs(filepath) method imported from sw_directories")
             print("Molecule name: A string of the molecule name, i.e. 'Ethane'")
             return(None)
         # Create a new directory for param files for the molecule and copy pdb there
-        pdb_filepath = os.path.join(directories.pdb_file_dir, (molecule_name + ".pdb"))
+        pdb_filepath = os.path.join(self.manager.pdb_file_dir, (molecule_name + ".pdb"))
         self.mod_pdb_file(pdb_filepath)
-        param_mol_dir = os.path.join(directories.molecules_dir, molecule_name)
+        param_mol_dir = os.path.join(self.manager.molecules_dir, molecule_name)
         if not os.path.exists(param_mol_dir):
             os.makedirs(param_mol_dir, exist_ok=True)
         shutil.copy2(pdb_filepath, param_mol_dir)
@@ -525,6 +525,7 @@ class BuildAmberSystems(BuildSystems):
         #print("The leap command that will run is:")
         #print(leap_command)
         subprocess.run(leap_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        self.gen_prepin_file_sing_mol(molecule_name)
 
     def gen_ac_file(self, directories=None, molecule_name=None):
         if directories == None or molecule_name == None:
@@ -538,15 +539,15 @@ class BuildAmberSystems(BuildSystems):
         subprocess.run(antechamber_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         return(None)
 
-    def gen_prepin_files(self, directories, molecule_name):
-        if directories == None or molecule_name == None:
-            print("Please provide 2 arguments as follows: gen_prepin_files(directories, molecule_name)")
-            print("Directories: A python object generated with the PolymerSimulatorDirs(filepath) method imported from sw_directories")
+    def gen_prepin_files(self, molecule_name):
+        # NOTE: this function is for generating prepin files of polymers, for single molecules, please use 'gen_prepin_files_single_mol'
+        if molecule_name == None:
+            print("Please provide 1 argument as follows: gen_prepin_files(molecule_name)")
             print("Molecule name: A string of the molecule name, i.e. 'Ethane'")
             return(None)
         
         # Find the path of the molecule directory (where all the required files are required)
-        molecule_dir = os.path.join(directories.molecules_dir, molecule_name)
+        molecule_dir = os.path.join(self.manager.molecules_dir, molecule_name)
         if os.path.exists(molecule_dir):
             pass
         else:
@@ -573,10 +574,10 @@ class BuildAmberSystems(BuildSystems):
                 return() 
 
         # Retrieve the residue codes from the database
-        head_rescode, mainchain_rescode, tail_rescode = directories.retrieve_polymeric_rescodes("3HB_trimer")
+        head_rescode, mainchain_rescode, tail_rescode = self.manager.retrieve_polymeric_rescodes("3HB_trimer")
         print(head_rescode, mainchain_rescode, tail_rescode)
         if head_rescode == None or mainchain_rescode == None or tail_rescode == None:
-            print("Residue codes for polymeric units not generated. Please generate them with 'build.PolymerUnits_GenerateRescode(directories, 'ethane')'")
+            print("Residue codes for polymeric units not generated. Please generate them with 'build.GenRescode_4_PolyUnits('ethane')'")
             return()
 
         # Define the prepgen commands with the collated information
@@ -597,7 +598,53 @@ class BuildAmberSystems(BuildSystems):
             except Exception as e:
                 # Exception occurred during subprocess execution
                 print("Exception:", e)
-        os.chdir(directories.main_dir)
+        os.chdir(self.manager.main_dir)
+        return(None)
+
+    def gen_prepin_file_sing_mol(self, molecule_name):
+        if molecule_name == None:
+            print("Please provide 1 argument as follows: gen_prepin_files(molecule_name)")
+            print("Molecule name: A string of the molecule name, i.e. 'Ethane'")
+            return(None)
+            
+        # Find the path of the molecule directory (where all the required files are required)
+        molecule_dir = os.path.join(self.manager.molecules_dir, molecule_name)
+        if os.path.exists(molecule_dir):
+            pass
+        else:
+            print("Please parameterize molecule.")
+            return()  
+    
+        # Define file names required for prepgen
+        prepi_file = os.path.join(molecule_dir, molecule_name + ".prepi")
+        pdb_file = os.path.join(molecule_dir, molecule_name + ".pdb")
+        frcmod_file = os.path.join(molecule_dir, molecule_name + ".frcmod")
+
+        antechamber_command = f"antechamber -i {pdb_file} -fi pdb -o {prepi_file} -fo prepi -c bcc -s 2"
+        try:
+            result = subprocess.run(antechamber_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            if result.returncode == 0:
+                # Command executed successfully
+                print("Output:", result.stdout)
+            else:
+                # Command failed, print error message
+                print("Error:", result.stderr)
+        except Exception as e:
+            # Exception occurred during subprocess execution
+            print("Exception:", e)
+
+        parmchk_command = f"parmchk2 -i {prepi_file} -f prepi -o {frcmod_file}"
+        try:
+            result = subprocess.run(antechamber_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            if result.returncode == 0:
+                # Command executed successfully
+                print("Output:", result.stdout)
+            else:
+                # Command failed, print error message
+                print("Error:", result.stderr)
+        except Exception as e:
+            # Exception occurred during subprocess execution
+            print("Exception:", e)
         return(None)
     
     def is_mol_parametrized(self, directories, molecule_name):
@@ -808,10 +855,10 @@ class BuildAmberSystems(BuildSystems):
         except Exception as e:
             print("Exception:", e)
             
-    def solvate_polymer_pdb(self, dirs, molecule_name, polymer_name):
+    def solvate_polymer_pdb(self, molecule_name, polymer_name):
         # This function will solvate a single polymer
         # Define directory where prepi files are found
-        molecule_dir = os.path.join(dirs.molecules_dir, molecule_name)
+        molecule_dir = os.path.join(self.manager.molecules_dir, molecule_name)
 
         # Change to prepi file directory
         cd_command = "cd " + molecule_dir
@@ -827,7 +874,7 @@ class BuildAmberSystems(BuildSystems):
         tail_prepi_filepath = "tail_" + molecule_name + ".prepi"
 
         # Define output directory - based on polymer name
-        output_dir = os.path.join(dirs.systems_dir, polymer_name)
+        output_dir = os.path.join(self.manager.systems_dir, polymer_name)
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
@@ -835,7 +882,7 @@ class BuildAmberSystems(BuildSystems):
         mol_name_1 = polymer_name
 
         # Get box size by taking x coord (its the length of the polymer) and adding a buffer
-        pdb_filepath = os.path.join(dirs.systems_dir, polymer_name, polymer_name + ".pdb")
+        pdb_filepath = os.path.join(self.manager.systems_dir, polymer_name, polymer_name + ".pdb")
         print(pdb_filepath)
         x, y, z = self.get_xyz_dists(pdb_filepath)
         box_dist = int(x) + 5
@@ -845,10 +892,11 @@ class BuildAmberSystems(BuildSystems):
         # Define required filepaths
         file_subtype = "_single_chain"
         intleap_path = polymer_name + file_subtype + ".intleap"
-        prmtop_filepath =  os.path.join(output_dir, polymer_name + file_subtype + "_" + str(box_dist) + ".prmtop")
-        rst_filepath = os.path.join(output_dir, polymer_name + file_subtype + "_" + str(box_dist) + ".rst7")
-        pdb_outpath = os.path.join(output_dir, polymer_name + file_subtype + "_" + str(box_dist) + ".pdb") 
-        single_chain_pdb_filepath = os.path.join(output_dir, polymer_name + file_subtype + "_" + str(box_dist) + ".pdb")
+        filename = polymer_name + file_subtype + "_" + str(box_dist)
+        prmtop_filepath =  os.path.join(output_dir, filename + ".prmtop")
+        rst_filepath = os.path.join(output_dir, filename + ".rst7")
+        pdb_outpath = os.path.join(output_dir, filename + ".pdb") 
+        single_chain_pdb_filepath = os.path.join(output_dir, filename + ".pdb")
 
 
         # Define file content for leap file
@@ -888,9 +936,9 @@ class BuildAmberSystems(BuildSystems):
              # Exception occurred during subprocess execution
             print("Exception:", e)
 
-        cd_command = "cd " + str(dirs.main_dir)
+        cd_command = "cd " + str(self.manager.main_dir)
         result = subprocess.run(cd_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-        return()
+        return(filename)
     
     def build_3_3_polymer_array(self, directories=None, base_molecule_name=None, molecule_name=None, number_of_repeat_units=None):
         # Thsis function builds arrays of polymers using the pre generated pdb files
@@ -1288,3 +1336,93 @@ class BuildAmberSystems(BuildSystems):
         cd_command = "cd " + str(dirs.main_dir)
         result = subprocess.run(cd_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         return(None)
+
+    def solvate_molecule(self, molecule_name):
+        molecule_dir = os.path.join(self.manager.molecules_dir, molecule_name)
+
+        try:
+            os.chdir(molecule_dir)
+            print("Current directory:", os.getcwd())
+        except Exception as e:
+            print("Exception:", e)
+            return(None)
+
+        molecule_prepi_filepath = molecule_name + ".prepi"
+        molecule_frcmod_filepath = molecule_name + ".frcmod"
+    
+        output_dir = os.path.join(self.manager.systems_dir, (molecule_name + "_wat_solv"))
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
+        molecule_pdb_filepath = os.path.join(self.manager.molecules_dir, molecule_name, (molecule_name + ".pdb"))
+        x, y, z = self.get_xyz_dists(molecule_pdb_filepath)
+        box_dist = int(max([x,y,z])) + 5
+        box_dist_line = "{" + str(box_dist) + " " + str(box_dist) + " " + str(box_dist)+ "}"
+
+        file_subtype = "_wat_solv"
+        filename = molecule_name + file_subtype + "_" + str(box_dist)
+        intleap_path = filename + ".intleap"
+
+        prmtop_filepath = os.path.join(output_dir, filename + ".prmtop")
+        rst_filepath = os.path.join(output_dir, filename + ".rst7")
+        pdb_output = os.path.join(output_dir, filename + ".pdb")
+        '''OLD FILE CONTENT
+        file_content = f"""source leaprc.gaff
+            source leaprc.water.fb3
+
+            loadamberprep {molecule_prepi_filepath}
+            loadamberparams {molecule_frcmod_filepath}
+
+            {molecule_name} = loadpdb {molecule_pdb_filepath}
+
+            solvatebox {molecule_name} TIP3PBOX {box_dist_line}
+
+            saveamberparm {molecule_name} {prmtop_filepath} {rst_filepath}
+            savepdb {molecule_name} {pdb_output}
+            quit
+            """
+        '''
+        frcmod_filepath = os.path.join(self.manager.molecules_dir, molecule_name, molecule_name + ".frcmod")
+        lib_filepath = os.path.join(self.manager.molecules_dir, molecule_name, molecule_name + ".lib")
+        box_dist_line = "solvatebox " + molecule_name + " TIP3PBOX {12 12 12}"
+        
+        
+        file_content = f"""source leaprc.gaff
+            source leaprc.water.fb3
+            loadamberparams {frcmod_filepath}
+            loadoff {lib_filepath}
+
+            {box_dist_line}
+
+            saveamberparm {molecule_name} {prmtop_filepath} {rst_filepath}
+            savepdb {molecule_name} {pdb_output}
+            quit
+            """
+
+
+        
+        with open(intleap_path, 'w') as file:
+            file.write(file_content)
+
+        leap_command = "tleap -f " + intleap_path
+
+        try:
+            result = subprocess.run(leap_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            if result.returncode == 0:
+                # Command executed successfully
+                print("Output:", result.stdout)
+            else:
+                # Command failed, print error message
+                print("Error:", result.stderr)
+        except Exception as e:
+            # Exception occurred during subprocess execution
+            print("Exception:", e)
+
+        os.chdir(self.manager.main_dir)
+        return(filename)
+
+#class BuildBioOilSystems(BuildSystems):
+#    def __init__:
+ #       pass
+
+    
