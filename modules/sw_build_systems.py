@@ -872,8 +872,9 @@ class BuildAmberSystems(BuildSystems):
         mainchain_prepi_filepath = "mainchain_" + molecule_name + ".prepi"
         tail_prepi_filepath = "tail_" + molecule_name + ".prepi"
 
+        file_subtype = "_wat_solv"
         # Define output directory - based on polymer name
-        output_dir = os.path.join(self.manager.systems_dir, polymer_name)
+        output_dir = os.path.join(self.manager.systems_dir, polymer_name + file_subtype)
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
@@ -887,11 +888,12 @@ class BuildAmberSystems(BuildSystems):
         box_dist = int(x) + 5
 
         box_dist_line = "{" + str(int(x)+3) + " " + str(int(y)+3) + " " + str(int(z)+3) + "}"
+        box_vol = int(x*y*z)
 
         # Define required filepaths
-        file_subtype = "_single_chain"
+        
         intleap_path = polymer_name + file_subtype + ".intleap"
-        filename = polymer_name + file_subtype + "_" + str(box_dist)
+        filename = polymer_name + file_subtype + "_" + str(box_vol)
         prmtop_filepath =  os.path.join(output_dir, filename + ".prmtop")
         rst_filepath = os.path.join(output_dir, filename + ".rst7")
         pdb_outpath = os.path.join(output_dir, filename + ".pdb") 
@@ -939,19 +941,20 @@ class BuildAmberSystems(BuildSystems):
         result = subprocess.run(cd_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         return(filename)
     
-    def build_3_3_polymer_array(self, directories=None, base_molecule_name=None, molecule_name=None, number_of_repeat_units=None):
+    def build_3_3_polymer_array(self, base_molecule_name=None, molecule_name=None):
         # Thsis function builds arrays of polymers using the pre generated pdb files
-         if directories == None or molecule_name == None :
+         if molecule_name == None or base_molecule_name == None:
              # UPDATE THIS
-            print("Please provide 2 arguments as follows: build_3_3_polymer_array(directories, molecule_name)")
-            print("Directories: A python object generated with the PolymerSimulatorDirs(filepath) method imported from sw_directories")
-            print("Molecule name: A string of the molecule name, i.e. 'Ethane'")
+            print("Please provide 3 arguments as follows: build_3_3_polymer_array(base_molecule_nmae, molecule_name)")
+            print("Base polymer name: A string of the polymer name, i.e. '3HB_trimer'")
+            print("Polymer name: A string of the polymer name, i.e. '3HB_10_polymer'")
+            
             return(None)        
             
-         pdb_file = directories.load_pdb_filepath(molecule_name)
-         base_pdb_file = directories.load_pdb_filepath("3HB_trimer")
+         pdb_file = self.manager.load_pdb_filepath(molecule_name)
+         base_pdb_file = self.manager.load_pdb_filepath("3HB_trimer")
          
-         molecule_dir = os.path.join(directories.molecules_dir, base_molecule_name)
+         molecule_dir = os.path.join(self.manager.molecules_dir, base_molecule_name)
          cd_command = "cd " + molecule_dir
          print(cd_command)
 
@@ -966,18 +969,19 @@ class BuildAmberSystems(BuildSystems):
          tail_prepi_filepath = "tail_" + base_molecule_name + ".prepi"
 
          file_subtype = "_3_3_array"
-         output_dir = os.path.join(directories.systems_dir, (molecule_name + file_subtype))
+         output_dir = os.path.join(self.manager.systems_dir, (molecule_name + file_subtype))
          if not os.path.exists(output_dir):
              os.makedirs(output_dir)
 
          x, y, z = self.get_xyz_dists(pdb_file)
 
          # translate_distance = int(max(x, y, z)) + 1
-         translate_distance = int(max(x, y)) + 1 # Removed z as they should not overlap in this distance
+         #translate_distance = int(max(x, y)) + 1 # Removed z as they should not overlap in this distance
+         translate_distance = int((max(x, y))/2) # Removed z as they should not overlap in this distance
 
          base_x, base_y, base_z = self.get_xyz_dists(base_pdb_file)
-         box_dist_x = translate_distance*5
-         box_dist_y = translate_distance*5
+         box_dist_x = translate_distance*3
+         box_dist_y = translate_distance*3
          box_dist_z = int(z+3)
          box_dist = box_dist_x*box_dist_y*box_dist_z # Note: this is actually the volume, but 'box_dist' is a variable used to name files below and it has not been updated yet
          print(box_dist_x, box_dist_y, box_dist_z)
@@ -1012,17 +1016,20 @@ class BuildAmberSystems(BuildSystems):
 
          base_mol_name = molecule_name.split("_")[0]
          intleap_path = base_mol_name + file_subtype + ".intleap"
-    
-         prmtop_filepath =  os.path.join(output_dir, molecule_name + file_subtype + "_" + str(box_dist) + ".prmtop")
-         rst_filepath = os.path.join(output_dir, molecule_name + file_subtype + "_" + str(box_dist) + ".rst7")
+
+         system_name = molecule_name + file_subtype + "_" + str(box_dist)
+         unsolved_system_name = "unsolved_" + molecule_name + file_subtype
+        
+         prmtop_filepath =  os.path.join(output_dir, system_name + ".prmtop")
+         rst_filepath = os.path.join(output_dir, system_name + ".rst7")
 
          unsolved_prmtop_filepath =  os.path.join(output_dir, "unsolved_" + molecule_name + file_subtype + ".prmtop")
          unsolved_rst_filepath = os.path.join(output_dir, "unsolved_" + molecule_name + file_subtype + ".rst7")
         
-         three_three_array_pdb_filepath = os.path.join(output_dir, molecule_name + file_subtype + "_" + str(box_dist) + ".pdb")
+         three_three_array_pdb_filepath = os.path.join(output_dir, system_name + ".pdb")
          unsolved_three_three_array_pdb_filepath = os.path.join(output_dir, "unsolved_" + molecule_name + file_subtype + ".pdb")
     
-         head_rescode, mainchain_rescode, tail_rescode = directories.retrieve_polymeric_rescodes(base_molecule_name)
+         head_rescode, mainchain_rescode, tail_rescode = self.manager.retrieve_polymeric_rescodes(base_molecule_name)
 
          file_content = f"""source leaprc.gaff
          source leaprc.water.fb3
@@ -1086,9 +1093,9 @@ class BuildAmberSystems(BuildSystems):
              # Exception occurred during subprocess execution
              print("Exception:", e)
 
-         cd_command = "cd " + str(directories.main_dir)
+         cd_command = "cd " + str(self.manager.main_dir)
          result = subprocess.run(cd_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-         return()
+         return(system_name, unsolved_system_name)
 
     def add_ter_to_pckml_result(self, dirs, pdb_file, base_molecule_name):
         """
