@@ -192,7 +192,7 @@ This tutorial provides examples of how to use the filepath manager. There will b
 files are currently generated. However, it provides a useful framework for working with files and systems easily. Many of
 the other methods described in future notebooks use this filepath manager so it is crucial to understand its functionality.
 
-Do the tutorial: **Tutorial_1_filepath_manager.ipynb
+Do the tutorial: **Tutorial_1_filepath_manager.ipynb**
 
 #### 2.1.2 Paramtarezing small molecules and polymers
 
@@ -217,13 +217,17 @@ Amber topologies and parameters will be generated for systesms of solvated small
 
 Do the tutorial: **Tutorial_3_Solvating_Small_Molecules_and_Polymers.ipynb**
 
-#### 2.1.4 
+#### 2.1.4 Building systems with polymers
 
 This notebook is split into 2 sections; <br>
     1. Building 3x3 arrays of polymers <br>
     2. Building 2x10 arrays of polymers - *coming soon...* <br>
     
 Amber topologies and parameters will be generated for systesms of the above systesm to be used for molecular dynamics simulations. <br>
+
+#### 2.1.5 Running simulations
+
+This notebook will explain how to run simulations on systems where amber topologies and coordinates have been generated for. The example in this tutorial is for the 3x3 array of 3HB_10-mers generated in **tutorial_4**, however, this will work with any system generated in either **tutorial_3** or **tutorial_4**.
 
 
 #### 2.2.2.2 Module guides
