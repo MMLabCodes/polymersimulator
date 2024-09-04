@@ -1,4 +1,4 @@
-# MMlab Simulator
+# Polymer Simulator
 
 This repository contains content that will allow for simulations of polymers using **openmm** with **Amber**.
 
