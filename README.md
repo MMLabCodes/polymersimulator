@@ -1,6 +1,6 @@
-# Polymer simulator
+# MMlab Simulator
 
-This directory contains content that will allow for simulations of polymers using **openmm** with **Amber**.
+This repository contains content that will allow for simulations of polymers using **openmm** with **Amber**.
 
 ## 1. Setting up the environment and cloning repository
 
@@ -182,37 +182,50 @@ We can launch jupyter notebooks from ubuntu with:
    ```
 No we can select the first URL (the one containing 'localhost:8888') and copy and paste it into a browser, this will launch jupyter notebook (fingers crossed!)
  
-From there we can naviagate to the jupyter notebook folder and launch notebooks from there.
+From there we can navigate to the jupyter notebook folder and launch notebooks from there.
 
-### 2.2.1 Jupyter notebook tutorials
+### 2.1 Jupyter notebook tutorials
 
-Before taking a look at at the decsriptions of other jupyter notebooks and guide - please follow these tutorials in order. <br>
+#### 2.1.1 Filepath manager
 
-These can be found in the cloned repository and are labelled appropriately.
+This tutorial provides examples of how to use the filepath manager. There will be many cases where nothing is returned as no
+files are currently generated. However, it provides a useful framework for working with files and systems easily. Many of
+the other methods described in future notebooks use this filepath manager so it is crucial to understand its functionality.
 
-### 2.2.2 Jupyter notebook descriptions
+Do the tutorial: **Tutorial_1_filepath_manager.ipynb
 
-#### 2.2.2.1 Tutorials
+#### 2.1.2 Paramtarezing small molecules and polymers
 
-There are a series of tutorials recommended to follow and these are numbered as so.
-
-1. **Tutorial_1.ipynb**
-
-    This notebook contains information on how to begin building systems using some python modules that can be found in the github. <br>
+This notebook is split into 2 sections; <br>
+    1. Parameterizing small molecules <br>
+    2. Parameterizing polymers <br>
     
-    The sections in this notebook are: <br>
-        1. Generating PDB file from a SMILES string with a unique residue code for that molecule. <br>
-        2. Parameterizing this PDB file so we can use it in MD simulations. <br>
-        3. Generating systems of arrays with their associated topology and coordinate files for MD simulations. <br>
+Parameterizing molecules is carried out using the code in **modules/sw_build_systems** and utilises amber tools to generate 
+parameters using GAFF (generalized amber forcefield).
 
-2. **Tutorial_2.ipynb**
+Do the tutorial: **Tutorial_2_Parameterizing_Small_Molecules_and_Polymers.ipynb**
 
-    This notebook contains information on how to run openmm simulations from parameterized systems - the generation of these systems can be found in **Tutorial_1**. <br>
+*Note: this code for generating parameters is project agnostic, and for specific cases - easier tools may alreadt exist*
 
-    This notebook uses python classes from the sw_openmm python module to intialize and set up simulations from either: <br>
-        1. Amber topology files and coordinates <br>
-        2. PDB files for use with ANI forcefield (currently no description for this - **coming soon**)
+#### 2.1.3 Solvating small molecules and polymers
+
+This notebook is split into 2 sections; <br>
+    1. Solvating small molecules <br>
+    2. Solvating polymers <br>
     
+Amber topologies and parameters will be generated for systesms of solvated small molecules and polymers to be used for molecular dynamics simulations. <br>
+
+Do the tutorial: **Tutorial_3_Solvating_Small_Molecules_and_Polymers.ipynb**
+
+#### 2.1.4 
+
+This notebook is split into 2 sections; <br>
+    1. Building 3x3 arrays of polymers <br>
+    2. Building 2x10 arrays of polymers - *coming soon...* <br>
+    
+Amber topologies and parameters will be generated for systesms of the above systesm to be used for molecular dynamics simulations. <br>
+
+
 #### 2.2.2.2 Module guides
 
 There are a series of guides that give a detailed over of what each module does - some of this information may also be included within the tutorials.
@@ -237,25 +250,7 @@ There are a series of guides that give a detailed over of what each module does 
 
     Notebook and associated description coming soon...
 
-#### 2.2.2.3 Other notebooks
-
-These are other notebooks that are useful to further understand the capabiltity of this code workflow. You will not need to read these unless you want to understand other methods of running the code.
-
-1. **python_parametrization.ipynb**
-
-    Description coming soon - needs to be integrated with build_simulation functions (i.e. directory creation and generation of filepaths)
-
-## 3. Python scripts 
-
-There are a series of python scripts associated with this project:
-    - pdb file generation 
-    - Molecular dynamics input (paramater/topology) generation
-    - Molecular dynamics scripts
-
-~~Descriptions coming soon...~~
-Decsriptions currently being added...
-
-### 3.1 Python modules - easy handling 
+### 3 Python modules - easy handling 
 
 The python modules created here aim to provide easier handling of a range of different aspects of this project and are detailed in more depth below. <br>
 
@@ -293,147 +288,7 @@ The python modules created here aim to provide easier handling of a range of dif
 
    Description coming soon...
 
-### 3.2 Python scripts - pdb file generation
 
-1. **smiles_to_pdb.py**
-
-    This python script generates a PDB file from a SMILES string and also generates a unique residue code
-        for that PDB file by generating and cross-referencing with a database of all generated pdbs. This residue code
-        is useful for tracking and analysis of molecules in MD simulations.
-
-    This python file requires the following inputs: <br>
-    ```
-    Parameters: 
-    - smiles (str): SMILES representation of the molecule. 
-    - name (str): Name of the molecule. 
-    - directory (str): Directory where the PDB file will be saved. 
-    - residue_code_csv (str): Path to the CSV file containing existing residue codes. 
-    ```
-        
-    This python script should be run from the "polymer_simulator" directory as follows: <br>
-    ```
-    python3 python_scripts/smiles_to_pdb.py C methane /pdb_files/molecules /pdb_files/residue_codes.csv 
-    ```
-    The general form of providing arguments for this script is: <br>
-    ```
-    python3 python_scripts/smiles_to_pdb.py <smiles> <molecule_name> <pdb_file_directory> <residue_code_csv>
-    ```
-    
-    It is necessary to create the "pdb_files/molecules" directory intially, but the csv should be generated automatically if it does not already exist.
-
-2. **csv_to_pdb.py**
-
-Coming soon...
-
-### 3.2 Python scripts - Molecular dynamics input (paramater/topology) generation 
-    
-1. **python_parametrizer.py**
-
-    For this section of python scripts - the output from this script is the most important 
-        and is required by each subsequent script. In short, this python script parametrizes
-        the molecules and the subsequent scripts build systems by calling these parameters. 
-        
-    This python file requires the following inputs:
-    ```
-    Parameters:
-    - pdb file
-    ```
-    
-    This python script should be run the the "polymer_simulator" directory as follows :
-    ```
-    python3 python_scripts/python_parametrizer.py path_to_pdb_file.pdb 
-    ```
-    The general form of providing arguments for this script is: <br>
-    ```
-    python3 python_scripts/python_parametrizer.py <path_to_pdb_file.pdb> 
-    ```
-    The "path_to_pdb_file.pdb" path should be something similar: <br>
-        "~/polymer_simulator/pdb_files/molecules/pdb_file.pdb"
-
-2. **single_molecule_solvater.py**
-
-    This python script generates the topology and paramaters for a system comprised of a single solvated
-        monomer using *AMBER* for molecular dynamics simulations. 
-        
-    This python file requires the following inputs: <br>
-    ```
-    Parameters: 
-    - molecule_name (str): Name of the molecule. 
-    ```
-    This python script should be run from the "polymer_simulator" directory as follows: <br>
-    ```
-    python3 python_scripts/single_molecule_solvater.py methane 
-    ```  
-    The general form of providing arguments for this script is: <br>
-    ```   
-    python3 python_scripts/single_molecule_solvater.py <molecule_name> 
-    ```
-    The AMBER files generated are for a single solvated molecule in a box with dimensions twice 
-        that of its max pairwise distance.
-        
-    If the molecule being solvated has not been previously solvated with **python_parametrizer.py** and
-        error will be seen asking you to first parametrize the molecue.
-
-6. **2_2_array_generator.py**
-
-Coming soon...
-
-7. **3_3_array_generator.py**
-
-Coming soon...
-
-### 3.3 Python scripts - Molecular dynamics scripts 
-
-ADD ABOUT GENERATED INPUTS BEING USED FOR THE SCRIPTS - ADD A PART ABOUIT WHAT INPUTS ARE GENERATED FROM EACH SCRIPT
-MAYBE ADD PICS OF THEM AS WELL <br>
-
-The prmtop and inpcrd files are generated by the scripts given in section "3.2 python scripts for molecular dynamics input"
-and each python script in that section will generate valid inputs for this script. <br>
-        
-*Note: Other types of paramater and coordiante files will be supported, but for now only **".prmtop"** and **".rst7"** filetypes are supported.*
-
-1. **simple_md_run.py**
-
-    This python script carries out a simple molecular dynamics run - an NVT simulation.
-    The default length of this simulation is 10,000 steps with a timestep fo 2 fs - these can be changed manually by editting the script.
-
-    This python file requires the following inputs: <br>
-    ```
-    Parameters: 
-    - prmtop file (str): Parameter file for a system (this file will have the ".prmtop" extension) 
-    - inpcrd file (str): Coordinate file for a system (this file will have the ".rst7" extension) 
-    ```
-    This python script should be run from the "polymer_simulator" directory as follows: <br>
-    ```
-    python3 python_script/simple_md_run.py path_to_prmtopfile path_to_rst7file 
-    ```
-    The general form of providing arguments for this script is: <br>
-    ```  
-    python3 python_scripts/simple_md_run.py <parameter_file> <coordinate_file> 
-    ```
-
-      
-2. **equilibration_production.py**
-
-    This python script carries out a molecular dynamics simulation in 2 parts: <br>
-        1. Equilibration for 1,000,000 steps with a timestep of 2fs (NPT ensemble) <br>
-        2. Production run for 2,000,000 steps with a timesept of 2fs (NVT ensemble) <br>
-        
-    This python file requires the following inputs: <br>
-    ```
-    Parameters: 
-    - prmtop file (str): Parameter file for a system (this file will have the ".prmtop" extension) 
-    - inpcrd file (str): Coordinate file for a system (this file will have the ".rst7" extension) 
-    ```
-        
-    This python script should be run from the "polymer_simulator" directory as follows: <br>
-    ```
-    python3 python_scripts/equilibration_production.py path_to_prmtopfile path_to_rst7file <br>
-    ```   
-    The general form of providing arguments for this script is: 
-    ```  
-    python3 python_scripts/equilibration_production.py <parameter_file> <coordinate_file> 
-    ```   
 
 ## 4. Working on windows system <a name="section-4"></a>
 
