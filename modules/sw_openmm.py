@@ -562,7 +562,7 @@ class BuildSimulation():
     anneal_parameters = [300, 700, 5, 3000, 100]
     minimized_only = None # This will change to True/False and will determine how periodic box vectors are set
     
-    def __init__(self, directories, filename):
+    def __init__(self, manager, filename):
         """
         Initializes a BuildSimulation object with specified directories and filename 
 
@@ -580,9 +580,9 @@ class BuildSimulation():
         Notes:
             If the output directory does not exist, it will be created.
         """
+        self.manager = manager
         self.filename = filename
-        self.directories = directories
-        self.output_dir = os.path.join(self.directories.systems_dir, self.filename, self.timestamp)
+        self.output_dir = os.path.join(self.manager.systems_dir, self.filename, self.timestamp)
         if not os.path.exists(self.output_dir):
             os.makedirs(self.output_dir)
         self.log_info = {'Minimization': {'Temperature':None,'Time taken': None},
@@ -801,7 +801,7 @@ class BuildSimulation():
         """Display help information for the anneal method."""
         print(cls.anneal.__doc__)    
     
-    def equilibrate(self, directories, simulation, total_steps=None, temp=None, pressure=None):
+    def equilibrate(self, simulation, total_steps=None, temp=None, pressure=None):
         """
         Function to equilibrate the provided simulation to reach a specified temperature and pressure.
         
@@ -920,7 +920,7 @@ class BuildSimulation():
         """Display help information for the equilibrate method."""
         print(cls.equilibrate.__doc__) 
         
-    def production_run(self, directories, simulation, total_steps=None, temp=None):
+    def production_run(self, simulation, total_steps=None, temp=None):
         """
         Function to perform a production run simulation with the provided parameters.
         
@@ -1295,11 +1295,12 @@ class AmberSimulation(BuildSimulation):
             Returns a string representation of the AmberSimulation object.
     """
     
-    def __init__(self, directories, topology_file, coordinates_file):     
+    def __init__(self, manager, topology_file, coordinates_file): 
+        self.manger = manager
         self.filename = os.path.basename(topology_file).split('.')[0]
         
         # Inherit attributes defined in the parent class and pass directories to the BuildSimulation constructor
-        super().__init__(directories, self.filename)
+        super().__init__(manager, self.filename)
         
         self.amb_coordinates = app.AmberInpcrdFile(coordinates_file)
         self.amb_topology = app.AmberPrmtopFile(topology_file, periodicBoxVectors=self.amb_coordinates.boxVectors)
