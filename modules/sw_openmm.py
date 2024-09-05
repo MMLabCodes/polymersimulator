@@ -658,7 +658,7 @@ class BuildSimulation():
         """Display help information for the minimize_energy method."""
         print(cls.minimize_energy.__doc__)    
      
-    def anneal(self, directories, simulation, start_temp=None, max_temp=None, cycles=None, holding_steps=None, steps_at_temp=None):
+    def anneal(self, simulation, start_temp=None, max_temp=None, cycles=None, holding_steps=None, steps_at_temp=None):
         """
         Function to perform simulated annealing on the provided simulation system.
         
