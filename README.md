@@ -194,7 +194,7 @@ the other methods described in future notebooks use this filepath manager so it 
 
 Do the tutorial: **Tutorial_1_filepath_manager.ipynb**
 
-#### 2.1.2 Paramtarezing small molecules and polymers
+#### 2.1.2 Paramterezing small molecules and polymers
 
 This notebook is split into 2 sections; <br>
     1. Parameterizing small molecules <br>
@@ -238,19 +238,15 @@ There are a series of guides that give a detailed over of what each module does 
 
     This notebook contains detailed explanations and examples of how to use the functions found in the **sw_openmm.py** module. This guide is essential to using this python module and should be read and referred to when running openmm simulations. This module functions as wrapper for openmm scripts and no experience with openmm is required to use this module. <br>
 
-2. **openmm_simulation_script_guide.ipynb** <br>
+2. **parameterization_guide.ipynb** <br>
 
-    This notebook contains details on how to set up openmm python scripts. All of the scripts shown are included in the **sw_openmm.py** module - it is recommended to look through the **openmm_simulation_guide.ipynb** notebook first and then refer to this notebook if you would like more information. However, this ntoebook is not essential to using any of the python modules and does not expand on anything included in the jupyter notebook tutorials. This notebook is **no longer being updated**. <br>
+   This notebook includes details on parameterizing molecules for MD simulations using tleap and antechamber. All of methods shown here are included in the **sw_build_systems.py** module - it is recommend to work through the tutroial notebooks first and then refer to this notebook if you would like more information. <br>
 
-3. **parameterization_guide.ipynb** <br>
-
-   This notebook includes details on parameterizing molecules for MD simulations using tleap and antechamber. All of methods shown here are included in the **sw_build_systems.py** module - it is recommend to look through the **building_systems_guide.ipynb** notebook first and then refer to this notebook if you would like more information. <br>
-
-4. **building_systems_guide.ipynb** <br>
+3. **building_systems_guide.ipynb** <br>
 
     Notebook and associated description coming soon...
 
-5. **filepath_manager_guide.ipynb** <br>
+3. **filepath_manager_guide.ipynb** <br>
 
     Notebook and associated description coming soon...
 
@@ -292,6 +288,9 @@ The python modules created here aim to provide easier handling of a range of dif
 
    Description coming soon...
 
+4. **sw_analysis.py**
+
+   Decription coming soon...
 
 
 ## 4. Working on windows system <a name="section-4"></a>
