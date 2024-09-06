@@ -221,7 +221,7 @@ Do the tutorial: **Tutorial_3_Solvating_Small_Molecules_and_Polymers.ipynb**
 
 This notebook is split into 2 sections; <br>
     1. Building 3x3 arrays of polymers <br>
-    2. Building 2x10 arrays of polymers - *coming soon...* <br>
+    2. Building 2x10 arrays of polymers - *array is generated, but solvation of the array in water does not* <br>
     
 Amber topologies and parameters will be generated for systesms of the above systesm to be used for molecular dynamics simulations. <br>
 
