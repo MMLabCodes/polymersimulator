@@ -952,7 +952,7 @@ class BuildAmberSystems(BuildSystems):
             return(None)        
             
          pdb_file = self.manager.load_pdb_filepath(molecule_name)
-         base_pdb_file = self.manager.load_pdb_filepath("3HB_trimer")
+         base_pdb_file = self.manager.load_pdb_filepath(base_molecule_name)
          
          molecule_dir = os.path.join(self.manager.molecules_dir, base_molecule_name)
          cd_command = "cd " + molecule_dir
@@ -1426,6 +1426,218 @@ class BuildAmberSystems(BuildSystems):
 
         os.chdir(self.manager.main_dir)
         return(filename)
+
+    def build_2_10_polymer_array(self, base_molecule_name=None, molecule_name=None):
+         # Thsis function builds arrays of polymers using the pre generated pdb files
+         if molecule_name == None or base_molecule_name == None:
+            print("Please provide 3 arguments as follows: build_2_10_polymer_array(base_molecule_nmae, molecule_name)")
+            print("Base polymer name: A string of the polymer name, i.e. '3HB_trimer'")
+            print("Polymer name: A string of the polymer name, i.e. '3HB_10_polymer'")
+            
+            return(None)        
+            
+         pdb_file = self.manager.load_pdb_filepath(molecule_name)
+         base_pdb_file = self.manager.load_pdb_filepath(base_molecule_name)
+         
+         molecule_dir = os.path.join(self.manager.molecules_dir, base_molecule_name)
+         cd_command = "cd " + molecule_dir
+         print(cd_command)
+
+         try:
+             os.chdir(molecule_dir)
+             print("Current directory:", os.getcwd())
+         except Exception as e:
+             print("Exception:", e)
+             
+         head_prepi_filepath = "head_" + base_molecule_name + ".prepi"
+         mainchain_prepi_filepath = "mainchain_" + base_molecule_name + ".prepi"
+         tail_prepi_filepath = "tail_" + base_molecule_name + ".prepi"
+
+         file_subtype = "_2_10_array"
+         output_dir = os.path.join(self.manager.systems_dir, (molecule_name + file_subtype))
+         if not os.path.exists(output_dir):
+             os.makedirs(output_dir)
+
+         x, y, z = self.get_xyz_dists(pdb_file)
+
+         #translate_distance = int(max(x, y)) + 1 # Removed z as they should not overlap in this distance
+         translate_distance = int((max(x, y))/2) # Removed z as they should not overlap in this distance
+
+         box_dist_x = translate_distance*7.5
+         box_dist_y = translate_distance*7.5
+         box_dist_z = int(z+3)
+         box_dist = box_dist_x*box_dist_y*box_dist_z # Note: this is actually the volume, but 'box_dist' is a variable used to name files below and it has not been updated yet
+         print(box_dist_x, box_dist_y, box_dist_z)
+         print(x,y,z)
+         box_dist_line = "{" + str(box_dist_x) + " " + str(box_dist_y) + " " + str(box_dist_z) + "}"
+
+         molecule_name_1 = molecule_name + "_1"
+         molecule_name_2 = molecule_name + "_2"
+         molecule_name_3 = molecule_name + "_3"
+         molecule_name_4 = molecule_name + "_4"
+         molecule_name_5 = molecule_name + "_5"
+         molecule_name_6 = molecule_name + "_6"
+         molecule_name_7 = molecule_name + "_7"
+         molecule_name_8 = molecule_name + "_8"
+         molecule_name_9 = molecule_name + "_9"
+         molecule_name_10 = molecule_name + "_10"
+         molecule_name_11 = molecule_name + "_11"
+         molecule_name_12 = molecule_name + "_12"
+         molecule_name_13 = molecule_name + "_13"
+         molecule_name_14 = molecule_name + "_14"
+         molecule_name_15 = molecule_name + "_15"
+         molecule_name_16 = molecule_name + "_16"
+         molecule_name_17 = molecule_name + "_17"
+         molecule_name_18 = molecule_name + "_18"
+         molecule_name_19 = molecule_name + "_19"
+         molecule_name_20 = molecule_name + "_20"
+         
+         # central 2 polymers on the top line (1,2)
+         translate_line_1 = "{0.0 " + str(translate_distance/2) + " 0.0}"
+         translate_line_2 = "{0.0 " + str(-translate_distance/2) + " 0.0}"
+
+         # central 2 polymers on the bottom line (3,4)
+         translate_line_3 = "{0.0 " + str(translate_distance/2) + " " + str(translate_distance) + "}"
+         translate_line_4 = "{0.0 " + str(-translate_distance/2) + " " + str(translate_distance) + "}"
+
+         # Polymers either side of central 2 polymers on the top line (5,6)
+         translate_line_5 = "{0.0 " + str(translate_distance*1.5) + " 0.0}"
+         translate_line_6 = "{0.0 " + str(-translate_distance*1.5) + " 0.0}"
+
+         # Polymers either side of central 2 polymers on the bottom line (7,8)
+         translate_line_7 = "{0.0 " + str(translate_distance*1.5) + " " + str(translate_distance) + "}"
+         translate_line_8 = "{0.0 " + str(-translate_distance*1.5) + " " + str(translate_distance) + "}"
+
+         # Polymers (9,10)
+         translate_line_9 = "{0.0 " + str(translate_distance*2.5) + " 0.0}"
+         translate_line_10 = "{0.0 " + str(-translate_distance*2.5) + " 0.0}"
+
+         # Polymers (11,12)
+         translate_line_11 = "{0.0 " + str(translate_distance*2.5) + " " + str(translate_distance) + "}"
+         translate_line_12 = "{0.0 " + str(-translate_distance*2.5) + " " + str(translate_distance) + "}"
+
+         # Polymers (13,14)
+         translate_line_13 = "{0.0 " + str(translate_distance*3.5) + " 0.0}"
+         translate_line_14 = "{0.0 " + str(-translate_distance*3.5) + " 0.0}"
+
+         # Polymers (15,16)
+         translate_line_15 = "{0.0 " + str(translate_distance*3.5) + " " + str(translate_distance) + "}"
+         translate_line_16 = "{0.0 " + str(-translate_distance*3.5) + " " + str(translate_distance) + "}"
+
+         # Polymers (17,18)
+         translate_line_17 = "{0.0 " + str(translate_distance*4.5) + " 0.0}"
+         translate_line_18 = "{0.0 " + str(-translate_distance*4.5) + " 0.0}"
+
+         # Polymers (19,20)
+         translate_line_19 = "{0.0 " + str(translate_distance*4.5) + " " + str(translate_distance) + "}"
+         translate_line_20 = "{0.0 " + str(-translate_distance*4.5) + " " + str(translate_distance) + "}"
+
+         combine_line = "{" + molecule_name_1 + " " + molecule_name_2 + " " + molecule_name_3 + " " + molecule_name_4 + " " + molecule_name_5 + " " + molecule_name_6 + " " + molecule_name_7 + " " + molecule_name_8 + " " + molecule_name_9 + " " + molecule_name_10 + " " + molecule_name_11 + " " + molecule_name_12 + " " + molecule_name_13 + " " + molecule_name_14 + " " + molecule_name_15 + " " + molecule_name_16 + " " + molecule_name_17 + " " + molecule_name_18 + " " + molecule_name_19 + " " + molecule_name_20 + "}"
+
+         base_mol_name = molecule_name.split("_")[0]
+         intleap_path = base_mol_name + file_subtype + ".intleap"
+
+         system_name = molecule_name + file_subtype + "_" + str(box_dist)
+         unsolved_system_name = "unsolved_" + molecule_name + file_subtype
+        
+         prmtop_filepath =  os.path.join(output_dir, system_name + ".prmtop")
+         rst_filepath = os.path.join(output_dir, system_name + ".rst7")
+
+         unsolved_prmtop_filepath =  os.path.join(output_dir, "unsolved_" + molecule_name + file_subtype + ".prmtop")
+         unsolved_rst_filepath = os.path.join(output_dir, "unsolved_" + molecule_name + file_subtype + ".rst7")
+        
+         two_ten_array_pdb_filepath = os.path.join(output_dir, system_name + ".pdb")
+         unsolved_two_ten_array_pdb_filepath = os.path.join(output_dir, "unsolved_" + molecule_name + file_subtype + ".pdb")
+    
+         head_rescode, mainchain_rescode, tail_rescode = self.manager.retrieve_polymeric_rescodes(base_molecule_name)
+
+         file_content = f"""source leaprc.gaff
+         source leaprc.water.fb3
+         source leaprc.protein.ff14SB
+
+         loadamberprep {head_prepi_filepath}
+         loadamberprep {mainchain_prepi_filepath}
+         loadamberprep {tail_prepi_filepath}
+
+         list
+            
+         {molecule_name_1} = loadpdb {pdb_file}
+         {molecule_name_2} = loadpdb {pdb_file}
+         {molecule_name_3} = loadpdb {pdb_file}
+         {molecule_name_4} = loadpdb {pdb_file}
+         {molecule_name_5} = loadpdb {pdb_file}
+         {molecule_name_6} = loadpdb {pdb_file}
+         {molecule_name_7} = loadpdb {pdb_file}
+         {molecule_name_8} = loadpdb {pdb_file}
+         {molecule_name_9} = loadpdb {pdb_file}
+         {molecule_name_10} = loadpdb {pdb_file}
+         {molecule_name_11} = loadpdb {pdb_file}
+         {molecule_name_12} = loadpdb {pdb_file}
+         {molecule_name_13} = loadpdb {pdb_file}
+         {molecule_name_14} = loadpdb {pdb_file}
+         {molecule_name_15} = loadpdb {pdb_file}
+         {molecule_name_16} = loadpdb {pdb_file}
+         {molecule_name_17} = loadpdb {pdb_file}
+         {molecule_name_18} = loadpdb {pdb_file}
+         {molecule_name_19} = loadpdb {pdb_file}
+         {molecule_name_20} = loadpdb {pdb_file}
+         
+         check {molecule_name_1}
+         
+         translate {molecule_name_1} {translate_line_1}
+         translate {molecule_name_2} {translate_line_2}
+         translate {molecule_name_3} {translate_line_3}
+         translate {molecule_name_4} {translate_line_4}
+         translate {molecule_name_5} {translate_line_5}
+         translate {molecule_name_6} {translate_line_6}
+         translate {molecule_name_7} {translate_line_7}
+         translate {molecule_name_8} {translate_line_8}
+         translate {molecule_name_9} {translate_line_9}
+         translate {molecule_name_10} {translate_line_10}
+         translate {molecule_name_11} {translate_line_11}
+         translate {molecule_name_12} {translate_line_12}
+         translate {molecule_name_13} {translate_line_13}
+         translate {molecule_name_14} {translate_line_14}
+         translate {molecule_name_15} {translate_line_15}
+         translate {molecule_name_16} {translate_line_16}
+         translate {molecule_name_17} {translate_line_17}
+         translate {molecule_name_18} {translate_line_18}
+         translate {molecule_name_19} {translate_line_19}
+         translate {molecule_name_20} {translate_line_20}
+         
+         system = combine {combine_line}
+         saveamberparm system {unsolved_prmtop_filepath} {unsolved_rst_filepath}
+         savepdb system {unsolved_two_ten_array_pdb_filepath}
+    
+         solvatebox system TIP3PBOX {box_dist_line}
+
+         saveamberparm system {prmtop_filepath} {rst_filepath}
+         savepdb system {two_ten_array_pdb_filepath}
+         quit
+         """
+    
+         with open(intleap_path, 'w') as file:
+             file.write(file_content)
+            
+         leap_command = "tleap -f " + intleap_path
+         #print("The command that would be run in the shell is: ")
+         #print(leap_command)
+         print(intleap_path)
+         try:
+             result = subprocess.run(leap_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+             if result.returncode == 0:
+                 # Command executed successfully
+                print("Output:", result.stdout)
+             else:
+                 # Command failed, print error message
+                 print("Error:", result.stderr)
+         except Exception as e:
+             # Exception occurred during subprocess execution
+             print("Exception:", e)
+
+         cd_command = "cd " + str(self.manager.main_dir)
+         result = subprocess.run(cd_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+         return(system_name, unsolved_system_name)
 
 #class BuildBioOilSystems(BuildSystems):
 #    def __init__:
