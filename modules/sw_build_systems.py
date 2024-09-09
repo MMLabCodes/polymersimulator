@@ -1067,7 +1067,7 @@ class BuildAmberSystems(BuildSystems):
          saveamberparm system {unsolved_prmtop_filepath} {unsolved_rst_filepath}
          savepdb system {unsolved_three_three_array_pdb_filepath}
     
-         solvatebox system TIP3PBOX {box_dist_line}
+         solvatebox system TIP3PBOX 12.0
 
          saveamberparm system {prmtop_filepath} {rst_filepath}
          savepdb system {three_three_array_pdb_filepath}
@@ -1463,13 +1463,22 @@ class BuildAmberSystems(BuildSystems):
          #translate_distance = int(max(x, y)) + 1 # Removed z as they should not overlap in this distance
          translate_distance = int((max(x, y))/2) # Removed z as they should not overlap in this distance
 
-         box_dist_x = translate_distance*7.5
-         box_dist_y = translate_distance*7.5
-         box_dist_z = int(z+3)
-         box_dist = box_dist_x*box_dist_y*box_dist_z # Note: this is actually the volume, but 'box_dist' is a variable used to name files below and it has not been updated yet
-         print(box_dist_x, box_dist_y, box_dist_z)
-         print(x,y,z)
-         box_dist_line = "{" + str(box_dist_x) + " " + str(box_dist_y) + " " + str(box_dist_z) + "}"
+         #box_dist_x = int(x+10) # box is only the size of 1 polymer in x direction
+         #box_dist_y = int(y*10)+10 # Y distance is 10 times polymer y distance + 5 as a buffer
+         #box_dist_z = int(z+translate_distance+10)
+         #print("Calculated box: ", box_dist_x, box_dist_y, box_dist_z)
+
+         # Some default box sizes to get this to work
+         #box_dist_x = 50
+         #box_dist_y = 200
+         #box_dist_z = 60
+
+         #print("Default box: ", box_dist_x, box_dist_y, box_dist_z)
+        
+         #box_dist = box_dist_x*box_dist_y*box_dist_z # Note: this is actually the volume, but 'box_dist' is a variable used to name files below and it has not been updated yet
+
+        # print(x,y,z)
+         ##box_dist_line = "{" + str(box_dist_x) + " " + str(box_dist_y) + " " + str(box_dist_z) + "}"
 
          molecule_name_1 = molecule_name + "_1"
          molecule_name_2 = molecule_name + "_2"
@@ -1537,7 +1546,7 @@ class BuildAmberSystems(BuildSystems):
          base_mol_name = molecule_name.split("_")[0]
          intleap_path = base_mol_name + file_subtype + ".intleap"
 
-         system_name = molecule_name + file_subtype + "_" + str(box_dist)
+         system_name = molecule_name + file_subtype
          unsolved_system_name = "unsolved_" + molecule_name + file_subtype
         
          prmtop_filepath =  os.path.join(output_dir, system_name + ".prmtop")
@@ -1609,7 +1618,7 @@ class BuildAmberSystems(BuildSystems):
          saveamberparm system {unsolved_prmtop_filepath} {unsolved_rst_filepath}
          savepdb system {unsolved_two_ten_array_pdb_filepath}
     
-         solvatebox system TIP3PBOX {box_dist_line}
+         solvatebox system TIP3PBOX 12.0
 
          saveamberparm system {prmtop_filepath} {rst_filepath}
          savepdb system {two_ten_array_pdb_filepath}
