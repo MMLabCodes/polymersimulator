@@ -854,10 +854,15 @@ class BuildAmberSystems(BuildSystems):
             print("Exception:", e)
         return(pdb_filepath)
             
-    def solvate_polymer_pdb(self, molecule_name, polymer_name):
+    def solvate_polymer_pdb(self, molecule_name, polymer_name, buffer=None):
         # This function will solvate a single polymer
         # Define directory where prepi files are found
         molecule_dir = os.path.join(self.manager.molecules_dir, molecule_name)
+
+        if buffer == None:
+            buffer = "10"
+        else:
+            buffer = str(buffer)
 
         # Change to prepi file directory
         cd_command = "cd " + molecule_dir
@@ -883,17 +888,10 @@ class BuildAmberSystems(BuildSystems):
 
         # Get box size by taking x coord (its the length of the polymer) and adding a buffer
         pdb_filepath = os.path.join(self.manager.systems_dir, polymer_name, polymer_name + ".pdb")
-        print(pdb_filepath)
-        x, y, z = self.get_xyz_dists(pdb_filepath)
-        box_dist = int(x) + 5
 
-        box_dist_line = "{" + str(int(x)+3) + " " + str(int(y)+3) + " " + str(int(z)+3) + "}"
-        box_vol = int(x*y*z)
-
-        # Define required filepaths
-        
+        # Define required filepaths   
         intleap_path = polymer_name + file_subtype + ".intleap"
-        filename = polymer_name + file_subtype + "_" + str(box_vol)
+        filename = polymer_name + file_subtype + f"_{buffer}"
         prmtop_filepath =  os.path.join(output_dir, filename + ".prmtop")
         rst_filepath = os.path.join(output_dir, filename + ".rst7")
         pdb_outpath = os.path.join(output_dir, filename + ".pdb") 
@@ -913,7 +911,7 @@ class BuildAmberSystems(BuildSystems):
 
              check {mol_name_1}
 
-             solvatebox {mol_name_1} TIP3PBOX {box_dist_line}
+             solvatebox {mol_name_1} TIP3PBOX {buffer}
 
              saveamberparm {mol_name_1} {prmtop_filepath} {rst_filepath}
              savepdb {mol_name_1} {pdb_outpath}
@@ -941,7 +939,7 @@ class BuildAmberSystems(BuildSystems):
         result = subprocess.run(cd_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         return(filename)
     
-    def build_3_3_polymer_array(self, base_molecule_name=None, molecule_name=None):
+    def build_3_3_polymer_array(self, base_molecule_name=None, molecule_name=None, buffer=None):
         # Thsis function builds arrays of polymers using the pre generated pdb files
          if molecule_name == None or base_molecule_name == None:
              # UPDATE THIS
@@ -950,7 +948,12 @@ class BuildAmberSystems(BuildSystems):
             print("Polymer name: A string of the polymer name, i.e. '3HB_10_polymer'")
             
             return(None)        
-            
+
+         if buffer == None:
+             buffer = "10"
+         else:
+             buffer = str(buffer)
+        
          pdb_file = self.manager.load_pdb_filepath(molecule_name)
          base_pdb_file = self.manager.load_pdb_filepath(base_molecule_name)
          
@@ -978,15 +981,6 @@ class BuildAmberSystems(BuildSystems):
          # translate_distance = int(max(x, y, z)) + 1
          #translate_distance = int(max(x, y)) + 1 # Removed z as they should not overlap in this distance
          translate_distance = int((max(x, y))/2) # Removed z as they should not overlap in this distance
-
-         base_x, base_y, base_z = self.get_xyz_dists(base_pdb_file)
-         box_dist_x = translate_distance*3
-         box_dist_y = translate_distance*3
-         box_dist_z = int(z+3)
-         box_dist = box_dist_x*box_dist_y*box_dist_z # Note: this is actually the volume, but 'box_dist' is a variable used to name files below and it has not been updated yet
-         print(box_dist_x, box_dist_y, box_dist_z)
-         print(x,y,z)
-         box_dist_line = "{" + str(box_dist_x) + " " + str(box_dist_y) + " " + str(box_dist_z) + "}"
 
          molecule_name_1 = molecule_name + "_1"
          molecule_name_2 = molecule_name + "_2"
@@ -1343,7 +1337,12 @@ class BuildAmberSystems(BuildSystems):
         result = subprocess.run(cd_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         return(None)
 
-    def solvate_molecule(self, molecule_name):
+    def solvate_molecule(self, molecule_name, buffer=None):
+        if buffer == None:
+            buffer = "10"
+        else:
+            buffer = str(buffer)
+        
         molecule_dir = os.path.join(self.manager.molecules_dir, molecule_name)
 
         try:
@@ -1362,11 +1361,9 @@ class BuildAmberSystems(BuildSystems):
 
         molecule_pdb_filepath = os.path.join(self.manager.molecules_dir, molecule_name, (molecule_name + ".pdb"))
         x, y, z = self.get_xyz_dists(molecule_pdb_filepath)
-        box_dist = int(max([x,y,z])) + 5
-        box_dist_line = "{" + str(box_dist) + " " + str(box_dist) + " " + str(box_dist)+ "}"
 
         file_subtype = "_wat_solv"
-        filename = molecule_name + file_subtype + "_" + str(box_dist)
+        filename = molecule_name + file_subtype + f"_{buffer}"
         intleap_path = filename + ".intleap"
 
         prmtop_filepath = os.path.join(output_dir, filename + ".prmtop")
@@ -1390,7 +1387,7 @@ class BuildAmberSystems(BuildSystems):
         '''
         frcmod_filepath = os.path.join(self.manager.molecules_dir, molecule_name, molecule_name + ".frcmod")
         lib_filepath = os.path.join(self.manager.molecules_dir, molecule_name, molecule_name + ".lib")
-        box_dist_line = "solvatebox " + molecule_name + " TIP3PBOX {12 12 12}"
+        box_dist_line = "solvatebox " + molecule_name + " TIP3PBOX {" + buffer + "}"
         
         
         file_content = f"""source leaprc.gaff
@@ -1398,7 +1395,7 @@ class BuildAmberSystems(BuildSystems):
             loadamberparams {frcmod_filepath}
             loadoff {lib_filepath}
 
-            {box_dist_line}
+            solvatebox {molecule_name} TIP3PBOX {buffer}
 
             saveamberparm {molecule_name} {prmtop_filepath} {rst_filepath}
             savepdb {molecule_name} {pdb_output}
@@ -1427,7 +1424,7 @@ class BuildAmberSystems(BuildSystems):
         os.chdir(self.manager.main_dir)
         return(filename)
 
-    def build_2_10_polymer_array(self, base_molecule_name=None, molecule_name=None):
+    def build_2_10_polymer_array(self, base_molecule_name=None, molecule_name=None, buffer=None):
          # Thsis function builds arrays of polymers using the pre generated pdb files
          if molecule_name == None or base_molecule_name == None:
             print("Please provide 3 arguments as follows: build_2_10_polymer_array(base_molecule_nmae, molecule_name)")
@@ -1435,7 +1432,13 @@ class BuildAmberSystems(BuildSystems):
             print("Polymer name: A string of the polymer name, i.e. '3HB_10_polymer'")
             
             return(None)        
-            
+
+         if buffer == None:
+             buffer = "10"
+         else:
+             buffer = str(buffer)
+        
+         
          pdb_file = self.manager.load_pdb_filepath(molecule_name)
          base_pdb_file = self.manager.load_pdb_filepath(base_molecule_name)
          
@@ -1462,23 +1465,6 @@ class BuildAmberSystems(BuildSystems):
 
          #translate_distance = int(max(x, y)) + 1 # Removed z as they should not overlap in this distance
          translate_distance = int((max(x, y))/2) # Removed z as they should not overlap in this distance
-
-         #box_dist_x = int(x+10) # box is only the size of 1 polymer in x direction
-         #box_dist_y = int(y*10)+10 # Y distance is 10 times polymer y distance + 5 as a buffer
-         #box_dist_z = int(z+translate_distance+10)
-         #print("Calculated box: ", box_dist_x, box_dist_y, box_dist_z)
-
-         # Some default box sizes to get this to work
-         #box_dist_x = 50
-         #box_dist_y = 200
-         #box_dist_z = 60
-
-         #print("Default box: ", box_dist_x, box_dist_y, box_dist_z)
-        
-         #box_dist = box_dist_x*box_dist_y*box_dist_z # Note: this is actually the volume, but 'box_dist' is a variable used to name files below and it has not been updated yet
-
-        # print(x,y,z)
-         ##box_dist_line = "{" + str(box_dist_x) + " " + str(box_dist_y) + " " + str(box_dist_z) + "}"
 
          molecule_name_1 = molecule_name + "_1"
          molecule_name_2 = molecule_name + "_2"
@@ -1618,7 +1604,7 @@ class BuildAmberSystems(BuildSystems):
          saveamberparm system {unsolved_prmtop_filepath} {unsolved_rst_filepath}
          savepdb system {unsolved_two_ten_array_pdb_filepath}
     
-         solvatebox system TIP3PBOX 12.0
+         solvatebox system TIP3PBOX {buffer}
 
          saveamberparm system {prmtop_filepath} {rst_filepath}
          savepdb system {two_ten_array_pdb_filepath}
