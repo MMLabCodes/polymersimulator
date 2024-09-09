@@ -1011,7 +1011,7 @@ class BuildAmberSystems(BuildSystems):
          base_mol_name = molecule_name.split("_")[0]
          intleap_path = base_mol_name + file_subtype + ".intleap"
 
-         system_name = molecule_name + file_subtype + "_" + str(box_dist)
+         system_name = molecule_name + file_subtype + f"_{buffer}"
          unsolved_system_name = "unsolved_" + molecule_name + file_subtype
         
          prmtop_filepath =  os.path.join(output_dir, system_name + ".prmtop")
@@ -1061,7 +1061,7 @@ class BuildAmberSystems(BuildSystems):
          saveamberparm system {unsolved_prmtop_filepath} {unsolved_rst_filepath}
          savepdb system {unsolved_three_three_array_pdb_filepath}
     
-         solvatebox system TIP3PBOX 12.0
+         solvatebox system TIP3PBOX {buffer}
 
          saveamberparm system {prmtop_filepath} {rst_filepath}
          savepdb system {three_three_array_pdb_filepath}
