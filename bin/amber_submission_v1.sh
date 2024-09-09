@@ -42,7 +42,7 @@ source activate AmberTools23
 ## Job info ##
 
 echo "OPENMM job $SLURM_JOBID"
-echo "INPUT STYSTEM $system_nam3"
+echo "INPUT STYSTEM $system_name"
 echo "SIMULATION_SCRIPT $simulation_script"
 
 ## Working directory setup ##
