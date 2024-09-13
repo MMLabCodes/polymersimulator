@@ -529,7 +529,7 @@ class BuildAmberSystems(BuildSystems):
 
     def gen_ac_file(self, molecule_name=None):
         # This function isn't required so much - however it will generate .ac files 
-        if directories == None or molecule_name == None:
+        if molecule_name == None:
             print("Please provide 1 argument as follows: gen_ac_file(molecule_name)")
             print("Molecule name: A string of the molecule name, i.e. 'Ethane'")
             return(None)
