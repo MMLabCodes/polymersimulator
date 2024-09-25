@@ -588,7 +588,8 @@ class BuildSimulation():
         self.log_info = {'Minimization': {'Temperature':None,'Time taken': None},
                             'Annealing': {'Time taken': None, 'Simulation time': None, 'Start temp': None, 'Target temp': None, 'Cycles': None, 'Steps at plateaus': None, 'Steps at incremental temps': None, 'Timestep': None},
                             'Equilibration': {'Time taken': None, 'Simulation time': None, 'Temperature': None, 'Pressure': None, 'Timestep': None},
-                            'Production': {'Time taken': None, 'Simulation time': None, 'Temperature': None, 'Timestep': None}}
+                            'Production': {'Time taken': None, 'Simulation time': None, 'Temperature': None, 'Timestep': None},
+                        'Thermal Ramp' : {'Time taken':None, 'Simulation time':None, 'Start temp':None, 'Target temp':None, 'Quench Rate':None, 'Steps at incremental temps':None, 'Timestep':None, 'Ensemble':None, 'Method':None}}
         self.log_csv = os.path.join(self.output_dir, (self.filename + "_" + self.timestamp + "_log.csv"))
                              
     def type_of_simulation(self):
@@ -1017,7 +1018,97 @@ class BuildSimulation():
         self.log_info['Production']['Temperature'] = temp
         self.log_info['Production']['Timestep'] = self.timestep
         return(simulation, (output_dataname + ".txt"))
+        
+    def thermal_ramp(self, simulation, heating, quench_rate, ensemble, start_temp=None, max_temp=None, total_steps=None, pressure=None):
+        # Heating is a boolean - true for heating, false for cooling
+        # quench rate is an integer. i.e. 10 or 20 K (or smth else) and is the temperature steps the system is heated/cooled in
+        # Ensemble is "NVT" or "NPT"
+        if ensemble is "NVT" or ensemble is "NPT":
+            pass
+        else:
+            print("Please specify 'NVT' or 'NPT' ensemble for the thermal ramp")
+            return()
+            
+        thermal_ramp_start_time = time.time()
+
+        if start_temp is None:
+            start_temp = self.anneal_parameters[0]
+        if max_temp is None:
+            max_temp = self.anneal_parameters[1]
+        if pressure is None:
+             pressure = self.pressure
+        if total_steps is None:
+            total_steps = self.total_steps
+
+        # Extract positional info
+        state = simulation.context.getState(getPositions=True, getEnergy=True, enforcePeriodicBox=True) # Define state object 
+        xyz = state.getPositions() # Obtain positions of the particles from previous step
+        vx, vy, vz = state.getPeriodicBoxVectors() # Obtain periodc box vectors of the previous step
+        
+        # Set up integrator
+        integrator = LangevinIntegrator(start_temp*kelvin, self.friction_coeff/picoseconds, self.timestep*femtoseconds)
+        
+        if BuildSimulation.type_of_simulation(self) == "AMB":
+            system = self.amb_topology.createSystem(nonbondedMethod=app.PME, nonbondedCutoff=1.0*nanometers, constraints=app.HBonds)
+            if ensemble == "NPT":
+                barostat = MonteCarloBarostat((pressure*atmosphere), ((start_temp if heating==True else max_temp)*kelvin))
+                system.addForce(barostat)
+            simulation = app.Simulation(self.amb_topology.topology, system, integrator)
+        
+        if BuildSimulation.type_of_simulation(self) == "ANI":
+            system = self.potential.createSystem(self.ani_topology, nonbondedMethod=app.PME, nonbondedCutoff=1.0*nanometers, constraints=app.HBonds)
+            platform = PLatform.getPlatformByName('CUDA')
+            simulation = app.Simulation(self.ani_topology, system, integrator, platform)
+
+        # Update the xyz of each atom
+        simulation.context.setPeriodicBoxVectors(vx, vy, vz)
+        simulation.context.setPositions(xyz)
+
+        # Set up reporters
+        # PDB trajectory - this is slighlty redundant with the addition of the DCD trajectory, but it is still useful for 
+        output_pdbname = os.path.join(self.output_dir, (self.filename + "_temp_ramp_" + str(self.timestamp) + ".pdb" ))
+        simulation.reporters.append(app.PDBReporter(output_pdbname, self.reporter_freq))
+        
+        # DCD trajectory
+        output_dcdname = os.path.join(self.output_dir, (self.filename + "_temp_ramp_" + str(self.timestamp)))
+        dcdWriter = DcdWriter(output_dcdname, self.reporter_freq)
+        simulation.reporters.append(dcdWriter.dcdReporter)
+    
+        # Datawriter - This is a more complete data writer than previously used, the file generated is a comma delimited text file
+        output_dataname = os.path.join(self.output_dir, (self.filename + "_temp_ramp_" + str(self.timestamp)))
+        dataWriter = DataWriter(output_dataname, self.reporter_freq, total_steps)
+        simulation.reporters.append(dataWriter.stateDataReporter)
+        
+        incremental_temps = np.arange(start_temp, max_temp + quench_rate, quench_rate).tolist()
      
+        if heating is True:
+            pass # List will be low to high
+        if heating is False:
+            incremental_temps.reverse() # List now high to low for cooling
+         
+        steps_at_increment = int(total_steps/len(incremental_temps))
+
+        for i in range(len(incremental_temps)):
+            integrator.setTemperature(incremental_temps[i])
+            simulation.step(steps_at_increment)
+
+        thermal_ramp_end_time = time.time()
+        time_taken = thermal_ramp_start_time - thermal_ramp_end_time
+
+        self.log_info['Thermal Ramp']['Time taken'] = time_taken
+        self.log_info['Thermal Ramp']['Simulation time'] = total_steps*self.timestep
+        self.log_info['Thermal Ramp']['Start temp'] = start_temp
+        self.log_info['Thermal Ramp']['Target temp'] = max_temp
+        self.log_info['Thermal Ramp']['Quench Rate'] = quench_rate
+        self.log_info['Thermal Ramp']['Steps at incremental temps'] = steps_at_increment
+        self.log_info['Thermal Ramp']['Timestep'] = self.timestep
+        self.log_info['Thermal Ramp']['Ensemble'] = ensemble
+        self.log_info['Thermal Ramp']['Method'] = "heating" if heating==True else "cooling" 
+
+        return(simulation, (output_dataname + ".txt"))
+
+
+    
     @classmethod
     def production_run_help(cls):
         """Display help information for the production run method."""
