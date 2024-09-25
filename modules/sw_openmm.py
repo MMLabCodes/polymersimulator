@@ -1064,18 +1064,21 @@ class BuildSimulation():
         simulation.context.setPeriodicBoxVectors(vx, vy, vz)
         simulation.context.setPositions(xyz)
 
+        method = "heat" if heating==True else "cool"
+        output_filename = self.filename + "_temp_ramp_" + method + f"_{str(start_temp)}_{str(max_temp)}_" + str(self.timestamp)
+        
         # Set up reporters
         # PDB trajectory - this is slighlty redundant with the addition of the DCD trajectory, but it is still useful for 
-        output_pdbname = os.path.join(self.output_dir, (self.filename + "_temp_ramp_" + str(self.timestamp) + ".pdb" ))
+        output_pdbname = os.path.join(self.output_dir, (output_filename + ".pdb" ))
         simulation.reporters.append(app.PDBReporter(output_pdbname, self.reporter_freq))
         
         # DCD trajectory
-        output_dcdname = os.path.join(self.output_dir, (self.filename + "_temp_ramp_" + str(self.timestamp)))
+        output_dcdname = os.path.join(self.output_dir, output_filename)
         dcdWriter = DcdWriter(output_dcdname, self.reporter_freq)
         simulation.reporters.append(dcdWriter.dcdReporter)
     
         # Datawriter - This is a more complete data writer than previously used, the file generated is a comma delimited text file
-        output_dataname = os.path.join(self.output_dir, (self.filename + "_temp_ramp_" + str(self.timestamp)))
+        output_dataname = os.path.join(self.output_dir, output_filename)
         dataWriter = DataWriter(output_dataname, self.reporter_freq, total_steps)
         simulation.reporters.append(dataWriter.stateDataReporter)
         
