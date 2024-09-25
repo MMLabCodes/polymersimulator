@@ -1601,10 +1601,12 @@ class BuildAmberSystems(BuildSystems):
          translate {molecule_name_18} {translate_line_18}
          translate {molecule_name_19} {translate_line_19}
          translate {molecule_name_20} {translate_line_20}
-         
+
          system = combine {combine_line}
-         saveamberparm system {unsolved_prmtop_filepath} {unsolved_rst_filepath}
-         savepdb system {unsolved_two_ten_array_pdb_filepath}
+         unsolved_system = system
+         setBox unsolved_system vdw 0.0
+         saveamberparm unsolved_system {unsolved_prmtop_filepath} {unsolved_rst_filepath}
+         savepdb unsolved_system {unsolved_two_ten_array_pdb_filepath}
     
          solvatebox system TIP3PBOX {buffer}
 
