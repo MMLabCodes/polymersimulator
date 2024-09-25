@@ -943,7 +943,7 @@ class BuildAmberSystems(BuildSystems):
         # Thsis function builds arrays of polymers using the pre generated pdb files
          if molecule_name == None or base_molecule_name == None:
              # UPDATE THIS
-            print("Please provide 3 arguments as follows: build_3_3_polymer_array(base_molecule_nmae, molecule_name)")
+            print("Please provide 2 arguments as follows: build_3_3_polymer_array(base_molecule_nmae, molecule_name)")
             print("Base polymer name: A string of the polymer name, i.e. '3HB_trimer'")
             print("Polymer name: A string of the polymer name, i.e. '3HB_10_polymer'")
             
@@ -1058,8 +1058,10 @@ class BuildAmberSystems(BuildSystems):
          translate {molecule_name_9} {translate_line_9}
          
          system = combine {combine_line}
-         saveamberparm system {unsolved_prmtop_filepath} {unsolved_rst_filepath}
-         savepdb system {unsolved_three_three_array_pdb_filepath}
+         unsolved_system = system
+         setBox unsolved_system vdw 0.0
+         saveamberparm unsolved_system {unsolved_prmtop_filepath} {unsolved_rst_filepath}
+         savepdb unsolved_system {unsolved_three_three_array_pdb_filepath}
     
          solvatebox system TIP3PBOX {buffer}
 
