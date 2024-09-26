@@ -1023,7 +1023,7 @@ class BuildSimulation():
         # Heating is a boolean - true for heating, false for cooling
         # quench rate is an integer. i.e. 10 or 20 K (or smth else) and is the temperature steps the system is heated/cooled in
         # Ensemble is "NVT" or "NPT"
-        if ensemble is "NVT" or ensemble is "NPT":
+        if ensemble == "NVT" or ensemble == "NPT":
             pass
         else:
             print("Please specify 'NVT' or 'NPT' ensemble for the thermal ramp")
