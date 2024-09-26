@@ -574,7 +574,7 @@ class BuildAmberSystems(BuildSystems):
                 return() 
 
         # Retrieve the residue codes from the database
-        head_rescode, mainchain_rescode, tail_rescode = self.manager.retrieve_polymeric_rescodes("3HB_trimer")
+        head_rescode, mainchain_rescode, tail_rescode = self.manager.retrieve_polymeric_rescodes(molecule_name)
         print(head_rescode, mainchain_rescode, tail_rescode)
         if head_rescode == None or mainchain_rescode == None or tail_rescode == None:
             print("Residue codes for polymeric units not generated. Please generate them with 'build.GenRescode_4_PolyUnits('ethane')'")
