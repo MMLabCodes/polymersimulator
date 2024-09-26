@@ -1388,7 +1388,16 @@ class AmberSimulation(BuildSimulation):
         __str__():
             Returns a string representation of the AmberSimulation object.
     """
-    
+    def __new__(cls, *args, **kwargs):
+        # Check number of arguments provided
+        if len(args) != 3:
+            raise TypeError(
+                f"AmberSimulation expected 3 arguments, but {len(args)} were given. "
+                "Usage: 'sim = AmberSimulation(manager, topology_file, coordinates_file)'"
+            )
+        # Call __new__ to continue object creation if the argument count is correct
+        return super().__new__(cls)   
+        
     def __init__(self, manager, topology_file, coordinates_file): 
         self.manger = manager
         self.filename = os.path.basename(topology_file).split('.')[0]
