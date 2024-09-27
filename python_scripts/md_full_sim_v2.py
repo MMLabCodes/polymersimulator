@@ -67,7 +67,7 @@ print("System equilibrated")
 ## Now we cool the system slowly in NVT from 700K to 300K ##
 print("Cooling the system...")
 simulation.set_total_steps(10000000)
-cooled_sim, cooled_sim_data = simulation.thermal_ramp(eq_sim, false, 20, "NPT", 300, 700)
+cooled_sim, cooled_sim_data = simulation.thermal_ramp(eq_sim, False, 20, "NPT", 300, 700)
 simulation.graph_state_data(cooled_sim_data)
 print("Temperature cooled to 300K")
 
