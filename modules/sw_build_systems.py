@@ -1066,7 +1066,7 @@ class BuildAmberSystems(BuildSystems):
         base_mol_name = molecule_name.split("_")[0]
         intleap_path = base_mol_name + file_subtype + ".intleap"
 
-        system_name = molecule_name + file_subtype + f"_{buffer}"
+        system_name = molecule_name + file_subtype
         prmtop_filepath =  os.path.join(output_dir, system_name + ".prmtop")
         rst_filepath = os.path.join(output_dir, system_name + ".rst7")
      
@@ -1261,7 +1261,7 @@ class BuildAmberSystems(BuildSystems):
             self.build_3_3_polymer_array_crystal(base_molecule_name, molecule_name)
         if method == "random":
             system = self.generate_3_3_polymer_array_pckml(base_molecule_name, molecule_name)
-            gen_amber_params_4_pckml_array(system, base_molecule_name, molecule_name)
+            self.gen_amber_params_4_pckml_array(system, base_molecule_name, molecule_name)
         if method != "crystal" or method != "random":
             print("NO")
             return(None)
