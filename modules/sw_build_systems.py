@@ -955,7 +955,7 @@ class BuildAmberSystems(BuildSystems):
         unsolved_array_pdb_name = "unsolved_" + molecule_name + file_subtype + ".pdb"
         unsolved_array_pdb = os.path.join(output_dir, unsolved_array_pdb_name)
         x,y,z = self.get_xyz_dists(pdb_file)
-        box_edge_len = (max(x,y,z))*2
+        box_edge_len = int((max(x,y,z))*2)
         box_sizes = box_edge_len, box_edge_len, box_edge_len
         file_content=f"""tolerance 2.0
             output {unsolved_array_pdb}
