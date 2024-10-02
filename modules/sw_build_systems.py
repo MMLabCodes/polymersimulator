@@ -1033,7 +1033,7 @@ class BuildAmberSystems(BuildSystems):
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
-        x, y, z = get_xyz_dists(base_pdb_file)
+        x, y, z = self.get_xyz_dists(base_pdb_file)
 
         translate_distance = int((max(x, y))/2) # Removed z as they should not overlap in this distance
         z_trans = (z/2)+2
