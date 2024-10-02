@@ -1002,7 +1002,7 @@ class BuildAmberSystems(BuildSystems):
             file.writelines(modified_lines)
         return(None)
 
-    def build_3_3_polymer_array_crystal(self, base_molecule_name=None, molecule_name=None):
+    def generate_3_3_polymer_array_crystal(self, base_molecule_name=None, molecule_name=None):
         # Thsis function builds arrays of polymers using the pre generated pdb files
         if molecule_name == None or base_molecule_name == None:
          # UPDATE THIS
@@ -1135,7 +1135,7 @@ class BuildAmberSystems(BuildSystems):
         result = subprocess.run(cd_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         return(system_name)
     
-    def generate_3_3_polymer_array_pckml(self, base_molecule_name, molecule_name):
+    def generate_3_3_polymer_array_random(self, base_molecule_name, molecule_name):
         """
         Generates a 3x3 array of polymers using Packmol and adds 'TER' records after each polymer chain.
 
@@ -1256,12 +1256,12 @@ class BuildAmberSystems(BuildSystems):
 
         return(system_name)
         
-    def gen_polymer_3_3_array(self, base_molecule_name, molecule_name, method):
+    def generate_polymer_3_3_array(self, base_molecule_name, molecule_name, method):
         if method == "crystal":
-            self.build_3_3_polymer_array_crystal(base_molecule_name, molecule_name)
+            self.generate_3_3_polymer_array_crystal(base_molecule_name, molecule_name)
         if method == "random":
-            system = self.generate_3_3_polymer_array_pckml(base_molecule_name, molecule_name)
-            self.gen_amber_params_4_pckml_array(system, base_molecule_name, molecule_name)
+            system = self.generate_3_3_polymer_array_random(base_molecule_name, molecule_name)
+            self.gen_amber_params_4_pckml_array(system, base_molecule_name)
   
         
     
