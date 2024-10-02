@@ -403,6 +403,38 @@ class BuildSystems():
             print(cls.get_xyz_dists.__doc__)
             print("This method calculates the maximum distance between the largest and smallest xyz coordinates")
             print("from a PDB or XYZ file.")
+           
+        @staticmethod
+        def align_molecule(input_pdb):
+            # Packages used only in this method are imported here
+            import MDAnalysis as mda
+            import numpy as np
+            from scipy.spatial.transform import Rotation as R
+            
+            u = mda.Universe(input_pdb)
+            
+            # Select the atom group for alignment (you can specify your selection if needed)
+            ag = u.atoms
+
+            # Compute the principal axes using the mass-weighted inertia tensor
+            principal_axes = ag.principal_axes()
+
+            # Define the target axis, which is along the z-axis ([0, 0, 1])
+            z_axis = np.array([0, 0, 1])
+
+            # Get the principal axis that we want to align with the z-axis (typically the first one, corresponding to the largest eigenvalue)
+            principal_axis_to_align = principal_axes[0]
+
+            # Compute the rotation needed to align the principal axis with the z-axis
+            rotation, _ = R.align_vectors([principal_axis_to_align], [z_axis])
+
+            # Apply the rotation to the entire molecule
+            ag.positions = rotation.apply(ag.positions)
+
+            # Save the aligned molecule to a new PDB file
+            u.atoms.write(input_pdb)
+            
+            
 
 class BuildAmberSystems(BuildSystems):
     
@@ -468,14 +500,10 @@ class BuildAmberSystems(BuildSystems):
         pdb_filepath = os.path.join(param_mol_dir, (molecule_name + ".pdb"))
         mol2_filepath = os.path.join(param_mol_dir, (molecule_name + ".mol2"))
         antechamber_command = "antechamber -i " + pdb_filepath + " -fi pdb -o " + mol2_filepath + " -fo mol2 -c bcc -s 2"       
-        #print("The antechamber command that will run is:")
-        #print(antechamber_command)
         subprocess.run(antechamber_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     
         frcmod_filepath = os.path.join(param_mol_dir, (molecule_name + ".frcmod"))
-        parmchk_command = "parmchk2 -i " + mol2_filepath + " -f mol2 -o " + frcmod_filepath
-        #print("The parmchk command that will run is:")
-        #print(parmchk_command)      
+        parmchk_command = "parmchk2 -i " + mol2_filepath + " -f mol2 -o " + frcmod_filepath      
         subprocess.run(parmchk_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         
         lib_filepath = os.path.join(param_mol_dir, (molecule_name + ".lib"))
@@ -491,8 +519,6 @@ class BuildAmberSystems(BuildSystems):
         with open(intleap_filepath, 'w') as file:
             file.write(file_content)
         leap_command = "tleap -f " + intleap_filepath
-        #print("The leap command that will run is:")
-        #print(leap_command)
         subprocess.run(leap_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         self.gen_prepin_file_sing_mol(molecule_name)
 
@@ -524,7 +550,6 @@ class BuildAmberSystems(BuildSystems):
             return()  
     
         # Define file names required for prepgen
-        # Could have an additional function that generates these files
         head_file = "head_" + molecule_name + ".txt"
         head_prepin_file = os.path.join(molecule_dir, "head_" + molecule_name + ".prepi")
         mainchain_file = "mainchain_" + molecule_name + ".txt"
@@ -908,14 +933,19 @@ class BuildAmberSystems(BuildSystems):
         result = subprocess.run(cd_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         return(filename)
     
+    
+    
+    
+    
+    
+    
+    
     def build_3_3_polymer_array(self, base_molecule_name=None, molecule_name=None, buffer=None):
         # Thsis function builds arrays of polymers using the pre generated pdb files
          if molecule_name == None or base_molecule_name == None:
-             # UPDATE THIS
             print("Please provide 2 arguments as follows: build_3_3_polymer_array(base_molecule_nmae, molecule_name)")
             print("Base polymer name: A string of the polymer name, i.e. '3HB_trimer'")
-            print("Polymer name: A string of the polymer name, i.e. '3HB_10_polymer'")
-            
+            print("Polymer name: A string of the polymer name, i.e. '3HB_10_polymer'")         
             return(None)        
 
          if buffer == None:
@@ -946,9 +976,6 @@ class BuildAmberSystems(BuildSystems):
              os.makedirs(output_dir)
 
          x, y, z = self.get_xyz_dists(pdb_file)
-
-         # translate_distance = int(max(x, y, z)) + 1
-         #translate_distance = int(max(x, y)) + 1 # Removed z as they should not overlap in this distance
          translate_distance = int((max(x, y))/2) # Removed z as they should not overlap in this distance
 
          molecule_name_1 = molecule_name + "_1"
@@ -963,9 +990,7 @@ class BuildAmberSystems(BuildSystems):
 
          translate_line_1 = "{0.0 0.0 0.0}"
          translate_line_2 = "{" + str(translate_distance) + " 0.0 0.0}"
-         #translate_line_2 = "{0.0 0.0 " + str(translate_distance) + "}"
          translate_line_3 = "{" + str(-translate_distance) + " 0.0 0.0}"
-         #translate_line_3 = "{0.0 0.0 " + str(-translate_distance) + "}"
 
          translate_line_4 = "{" + str(translate_distance) + " " + str(translate_distance) + " 0.0}"
          translate_line_5 = "{" + str(-translate_distance) + " " + str(translate_distance) + " 0.0}"
@@ -1043,8 +1068,6 @@ class BuildAmberSystems(BuildSystems):
              file.write(file_content)
             
          leap_command = "tleap -f " + intleap_path
-         #print("The command that would be run in the shell is: ")
-         #print(leap_command)
          print(intleap_path)
          try:
              result = subprocess.run(leap_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
