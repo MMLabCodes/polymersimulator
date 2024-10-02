@@ -955,7 +955,8 @@ class BuildAmberSystems(BuildSystems):
         unsolved_array_pdb_name = "unsolved_" + molecule_name + file_subtype + ".pdb"
         unsolved_array_pdb = os.path.join(output_dir, unsolved_array_pdb_name)
         x,y,z = self.get_xyz_dists(pdb_file)
-        box_sizes = int((x*2)), int((y*2)), int((z*2))
+        box_edge_len = (max(x,y,z))*2
+        box_sizes = box_edge_len, box_edge_len, box_edge_len
         file_content=f"""tolerance 2.0
             output {unsolved_array_pdb}
             filetype pdb
@@ -982,116 +983,6 @@ class BuildAmberSystems(BuildSystems):
             print("Exception:", e)
         
         self.add_ter_to_pckml_result(dirs, unsolved_array_pdb, base_molecule_name)
-        return(None)
-
-    def solvate_pckml_3_3_array(self, dirs, molecule_name, base_molecule_name):
-        """
-        Solvates a 3x3 polymer array using tleap and generates the necessary parameter and coordinate files.
-
-        This function prepares a solvated 3x3 array of polymer molecules by executing a series of steps:
-        1. Calculates the dimensions of the polymer array.
-        2. Changes the working directory to the base molecule directory.
-        3. Constructs paths for required files and directories.
-        4. Generates the tleap input script to load the polymer array, solvate it, and save the parameter and coordinate files.
-        5. Executes tleap with the generated input script.
-        6. Changes the working directory back to the main directory.
-
-        Parameters:
-        dirs (object): An object that provides methods for directory and file management.
-        molecule_name (str): The name of the molecule to be used for creating the polymer array.
-        base_molecule_name (str): The base name of the molecule used to identify the polymeric residue codes and file paths.
-
-        Returns:
-        None
-
-        The function performs the following steps:
-        1. Loads the PDB file path and calculates the dimensions of the polymer array.
-        2. Changes the working directory to the base molecule directory and handles any exceptions that may occur.
-        3. Defines the file paths for the head, mainchain, and tail prepi files.
-        4. Creates the output directory if it does not exist.
-        5. Constructs the file paths for the unsolved and solved PDB files, as well as the parameter and restart files.
-        6. Generates the content for the tleap input file, specifying the solvation box size.
-        7. Writes the tleap input file to the output directory.
-        8. Executes the tleap command and handles the output or any errors.
-        9. Changes the working directory back to the main directory.
-
-        Example usage:
-            solvate_pckml_3_3_array(dirs, 'polymer_molecule', 'base_polymer')
-        """
-        pdb_file = dirs.load_pdb_filepath(molecule_name)
-        x,y,z = self.get_xyz_dists(pdb_file)
-        base_molecule_dir = os.path.join(dirs.molecules_dir, base_molecule_name)
-        cd_command = "cd " + base_molecule_dir
-    
-        try:
-            os.chdir(base_molecule_dir)
-            print("Current directory:", os.getcwd())
-        except Exception as e:
-            print("Exception:", e)
-
-        head_prepi_filepath = "head_" + base_molecule_name + ".prepi"
-        mainchain_prepi_filepath = "mainchain_" + base_molecule_name + ".prepi"
-        tail_prepi_filepath = "tail_" + base_molecule_name + ".prepi"
-
-        file_subtype = "_3_3_array"
-        output_dir = os.path.join(dirs.systems_dir, (molecule_name + file_subtype))
-
-        box_sizes = int((x)), int((y)), int((z))
-        box_vol = box_sizes[0]*box_sizes[1]*box_sizes[2]
-
-        unsolved_pdb_name = "unsolved_" + molecule_name + file_subtype + ".pdb"
-        unsolved_pdb_filepath = os.path.join(dirs.systems_dir, (molecule_name + file_subtype), unsolved_pdb_name)
-
-        solved_pdb_name = "solved_" + molecule_name + file_subtype + ".pdb"
-        solved_pdb_filepath = os.path.join(dirs.systems_dir, (molecule_name + file_subtype), solved_pdb_name)
-
-        prmtop_filepath =  os.path.join(output_dir, molecule_name + file_subtype + "_" + str(box_vol) + ".prmtop")
-        rst_filepath = os.path.join(output_dir, molecule_name + file_subtype + "_" + str(box_vol) + ".rst7")
-
-        intleap_filepath =  molecule_name + file_subtype + "_" + str(box_vol) + ".intleap"
-
-        box_dist_line = "{" + str(box_sizes[0]) + " " + str(box_sizes[1]) + " " + str(box_sizes[2]) + "}"
-
-        file_content = f"""source leaprc.gaff
-            source leaprc.water.fb3
-            source leaprc.protein.ff14SB
-
-            loadamberprep {head_prepi_filepath}
-            loadamberprep {mainchain_prepi_filepath}
-            loadamberprep {tail_prepi_filepath}
-
-            list
-
-            array = loadpdb {unsolved_pdb_filepath}
-
-            check array
-
-            solvatebox array TIP3PBOX {box_dist_line}
-
-            saveamberparm array {prmtop_filepath} {rst_filepath}
-            savepdb array {solved_pdb_filepath}
-            quit
-            """
-
-        with open(intleap_filepath, 'w') as file:
-            file.write(file_content)
-
-        leap_command = "tleap -f " + intleap_filepath
-        print(leap_command)
-        try:
-            result = subprocess.run(leap_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-            if result.returncode == 0:
-                 # Command executed successfully
-                print("Output:", result.stdout)
-            else:
-                 # Command failed, print error message
-                print("Error:", result.stderr)
-        except Exception as e:
-             # Exception occurred during subprocess execution
-            print("Exception:", e)
-
-        cd_command = "cd " + str(dirs.main_dir)
-        result = subprocess.run(cd_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         return(None)
 
     def solvate_molecule(self, molecule_name, buffer=None):
