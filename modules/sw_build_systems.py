@@ -1029,7 +1029,8 @@ class BuildAmberSystems(BuildSystems):
         tail_prepi_filepath = "tail_" + base_molecule_name + ".prepi"
 
         file_subtype = "_3_3_array_crystal"
-        output_dir = os.path.join(self.manager.systems_dir, (molecule_name + file_subtype))
+        system_name = molecule_name + file_subtype
+        output_dir = os.path.join(self.manager.systems_dir, system_name)
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
@@ -1064,9 +1065,8 @@ class BuildAmberSystems(BuildSystems):
         combine_line = "{" + molecule_name_1 + " " + molecule_name_2 + " " + molecule_name_3 + " " + molecule_name_4 + " " + molecule_name_5 + " " + molecule_name_6 + " " + molecule_name_7 + " " + molecule_name_8 + " " + molecule_name_9 + "}"
 
         base_mol_name = molecule_name.split("_")[0]
-        intleap_path = base_mol_name + file_subtype + ".intleap"
+        intleap_path = system_name + ".intleap"
 
-        system_name = molecule_name + file_subtype
         prmtop_filepath =  os.path.join(output_dir, system_name + ".prmtop")
         rst_filepath = os.path.join(output_dir, system_name + ".rst7")
      
@@ -1107,7 +1107,7 @@ class BuildAmberSystems(BuildSystems):
         translate {molecule_name_9} {translate_line_9}
          
         system = combine {combine_line}
-        setBox ystem vdw 0.0
+        setBox system vdw 0.0
         saveamberparm system {prmtop_filepath} {rst_filepath}
         savepdb system {three_three_array_pdb_filepath}
     
@@ -1262,9 +1262,7 @@ class BuildAmberSystems(BuildSystems):
         if method == "random":
             system = self.generate_3_3_polymer_array_pckml(base_molecule_name, molecule_name)
             self.gen_amber_params_4_pckml_array(system, base_molecule_name, molecule_name)
-        if method != "crystal" or method != "random":
-            print("NO")
-            return(None)
+  
         
     
         
