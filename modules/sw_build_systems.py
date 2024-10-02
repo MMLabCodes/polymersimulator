@@ -397,42 +397,42 @@ class BuildSystems():
 
         return(dist_x, dist_y, dist_z)
 
-        @classmethod
-        def get_xyz_dists_help(cls):
-            """Display help information for the get_xyz_dists method."""
-            print(cls.get_xyz_dists.__doc__)
-            print("This method calculates the maximum distance between the largest and smallest xyz coordinates")
-            print("from a PDB or XYZ file.")
+    @classmethod
+    def get_xyz_dists_help(cls):
+        """Display help information for the get_xyz_dists method."""
+        print(cls.get_xyz_dists.__doc__)
+        print("This method calculates the maximum distance between the largest and smallest xyz coordinates")
+        print("from a PDB or XYZ file.")
            
-        @staticmethod
-        def align_molecule(input_pdb):
-            # Packages used only in this method are imported here
-            import MDAnalysis as mda
-            import numpy as np
-            from scipy.spatial.transform import Rotation as R
+    @staticmethod
+    def align_molecule(input_pdb):
+        # Packages used only in this method are imported here
+        import MDAnalysis as mda
+        import numpy as np
+        from scipy.spatial.transform import Rotation as R
             
-            u = mda.Universe(input_pdb)
+        u = mda.Universe(input_pdb)
             
-            # Select the atom group for alignment (you can specify your selection if needed)
-            ag = u.atoms
+        # Select the atom group for alignment (you can specify your selection if needed)
+        ag = u.atoms
 
-            # Compute the principal axes using the mass-weighted inertia tensor
-            principal_axes = ag.principal_axes()
+        # Compute the principal axes using the mass-weighted inertia tensor
+        principal_axes = ag.principal_axes()
 
-            # Define the target axis, which is along the z-axis ([0, 0, 1])
-            z_axis = np.array([0, 0, 1])
+        # Define the target axis, which is along the z-axis ([0, 0, 1])
+        z_axis = np.array([0, 0, 1])
 
-            # Get the principal axis that we want to align with the z-axis (typically the first one, corresponding to the largest eigenvalue)
-            principal_axis_to_align = principal_axes[0]
+        # Get the principal axis that we want to align with the z-axis (typically the first one, corresponding to the largest eigenvalue)
+        principal_axis_to_align = principal_axes[0]
 
-            # Compute the rotation needed to align the principal axis with the z-axis
-            rotation, _ = R.align_vectors([principal_axis_to_align], [z_axis])
+        # Compute the rotation needed to align the principal axis with the z-axis
+        rotation, _ = R.align_vectors([principal_axis_to_align], [z_axis])
 
-            # Apply the rotation to the entire molecule
-            ag.positions = rotation.apply(ag.positions)
+        # Apply the rotation to the entire molecule
+        ag.positions = rotation.apply(ag.positions)
 
-            # Save the aligned molecule to a new PDB file
-            u.atoms.write(input_pdb)
+        # Save the aligned molecule to a new PDB file
+        u.atoms.write(input_pdb)
             
             
 
