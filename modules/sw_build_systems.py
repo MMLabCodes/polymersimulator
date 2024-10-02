@@ -280,39 +280,8 @@ class BuildSystems():
                     return entry
         return None
 
-    def max_pairwise_distance(self, mol):
-        """
-        Calculates the maximum pairwise distance between atoms in a molecule.
 
-        Parameters:
-            - mol (rdkit.Chem.Mol): RDKit molecule object.
-
-        Returns:
-            - float: Maximum pairwise distance between 2 atoms in the molecule.
-
-        Notes:
-            This function will no longer be updated.
-        """
-        warnings.warn(
-            "The max_pairwise_distance method is deprecated and will be removed in a future version. "
-            "Please use the get_xyz_dists method instead.",
-            DeprecationWarning
-        )
-        conformer = mol.GetConformer()
-        num_atoms = mol.GetNumAtoms()
-        # Extract atom coordinates
-        atom_positions = np.zeros((num_atoms, 3))
-        for i in range(num_atoms):
-            pos = conformer.GetAtomPosition(i)
-            atom_positions[i] = (pos.x, pos.y, pos.z)
-        # Calculate pairwise distances
-        distances = np.linalg.norm(atom_positions[:, np.newaxis, :] - atom_positions, axis=2)
-        # Exclude self-distances and get the maximum distance
-        np.fill_diagonal(distances, 0)
-        max_distance = np.max(distances)
-        return max_distance
-
-    def run_packmol(self, directories, input_file_name):
+    def run_packmol(self, input_file_name):
         """
         Run Packmol with the specified input file and directories.
 
@@ -340,14 +309,14 @@ class BuildSystems():
             print("")
             print("Call packmol_help() for more information")
             return()
-        packmol_filepath = directories.load_pckml_filepath(input_file_name)
+        packmol_filepath = self.manager.load_pckml_filepath(input_file_name)
         if os.path.exists(packmol_filepath):
             print(f"Packmol input file exists at '{packmol_filepath}'.")
         else:
             print("Packmol input file not found.")
             print("")
             return()
-        system_dir = os.path.join(directories.systems_dir, input_file_name)
+        system_dir = os.path.join(self.manager.systems_dir, input_file_name)
         packmol_command = self.packmol_path + " < " + packmol_filepath
         result = subprocess.run(packmol_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         return()
@@ -1429,7 +1398,7 @@ class BuildAmberSystems(BuildSystems):
     def build_2_10_polymer_array(self, base_molecule_name=None, molecule_name=None, buffer=None):
          # Thsis function builds arrays of polymers using the pre generated pdb files
          if molecule_name == None or base_molecule_name == None:
-            print("Please provide 3 arguments as follows: build_2_10_polymer_array(base_molecule_nmae, molecule_name)")
+            print("Please provide 2 arguments as follows: build_2_10_polymer_array(base_molecule_name, molecule_name, finite_polymer)")
             print("Base polymer name: A string of the polymer name, i.e. '3HB_trimer'")
             print("Polymer name: A string of the polymer name, i.e. '3HB_10_polymer'")
             
@@ -1458,7 +1427,7 @@ class BuildAmberSystems(BuildSystems):
          mainchain_prepi_filepath = "mainchain_" + base_molecule_name + ".prepi"
          tail_prepi_filepath = "tail_" + base_molecule_name + ".prepi"
 
-         file_subtype = "_2_10_array"
+         file_subtype = "_2_10_array" 
          output_dir = os.path.join(self.manager.systems_dir, (molecule_name + file_subtype))
          if not os.path.exists(output_dir):
              os.makedirs(output_dir)
@@ -1637,6 +1606,212 @@ class BuildAmberSystems(BuildSystems):
          cd_command = "cd " + str(self.manager.main_dir)
          result = subprocess.run(cd_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
          return(system_name, unsolved_system_name)
+
+    def build_2_10_polymer_array_infinite(self, base_molecule_name=None, molecule_name=None, number_of_units=None, buffer=None):
+        # Thsis function builds arrays of polymers using the pre generated pdb files
+        if number_of_units == None or base_molecule_name == None or molecule_name == None:
+            print("Please provide 3 arguments as follows: build_2_10_polymer_array(base_molecule_name, polymer_name, number_of_units)")
+            print("Base polymer name: A string of the polymer name, i.e. '3HB_trimer'")
+            print("Polymer name: A string of the polymer name, i.e. '3HB_10_polymer'")
+            
+            return(None)        
+
+        if buffer == None:
+            buffer = None
+        else:
+            buffer = str(buffer)
+        
+         
+        pdb_file = self.manager.load_pdb_filepath(molecule_name)
+         
+        molecule_dir = os.path.join(self.manager.molecules_dir, base_molecule_name)
+        cd_command = "cd " + molecule_dir
+        print(cd_command)
+
+        try:
+            os.chdir(molecule_dir)
+            print("Current directory:", os.getcwd())
+        except Exception as e:
+            print("Exception:", e)
+             
+        mainchain_prepi_filepath = "mainchain_" + base_molecule_name + ".prepi"
+
+        file_subtype = "_2_10_array_infinite" 
+        output_dir = os.path.join(self.manager.systems_dir, (molecule_name + file_subtype))
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
+        x, y, z = self.get_xyz_dists(pdb_file)
+
+        #translate_distance = int(max(x, y)) + 1 # Removed z as they should not overlap in this distance
+        translate_distance = int((max(x, y))/2) # Removed z as they should not overlap in this distance
+
+        molecule_name_1 = molecule_name + "_1"
+        molecule_name_2 = molecule_name + "_2"
+        molecule_name_3 = molecule_name + "_3"
+        molecule_name_4 = molecule_name + "_4"
+        molecule_name_5 = molecule_name + "_5"
+        molecule_name_6 = molecule_name + "_6"
+        molecule_name_7 = molecule_name + "_7"
+        molecule_name_8 = molecule_name + "_8"
+        molecule_name_9 = molecule_name + "_9"
+        molecule_name_10 = molecule_name + "_10"
+        molecule_name_11 = molecule_name + "_11"
+        molecule_name_12 = molecule_name + "_12"
+        molecule_name_13 = molecule_name + "_13"
+        molecule_name_14 = molecule_name + "_14"
+        molecule_name_15 = molecule_name + "_15"
+        molecule_name_16 = molecule_name + "_16"
+        molecule_name_17 = molecule_name + "_17"
+        molecule_name_18 = molecule_name + "_18"
+        molecule_name_19 = molecule_name + "_19"
+        molecule_name_20 = molecule_name + "_20"
+         
+        # central 2 polymers on the top line (1,2)
+        translate_line_1 = "{0.0 " + str(translate_distance/2) + " 0.0}"
+        translate_line_2 = "{0.0 " + str(-translate_distance/2) + " 0.0}"
+
+        # central 2 polymers on the bottom line (3,4)
+        translate_line_3 = "{0.0 " + str(translate_distance/2) + " " + str(translate_distance) + "}"
+        translate_line_4 = "{0.0 " + str(-translate_distance/2) + " " + str(translate_distance) + "}"
+
+        # Polymers either side of central 2 polymers on the top line (5,6)
+        translate_line_5 = "{0.0 " + str(translate_distance*1.5) + " 0.0}"
+        translate_line_6 = "{0.0 " + str(-translate_distance*1.5) + " 0.0}"
+
+        # Polymers either side of central 2 polymers on the bottom line (7,8)
+        translate_line_7 = "{0.0 " + str(translate_distance*1.5) + " " + str(translate_distance) + "}"
+        translate_line_8 = "{0.0 " + str(-translate_distance*1.5) + " " + str(translate_distance) + "}"
+
+        # Polymers (9,10)
+        translate_line_9 = "{0.0 " + str(translate_distance*2.5) + " 0.0}"
+        translate_line_10 = "{0.0 " + str(-translate_distance*2.5) + " 0.0}"
+
+        # Polymers (11,12)
+        translate_line_11 = "{0.0 " + str(translate_distance*2.5) + " " + str(translate_distance) + "}"
+        translate_line_12 = "{0.0 " + str(-translate_distance*2.5) + " " + str(translate_distance) + "}"
+
+        # Polymers (13,14)
+        translate_line_13 = "{0.0 " + str(translate_distance*3.5) + " 0.0}"
+        translate_line_14 = "{0.0 " + str(-translate_distance*3.5) + " 0.0}"
+
+        # Polymers (15,16)
+        translate_line_15 = "{0.0 " + str(translate_distance*3.5) + " " + str(translate_distance) + "}"
+        translate_line_16 = "{0.0 " + str(-translate_distance*3.5) + " " + str(translate_distance) + "}"
+
+        # Polymers (17,18)
+        translate_line_17 = "{0.0 " + str(translate_distance*4.5) + " 0.0}"
+        translate_line_18 = "{0.0 " + str(-translate_distance*4.5) + " 0.0}"
+
+        # Polymers (19,20)
+        translate_line_19 = "{0.0 " + str(translate_distance*4.5) + " " + str(translate_distance) + "}"
+        translate_line_20 = "{0.0 " + str(-translate_distance*4.5) + " " + str(translate_distance) + "}"
+
+        combine_line = "{" + molecule_name_1 + " " + molecule_name_2 + " " + molecule_name_3 + " " + molecule_name_4 + " " + molecule_name_5 + " " + molecule_name_6 + " " + molecule_name_7 + " " + molecule_name_8 + " " + molecule_name_9 + " " + molecule_name_10 + " " + molecule_name_11 + " " + molecule_name_12 + " " + molecule_name_13 + " " + molecule_name_14 + " " + molecule_name_15 + " " + molecule_name_16 + " " + molecule_name_17 + " " + molecule_name_18 + " " + molecule_name_19 + " " + molecule_name_20 + "}"
+
+        base_mol_name = molecule_name.split("_")[0]
+        intleap_path = base_mol_name + file_subtype + ".intleap"
+
+        system_name = molecule_name + file_subtype
+        unsolved_system_name = "unsolved_" + molecule_name + file_subtype
+        
+        prmtop_filepath =  os.path.join(output_dir, system_name + ".prmtop")
+        rst_filepath = os.path.join(output_dir, system_name + ".rst7")
+
+        unsolved_prmtop_filepath =  os.path.join(output_dir, "unsolved_" + molecule_name + file_subtype + ".prmtop")
+        unsolved_rst_filepath = os.path.join(output_dir, "unsolved_" + molecule_name + file_subtype + ".rst7")
+        
+        two_ten_array_pdb_filepath = os.path.join(output_dir, system_name + ".pdb")
+        unsolved_two_ten_array_pdb_filepath = os.path.join(output_dir, "unsolved_" + molecule_name + file_subtype + ".pdb")
+    
+        mainchain_rescode = self.manager.retrieve_polymeric_rescodes(base_molecule_name)[1]
+
+        poly_string = " ".join([mainchain_rescode] * number_of_units)
+        poly_string = f"{{{poly_string}}}"
+
+        file_content = f"""source leaprc.gaff
+        source leaprc.water.fb3
+        source leaprc.protein.ff14SB
+
+        loadamberprep {mainchain_prepi_filepath}
+
+        list
+            
+        {molecule_name_1} = sequence {poly_string}
+        {molecule_name_2} = sequence {poly_string}
+        {molecule_name_3} = sequence {poly_string}
+        {molecule_name_4} = sequence {poly_string}
+        {molecule_name_5} = sequence {poly_string}
+        {molecule_name_6} = sequence {poly_string}
+        {molecule_name_7} = sequence {poly_string}
+        {molecule_name_8} = sequence {poly_string}
+        {molecule_name_9} = sequence {poly_string}
+        {molecule_name_10} = sequence {poly_string}
+        {molecule_name_11} = sequence {poly_string}
+        {molecule_name_12} = sequence {poly_string}
+        {molecule_name_13} = sequence {poly_string}
+        {molecule_name_14} = sequence {poly_string}
+        {molecule_name_15} = sequence {poly_string}
+        {molecule_name_16} = sequence {poly_string}
+        {molecule_name_17} = sequence {poly_string}
+        {molecule_name_18} = sequence {poly_string}
+        {molecule_name_19} = sequence {poly_string}
+        {molecule_name_20} = sequence {poly_string}
+         
+        check {molecule_name_1}
+         
+        translate {molecule_name_1} {translate_line_1}
+        translate {molecule_name_2} {translate_line_2}
+        translate {molecule_name_3} {translate_line_3}
+        translate {molecule_name_4} {translate_line_4}
+        translate {molecule_name_5} {translate_line_5}
+        translate {molecule_name_6} {translate_line_6}
+        translate {molecule_name_7} {translate_line_7}
+        translate {molecule_name_8} {translate_line_8}
+        translate {molecule_name_9} {translate_line_9}
+        translate {molecule_name_10} {translate_line_10}
+        translate {molecule_name_11} {translate_line_11}
+        translate {molecule_name_12} {translate_line_12}
+        translate {molecule_name_13} {translate_line_13}
+        translate {molecule_name_14} {translate_line_14}
+        translate {molecule_name_15} {translate_line_15}
+        translate {molecule_name_16} {translate_line_16}
+        translate {molecule_name_17} {translate_line_17}
+        translate {molecule_name_18} {translate_line_18}
+        translate {molecule_name_19} {translate_line_19}
+        translate {molecule_name_20} {translate_line_20}
+
+        system = combine {combine_line}
+        unsolved_system = system
+        setBox unsolved_system vdw 0.0
+        saveamberparm unsolved_system {unsolved_prmtop_filepath} {unsolved_rst_filepath}
+        savepdb unsolved_system {unsolved_two_ten_array_pdb_filepath}
+
+        quit
+        """
+    
+        with open(intleap_path, 'w') as file:
+            file.write(file_content)
+            
+        leap_command = "tleap -f " + intleap_path
+        #print("The command that would be run in the shell is: ")
+        #print(leap_command)
+        print(intleap_path)
+        try:
+            result = subprocess.run(leap_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            if result.returncode == 0:
+                # Command executed successfully
+                print("Output:", result.stdout)
+            else:
+                # Command failed, print error message
+                print("Error:", result.stderr)
+        except Exception as e:
+            # Exception occurred during subprocess execution
+            print("Exception:", e)
+
+        cd_command = "cd " + str(self.manager.main_dir)
+        result = subprocess.run(cd_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        return(system_name, unsolved_system_name)
 
 #class BuildBioOilSystems(BuildSystems):
 #    def __init__:
