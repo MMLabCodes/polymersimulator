@@ -51,7 +51,7 @@ print("")
 print("Ramping the temperature from 0K to 700K in NVT ensemble...")
 simulation.set_timestep(2.0) # We want the system to evolve quickly here
 simulation.set_total_steps(2000000) # 4 ns 
-heated_sim, heated_sim_data = simulation.thermal_ramp(min_sim, True, 50, "NVT", 0, 700)
+heated_sim, heated_sim_data = simulation.thermal_ramp(min_sim, True, 50, "NVT", 300, 700)
 simulation.graph_state_data(heated_sim_data)
 print("Temperature ramped to 700k")
 
