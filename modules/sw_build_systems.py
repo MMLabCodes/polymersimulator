@@ -433,6 +433,8 @@ class BuildSystems():
 
         # Save the aligned molecule to a new PDB file
         u.atoms.write(input_pdb)
+
+        return(input_pdb)
             
             
 
@@ -1263,10 +1265,6 @@ class BuildAmberSystems(BuildSystems):
             system = self.generate_3_3_polymer_array_random(base_molecule_name, molecule_name)
             self.gen_amber_params_4_pckml_array(system, base_molecule_name)
   
-        
-    
-        
-
     def build_2_10_polymer_array(self, base_molecule_name=None, molecule_name=None, buffer=None):
          # Thsis function builds arrays of polymers using the pre generated pdb files
          if molecule_name == None or base_molecule_name == None:
