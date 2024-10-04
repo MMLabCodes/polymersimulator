@@ -643,6 +643,7 @@ class BuildSimulation():
         
         simulation.minimizeEnergy()
 
+
         state = simulation.context.getState(getPositions=True, getEnergy=True) 
         
         self.min_pdbname = os.path.join(self.output_dir, ("min_" + self.filename + ".pdb"))
@@ -726,11 +727,11 @@ class BuildSimulation():
         integrator = LangevinIntegrator(start_temp*kelvin, self.friction_coeff/picoseconds, self.timestep*femtoseconds)
         
         if BuildSimulation.type_of_simulation(self) == "AMB":
-            system = self.amb_topology.createSystem(nonbondedMethod=app.PME, nonbondedCutoff=self.nonbondedcutoff1.0*nanometers, constraints=app.HBonds)
+            system = self.amb_topology.createSystem(nonbondedMethod=app.PME, nonbondedCutoff=self.nonbondedcutoff*nanometers, constraints=app.HBonds)
             simulation = app.Simulation(self.amb_topology.topology, system, integrator)
         
         if BuildSimulation.type_of_simulation(self) == "ANI":
-            system = self.potential.createSystem(self.ani_topology, nonbondedMethod=app.PME, nonbondedCutoff=self.nonbondedcutoff1.0*nanometers, constraints=app.HBonds)
+            system = self.potential.createSystem(self.ani_topology, nonbondedMethod=app.PME, nonbondedCutoff=self.nonbondedcutoff*nanometers, constraints=app.HBonds)
             platform = PLatform.getPlatformByName('CUDA')
             simulation = app.Simulation(self.ani_topology, system, integrator, platform)
 
@@ -862,12 +863,12 @@ class BuildSimulation():
         integrator = LangevinIntegrator(temp*kelvin, self.friction_coeff/picoseconds, self.timestep*femtoseconds)
         
         if BuildSimulation.type_of_simulation(self) == "AMB":
-            system = self.amb_topology.createSystem(nonbondedMethod=app.PME, nonbondedCutoff=self.nonbondedcutoff1.0*nanometers, constraints=app.HBonds)
+            system = self.amb_topology.createSystem(nonbondedMethod=app.PME, nonbondedCutoff=self.nonbondedcutoff*nanometers, constraints=app.HBonds)
             system.addForce(barostat)
             simulation = app.Simulation(self.amb_topology.topology, system, integrator)
         
         if BuildSimulation.type_of_simulation(self) == "ANI":
-            system = self.potential.createSystem(self.ani_topology, nonbondedMethod=app.PME, nonbondedCutoff=self.nonbondedcutoff1.0*unit.nanometers, constraints=app.HBonds)
+            system = self.potential.createSystem(self.ani_topology, nonbondedMethod=app.PME, nonbondedCutoff=self.nonbondedcutoff*unit.nanometers, constraints=app.HBonds)
             system.addForce(barostat)
             platform = PLatform.getPlatformByName('CUDA')
             simulation = app.Simulation(self.ani_topology, system, integrator, platform)
@@ -973,11 +974,11 @@ class BuildSimulation():
         integrator = LangevinIntegrator(temp*kelvin, self.friction_coeff/picoseconds, self.timestep*femtoseconds)
         
         if BuildSimulation.type_of_simulation(self) == "AMB":
-            system = self.amb_topology.createSystem(nonbondedMethod=app.PME, nonbondedCutoff=self.nonbondedcutoff1.0*nanometers, constraints=app.HBonds)
+            system = self.amb_topology.createSystem(nonbondedMethod=app.PME, nonbondedCutoff=self.nonbondedcutoff*nanometers, constraints=app.HBonds)
             simulation = app.Simulation(self.amb_topology.topology, system, integrator)
         
         if BuildSimulation.type_of_simulation(self) == "ANI":
-            system = self.potential.createSystem(self.ani_topology, nonbondedMethod=app.PME, nonbondedCutoff=self.nonbondedcutoff1.0*nanometers, constraints=app.HBonds)
+            system = self.potential.createSystem(self.ani_topology, nonbondedMethod=app.PME, nonbondedCutoff=self.nonbondedcutoff*nanometers, constraints=app.HBonds)
             platform = PLatform.getPlatformByName('CUDA')
             simulation = app.Simulation(self.ani_topology, system, integrator, platform)  
         
@@ -1045,19 +1046,20 @@ class BuildSimulation():
         state = simulation.context.getState(getPositions=True, getEnergy=True, enforcePeriodicBox=True) # Define state object 
         xyz = state.getPositions() # Obtain positions of the particles from previous step
         vx, vy, vz = state.getPeriodicBoxVectors() # Obtain periodc box vectors of the previous step
+        print("Periodic box vectors are: ", vx, vy, vz)
         
         # Set up integrator
         integrator = LangevinIntegrator(start_temp*kelvin, self.friction_coeff/picoseconds, self.timestep*femtoseconds)
         
         if BuildSimulation.type_of_simulation(self) == "AMB":
-            system = self.amb_topology.createSystem(nonbondedMethod=app.PME, nonbondedCutoff=self.nonbondedcutoff1.0*nanometers, constraints=app.HBonds)
+            system = self.amb_topology.createSystem(nonbondedMethod=app.PME, nonbondedCutoff=self.nonbondedcutoff*nanometers, constraints=app.HBonds)
             if ensemble == "NPT":
                 barostat = MonteCarloBarostat((pressure*atmosphere), ((start_temp if heating==True else max_temp)*kelvin))
                 system.addForce(barostat)
             simulation = app.Simulation(self.amb_topology.topology, system, integrator)
         
         if BuildSimulation.type_of_simulation(self) == "ANI":
-            system = self.potential.createSystem(self.ani_topology, nonbondedMethod=app.PME, nonbondedCutoff=self.nonbondedcutoff1.0*nanometers, constraints=app.HBonds)
+            system = self.potential.createSystem(self.ani_topology, nonbondedMethod=app.PME, nonbondedCutoff=self.nonbondedcutoff*nanometers, constraints=app.HBonds)
             platform = PLatform.getPlatformByName('CUDA')
             simulation = app.Simulation(self.ani_topology, system, integrator, platform)
 
