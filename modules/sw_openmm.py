@@ -557,6 +557,7 @@ class BuildSimulation():
     friction_coeff = 1.0
     total_steps = 1000
     reporter_freq = 1000
+    nonbondedcutoff = 1.0
     timestamp = datetime.datetime.now().strftime('%Y-%m-%d_%H%M%S')
     # Start temp, max temp, cycles, holding_steps, steps at each temp
     anneal_parameters = [300, 700, 5, 3000, 100]
@@ -630,12 +631,12 @@ class BuildSimulation():
         integrator = LangevinIntegrator(self.temp*kelvin, self.friction_coeff/picoseconds, self.timestep*femtoseconds)
         
         if BuildSimulation.type_of_simulation(self) == "AMB":
-            system = self.amb_topology.createSystem(nonbondedMethod=app.PME, nonbondedCutoff=1.0*nanometers, constraints=HBonds)
+            system = self.amb_topology.createSystem(nonbondedMethod=app.PME, nonbondedCutoff=self.nonbondedcutoff*nanometers, constraints=HBonds)
             simulation = app.Simulation(self.amb_topology.topology, system, integrator)
             simulation.context.setPositions(self.amb_coordinates.positions)
             
         if BuildSimulation.type_of_simulation(self) == "ANI":
-            system = self.potential.createSystem(self.ani_topology, nonbondedMethod=app.PME, nonbondedCutoff=1.0*unit.nanometers, constraints=app.HBonds)
+            system = self.potential.createSystem(self.ani_topology, nonbondedMethod=app.PME, nonbondedCutoff=self.nonbondedcutoff*unit.nanometers, constraints=app.HBonds)
             platform = PLatform.getPlatformByName('CUDA')
             simulation = app.Simulation(self.ani_topology, system, integrator, platform)
             simulation.context.setPositions(self.ani_coordinates)
@@ -725,11 +726,11 @@ class BuildSimulation():
         integrator = LangevinIntegrator(start_temp*kelvin, self.friction_coeff/picoseconds, self.timestep*femtoseconds)
         
         if BuildSimulation.type_of_simulation(self) == "AMB":
-            system = self.amb_topology.createSystem(nonbondedMethod=app.PME, nonbondedCutoff=1.0*nanometers, constraints=app.HBonds)
+            system = self.amb_topology.createSystem(nonbondedMethod=app.PME, nonbondedCutoff=self.nonbondedcutoff1.0*nanometers, constraints=app.HBonds)
             simulation = app.Simulation(self.amb_topology.topology, system, integrator)
         
         if BuildSimulation.type_of_simulation(self) == "ANI":
-            system = self.potential.createSystem(self.ani_topology, nonbondedMethod=app.PME, nonbondedCutoff=1.0*nanometers, constraints=app.HBonds)
+            system = self.potential.createSystem(self.ani_topology, nonbondedMethod=app.PME, nonbondedCutoff=self.nonbondedcutoff1.0*nanometers, constraints=app.HBonds)
             platform = PLatform.getPlatformByName('CUDA')
             simulation = app.Simulation(self.ani_topology, system, integrator, platform)
 
@@ -861,12 +862,12 @@ class BuildSimulation():
         integrator = LangevinIntegrator(temp*kelvin, self.friction_coeff/picoseconds, self.timestep*femtoseconds)
         
         if BuildSimulation.type_of_simulation(self) == "AMB":
-            system = self.amb_topology.createSystem(nonbondedMethod=app.PME, nonbondedCutoff=1.0*nanometers, constraints=app.HBonds)
+            system = self.amb_topology.createSystem(nonbondedMethod=app.PME, nonbondedCutoff=self.nonbondedcutoff1.0*nanometers, constraints=app.HBonds)
             system.addForce(barostat)
             simulation = app.Simulation(self.amb_topology.topology, system, integrator)
         
         if BuildSimulation.type_of_simulation(self) == "ANI":
-            system = self.potential.createSystem(self.ani_topology, nonbondedMethod=app.PME, nonbondedCutoff=1.0*unit.nanometers, constraints=app.HBonds)
+            system = self.potential.createSystem(self.ani_topology, nonbondedMethod=app.PME, nonbondedCutoff=self.nonbondedcutoff1.0*unit.nanometers, constraints=app.HBonds)
             system.addForce(barostat)
             platform = PLatform.getPlatformByName('CUDA')
             simulation = app.Simulation(self.ani_topology, system, integrator, platform)
@@ -972,11 +973,11 @@ class BuildSimulation():
         integrator = LangevinIntegrator(temp*kelvin, self.friction_coeff/picoseconds, self.timestep*femtoseconds)
         
         if BuildSimulation.type_of_simulation(self) == "AMB":
-            system = self.amb_topology.createSystem(nonbondedMethod=app.PME, nonbondedCutoff=1.0*nanometers, constraints=app.HBonds)
+            system = self.amb_topology.createSystem(nonbondedMethod=app.PME, nonbondedCutoff=self.nonbondedcutoff1.0*nanometers, constraints=app.HBonds)
             simulation = app.Simulation(self.amb_topology.topology, system, integrator)
         
         if BuildSimulation.type_of_simulation(self) == "ANI":
-            system = self.potential.createSystem(self.ani_topology, nonbondedMethod=app.PME, nonbondedCutoff=1.0*nanometers, constraints=app.HBonds)
+            system = self.potential.createSystem(self.ani_topology, nonbondedMethod=app.PME, nonbondedCutoff=self.nonbondedcutoff1.0*nanometers, constraints=app.HBonds)
             platform = PLatform.getPlatformByName('CUDA')
             simulation = app.Simulation(self.ani_topology, system, integrator, platform)  
         
@@ -1049,14 +1050,14 @@ class BuildSimulation():
         integrator = LangevinIntegrator(start_temp*kelvin, self.friction_coeff/picoseconds, self.timestep*femtoseconds)
         
         if BuildSimulation.type_of_simulation(self) == "AMB":
-            system = self.amb_topology.createSystem(nonbondedMethod=app.PME, nonbondedCutoff=1.0*nanometers, constraints=app.HBonds)
+            system = self.amb_topology.createSystem(nonbondedMethod=app.PME, nonbondedCutoff=self.nonbondedcutoff1.0*nanometers, constraints=app.HBonds)
             if ensemble == "NPT":
                 barostat = MonteCarloBarostat((pressure*atmosphere), ((start_temp if heating==True else max_temp)*kelvin))
                 system.addForce(barostat)
             simulation = app.Simulation(self.amb_topology.topology, system, integrator)
         
         if BuildSimulation.type_of_simulation(self) == "ANI":
-            system = self.potential.createSystem(self.ani_topology, nonbondedMethod=app.PME, nonbondedCutoff=1.0*nanometers, constraints=app.HBonds)
+            system = self.potential.createSystem(self.ani_topology, nonbondedMethod=app.PME, nonbondedCutoff=self.nonbondedcutoff1.0*nanometers, constraints=app.HBonds)
             platform = PLatform.getPlatformByName('CUDA')
             simulation = app.Simulation(self.ani_topology, system, integrator, platform)
 
@@ -1239,6 +1240,14 @@ class BuildSimulation():
         """
         cls.reporter_freq = reporter_freq
         print("Reporter frequency set to every: ", reporter_freq, " steps")
+
+    @classmethod
+    def set_nonbondedcutoff(cls, nonbondedcutoff):
+        if nonbondedcutoff is not type(float):
+            print("Please pass a float to this method to set a new nonbondedcutoff")
+            print("Example: simulation.set_nonbondedcutoff(5.0)")
+            return(none)
+        cls.nonbondedcutoff = nonbondedcutoff
         
     @classmethod
     def set_anneal_parameters(cls, new_anneal_parameters): 
@@ -1389,7 +1398,8 @@ class AmberSimulation(BuildSimulation):
             Returns a string representation of the AmberSimulation object.
     """
     def __new__(cls, *args, **kwargs):
-        # Check number of arguments provided
+        # Check number of arguments provided #
+        # The __new__ method essentially creates a dummy instance before actually creating the real instance # 
         if len(args) != 3:
             raise TypeError(
                 f"AmberSimulation expected 3 arguments, but {len(args)} were given. "
