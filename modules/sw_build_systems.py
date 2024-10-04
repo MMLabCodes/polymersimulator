@@ -1305,8 +1305,8 @@ class BuildAmberSystems(BuildSystems):
         x, y, z = self.get_xyz_dists(base_pdb_file)
 
         translate_distance = int((max(x, y))/2) # Removed z as they should not overlap in this distance
-        z_trans = (z/2)+2
-        y_trans = (y/2)+2
+        z_trans = int((z/2)+2)
+        y_trans = int((y/2)+2)
 
         molecule_name_1 = molecule_name + "_1"
         molecule_name_2 = molecule_name + "_2"
