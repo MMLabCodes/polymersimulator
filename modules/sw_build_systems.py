@@ -753,7 +753,7 @@ class BuildAmberSystems(BuildSystems):
         with open(original_pdb_file, 'w') as outfile:
             outfile.writelines(updated_lines)
     
-    def gen_polymer_pdb(self, molecule_name, number_of_units):
+    def gen_polymer_pdb(self, molecule_name, number_of_units, infinite=None):
         """
         Generates a polymer PDB file using `tleap` based on the specified molecule and number of units.
 
@@ -800,6 +800,8 @@ class BuildAmberSystems(BuildSystems):
             os.makedirs(output_dir)
 
         polymer_name = molecule_name.split("_")[0] + "_" + str(number_of_units) + "_polymer"
+        if infinite is not None:
+            polymer_name = polymer_name + "_infinite"
 
         intleap_path = polymer_name + ".intleap"
         prmtop_filepath = os.path.join(output_dir, polymer_name + ".prmtop")
@@ -808,7 +810,10 @@ class BuildAmberSystems(BuildSystems):
 
         head_rescode, mainchain_rescode, tail_rescode = self.manager.retrieve_polymeric_rescodes(molecule_name)
 
-        polymer_code = " ".join([head_rescode] + [mainchain_rescode] * (number_of_units - 2) + [tail_rescode])
+        if infinite is not None:
+            polymer_code = " ".join([mainchain_rescode]*number_of_units) 
+        else:
+            polymer_code = " ".join([head_rescode] + [mainchain_rescode] * (number_of_units - 2) + [tail_rescode])
         polymer_command = "{" + polymer_code + "}"
 
         file_content = f"""source leaprc.gaff
@@ -1264,7 +1269,285 @@ class BuildAmberSystems(BuildSystems):
         if method == "random":
             system = self.generate_3_3_polymer_array_random(base_molecule_name, molecule_name)
             self.gen_amber_params_4_pckml_array(system, base_molecule_name)
-  
+            
+    def generate_5_5_polymer_array_crystal(self, base_molecule_name=None, molecule_name=None):
+        # Thsis function builds arrays of polymers using the pre generated pdb files
+        if molecule_name == None or base_molecule_name == None:
+         # UPDATE THIS
+            print("Please provide 2 arguments as follows: build_5_5_polymer_array(base_molecule_nmae, molecule_name)")
+            print("Base polymer name: A string of the polymer name, i.e. '3HB_trimer'")
+            print("Polymer name: A string of the polymer name, i.e. '3HB_10_polymer'")
+            
+            return(None)        
+
+        pdb_file = self.manager.load_pdb_filepath(molecule_name)
+        base_pdb_file = self.manager.load_pdb_filepath(base_molecule_name)
+         
+        molecule_dir = os.path.join(self.manager.molecules_dir, base_molecule_name)
+        cd_command = "cd " + molecule_dir
+
+        try:
+            os.chdir(molecule_dir)
+            print("Current directory:", os.getcwd())
+        except Exception as e:
+            print("Exception:", e)
+             
+        head_prepi_filepath = "head_" + base_molecule_name + ".prepi"
+        mainchain_prepi_filepath = "mainchain_" + base_molecule_name + ".prepi"
+        tail_prepi_filepath = "tail_" + base_molecule_name + ".prepi"
+
+        file_subtype = "_5_5_array_crystal"
+        system_name = molecule_name + file_subtype
+        output_dir = os.path.join(self.manager.systems_dir, system_name)
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
+        x, y, z = self.get_xyz_dists(base_pdb_file)
+
+        translate_distance = int((max(x, y))/2) # Removed z as they should not overlap in this distance
+        z_trans = (z/2)+2
+        y_trans = (y/2)+2
+
+        molecule_name_1 = molecule_name + "_1"
+        molecule_name_2 = molecule_name + "_2"
+        molecule_name_3 = molecule_name + "_3"
+        molecule_name_4 = molecule_name + "_4"
+        molecule_name_5 = molecule_name + "_5"
+        molecule_name_6 = molecule_name + "_6"
+        molecule_name_7 = molecule_name + "_7"
+        molecule_name_8 = molecule_name + "_8"
+        molecule_name_9 = molecule_name + "_9"
+        molecule_name_10 = molecule_name + "_10"
+        molecule_name_11 = molecule_name + "_11"
+        molecule_name_12 = molecule_name + "_12"
+        molecule_name_13 = molecule_name + "_13"
+        molecule_name_14 = molecule_name + "_14"
+        molecule_name_15 = molecule_name + "_15"
+        molecule_name_16 = molecule_name + "_16"
+        molecule_name_17 = molecule_name + "_17"
+        molecule_name_18 = molecule_name + "_18"
+        molecule_name_19 = molecule_name + "_19"
+        molecule_name_20 = molecule_name + "_20"
+        molecule_name_21 = molecule_name + "_21"
+        molecule_name_22 = molecule_name + "_22"
+        molecule_name_23 = molecule_name + "_23"
+        molecule_name_24 = molecule_name + "_24"
+        molecule_name_25 = molecule_name + "_25"
+        
+
+        translate_line_1 = "{0.0 0.0 0.0}"
+        translate_line_2 = "{0.0 0.0 " + str(z_trans) + " }"
+        translate_line_3 = "{0.0 0.0 " + str(-z_trans) + " }"
+
+        translate_line_4 = "{0.0 " + str(y_trans) + " " + str(z_trans) + "}"
+        translate_line_5 = "{0.0 " + str(y_trans) + " 0.0}"
+        translate_line_6 = "{0.0 " + str(y_trans) + " " + str(-z_trans) + "}"
+
+        translate_line_7 = "{0.0 " + str(-y_trans) + " " + str(z_trans) + "}"
+        translate_line_8 = "{0.0 " + str(-y_trans) + " 0.0}"
+        translate_line_9 = "{0.0 " + str(-y_trans) + " " + str(-z_trans) + "}"
+
+        translate_line_10 = "{0.0 " + str(2*y_trans) + " " + str(2*-z_trans) + "}"
+        translate_line_11 = "{0.0 " + str(2*y_trans) + " " + str(-z_trans) + "}"
+        translate_line_12 = "{0.0 " + str(2*y_trans) + " 0.0}"
+        translate_line_13 = "{0.0 " + str(2*y_trans) + " " + str(z_trans) + "}"
+        translate_line_14 = "{0.0 " + str(2*y_trans) + " " + str(2*z_trans) + "}"
+
+        translate_line_15 = "{0.0 " + str(2*-y_trans) + " " + str(2*-z_trans) + "}"
+        translate_line_16 = "{0.0 " + str(2*-y_trans) + " " + str(-z_trans) + "}"
+        translate_line_17 = "{0.0 " + str(2*-y_trans) + " 0.0}"
+        translate_line_18 = "{0.0 " + str(2*-y_trans) + " " + str(z_trans) + "}"
+        translate_line_19 = "{0.0 " + str(2*-y_trans) + " " + str(2*z_trans) + "}"
+
+        translate_line_20 = "{0.0 " + str(y_trans) + " " + str(2*-z_trans) + "}"
+        translate_line_21 = "{0.0 " + str(y_trans) + " " + str(2*z_trans) + "}"
+
+        translate_line_22 = "{0.0 " + str(-y_trans) + " " + str(2*-z_trans) + "}"
+        translate_line_23 = "{0.0 " + str(-y_trans) + " " + str(2*z_trans) + "}"
+
+        translate_line_24 = "{0.0 0.0" + str(2*-z_trans) + "}"
+        translate_line_25 = "{0.0 0.0" + str(2*z_trans) + "}"
+
+        combine_line = "{" + molecule_name_1 + " " + molecule_name_2 + " " + molecule_name_3 + " " + molecule_name_4 + " " + molecule_name_5 + " " + molecule_name_6 + " " + molecule_name_7 + " " + molecule_name_8 + " " + molecule_name_9 + " " + molecule_name_10 + " " + molecule_name_11 + " " + molecule_name_12 + " " + molecule_name_13 + " " + molecule_name_14 + " " + molecule_name_15 + " " + molecule_name_16 + " " + molecule_name_17 + " " + molecule_name_18 + " " + molecule_name_19 + " " + molecule_name_20 + " " + molecule_name_21 + " " + molecule_name_22 + " " + molecule_name_23 + " " + molecule_name_24 + " " + molecule_name_25 + "}"
+
+        base_mol_name = molecule_name.split("_")[0]
+        intleap_path = system_name + ".intleap"
+
+        prmtop_filepath =  os.path.join(output_dir, system_name + ".prmtop")
+        rst_filepath = os.path.join(output_dir, system_name + ".rst7")
+     
+        three_three_array_pdb_filepath = os.path.join(output_dir, system_name + ".pdb")
+ 
+        head_rescode, mainchain_rescode, tail_rescode = self.manager.retrieve_polymeric_rescodes(base_molecule_name)
+
+        file_content = f"""source leaprc.gaff
+        source leaprc.water.fb3
+        source leaprc.protein.ff14SB
+
+        loadamberprep {head_prepi_filepath}
+        loadamberprep {mainchain_prepi_filepath}
+        loadamberprep {tail_prepi_filepath}
+
+        list
+            
+        {molecule_name_1} = loadpdb {pdb_file}
+        {molecule_name_2} = loadpdb {pdb_file}
+        {molecule_name_3} = loadpdb {pdb_file}
+        {molecule_name_4} = loadpdb {pdb_file}
+        {molecule_name_5} = loadpdb {pdb_file}
+        {molecule_name_6} = loadpdb {pdb_file}
+        {molecule_name_7} = loadpdb {pdb_file}
+        {molecule_name_8} = loadpdb {pdb_file}
+        {molecule_name_9} = loadpdb {pdb_file}
+        {molecule_name_10} = loadpdb {pdb_file}
+        {molecule_name_11} = loadpdb {pdb_file}
+        {molecule_name_12} = loadpdb {pdb_file}
+        {molecule_name_13} = loadpdb {pdb_file}
+        {molecule_name_14} = loadpdb {pdb_file}
+        {molecule_name_15} = loadpdb {pdb_file}
+        {molecule_name_16} = loadpdb {pdb_file}
+        {molecule_name_17} = loadpdb {pdb_file}
+        {molecule_name_18} = loadpdb {pdb_file}
+        {molecule_name_19} = loadpdb {pdb_file}
+        {molecule_name_20} = loadpdb {pdb_file}
+        {molecule_name_21} = loadpdb {pdb_file}
+        {molecule_name_22} = loadpdb {pdb_file}
+        {molecule_name_23} = loadpdb {pdb_file}
+        {molecule_name_24} = loadpdb {pdb_file}
+        {molecule_name_25} = loadpdb {pdb_file}
+
+        check {molecule_name_1}
+         
+        translate {molecule_name_1} {translate_line_1}
+        translate {molecule_name_2} {translate_line_2}
+        translate {molecule_name_3} {translate_line_3}
+        translate {molecule_name_4} {translate_line_4}
+        translate {molecule_name_5} {translate_line_5}
+        translate {molecule_name_6} {translate_line_6}
+        translate {molecule_name_7} {translate_line_7}
+        translate {molecule_name_8} {translate_line_8}
+        translate {molecule_name_9} {translate_line_9}
+        translate {molecule_name_10} {translate_line_10}
+        translate {molecule_name_11} {translate_line_11}
+        translate {molecule_name_12} {translate_line_12}
+        translate {molecule_name_13} {translate_line_13}
+        translate {molecule_name_14} {translate_line_14}
+        translate {molecule_name_15} {translate_line_15}
+        translate {molecule_name_16} {translate_line_16}
+        translate {molecule_name_17} {translate_line_17}
+        translate {molecule_name_18} {translate_line_18}
+        translate {molecule_name_19} {translate_line_19}
+        translate {molecule_name_20} {translate_line_20}
+        translate {molecule_name_21} {translate_line_21}
+        translate {molecule_name_22} {translate_line_22}
+        translate {molecule_name_23} {translate_line_23}
+        translate {molecule_name_24} {translate_line_24}
+        translate {molecule_name_25} {translate_line_25}
+         
+        system = combine {combine_line}
+        setBox system vdw 0.0
+        saveamberparm system {prmtop_filepath} {rst_filepath}
+        savepdb system {three_three_array_pdb_filepath}
+    
+        quit
+        """
+    
+        with open(intleap_path, 'w') as file:
+            file.write(file_content)
+            
+        leap_command = "tleap -f " + intleap_path
+        print(intleap_path)
+        try:
+            result = subprocess.run(leap_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            if result.returncode == 0:
+                # Command executed successfully
+                print("Output:", result.stdout)
+            else:
+                # Command failed, print error message
+                print("Error:", result.stderr)
+        except Exception as e:
+            # Exception occurred during subprocess execution
+            print("Exception:", e)
+
+        cd_command = "cd " + str(self.manager.main_dir)
+        result = subprocess.run(cd_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        return(system_name)
+    
+    def generate_5_5_polymer_array_random(self, base_molecule_name, molecule_name):
+        """
+        Generates a 5x5 array of polymers using Packmol and adds 'TER' records after each polymer chain.
+
+        This function creates a 5x5 array of polymer molecules based on a given input molecule. It uses Packmol 
+        to arrange the molecules in the specified array and adds 'TER' records after each polymer chain to ensure 
+        proper formatting for subsequent simulations.
+
+        Parameters:
+        dirs (object): An object that provides methods for directory and file management.
+        molecule_name (str): The name of the molecule to be used for creating the polymer array. i.e. "3HB_10_polymer"
+        base_molecule_name (str): The base name of the molecule used to identify the polymeric residue codes. i.e. "3HB_trimer"
+
+        Returns:
+        None
+
+        The function performs the following steps:
+        1. Defines the file subtype and constructs the PDB file path.
+        2. Creates an output directory if it doesn't exist.
+        3. Constructs the output PDB file name for the unsolved array.
+        4. Calculates the dimensions of the box required to contain the 3x3 array of polymers.
+        5. Generates the Packmol input file content with the specified parameters.
+        6. Writes the Packmol input file to the output directory.
+        7. Executes the Packmol command to generate the unsolved array PDB file.
+        8. Adds 'TER' records to the generated PDB file using the `add_ter_to_pckml_result` function.
+
+        Example usage:
+            generate_3_3_polymer_array_pckml(dirs, 'polymer_molecule', 'base_polymer')
+        """
+        file_subtype = "_5_5_array_random"
+        pdb_file = self.manager.load_pdb_filepath(molecule_name)
+        system_name = molecule_name + file_subtype
+        output_dir = os.path.join(self.manager.systems_dir, system_name)
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+        array_pdb_name = system_name + ".pdb"
+        array_pdb = os.path.join(output_dir, array_pdb_name)
+        x,y,z = self.get_xyz_dists(pdb_file)
+        box_edge_len = int((max(x,y,z))*3)
+        box_sizes = box_edge_len, box_edge_len, box_edge_len
+        file_content=f"""tolerance 2.0
+            output {array_pdb}
+            filetype pdb
+            structure {pdb_file}
+            	number 25
+                inside box 0. 0. 0. {box_sizes[0]}. {box_sizes[1]}. {box_sizes[2]}.
+            end structure
+            """
+        packmol_input_file = system_name + ".pckml"
+        packmol_input_filepath = os.path.join(output_dir, packmol_input_file)
+        with open(packmol_input_filepath, 'w') as file:
+            file.write(file_content)
+        packmol_command = str(self.packmol_path) + " < " + packmol_input_filepath
+        try:
+            result = subprocess.run(packmol_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            if result.returncode == 0:
+            # Command executed successfully
+                print("Output:", result.stdout)
+            else:
+            # Command failed, print error message
+                print("Error:", result.stderr)
+        except Exception as e:
+        # Exception occurred during subprocess execution
+            print("Exception:", e)
+        
+        self.add_ter_to_pckml_result(array_pdb, base_molecule_name)
+        return(system_name)
+        
+    def generate_polymer_5_5_array(self, base_molecule_name, molecule_name, method):
+        if method == "crystal":
+            self.generate_5_5_polymer_array_crystal(base_molecule_name, molecule_name)
+        if method == "random":
+            system = self.generate_5_5_polymer_array_random(base_molecule_name, molecule_name)
+            self.gen_amber_params_4_pckml_array(system, base_molecule_name)  
+            
     def build_2_10_polymer_array(self, base_molecule_name=None, molecule_name=None, buffer=None):
          # Thsis function builds arrays of polymers using the pre generated pdb files
          if molecule_name == None or base_molecule_name == None:
