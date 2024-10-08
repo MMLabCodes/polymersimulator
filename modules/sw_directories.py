@@ -170,6 +170,8 @@ class SnippetSimManage:
             print("Change ethane for the name of the desired system")
             print("NOTE: If requesting a system for molecular dynamics - PDB files of a system must be generated using tleap prior to this step")
             return(None)
+
+         
         # Walk through the directory tree recursively
         for root, dirs, files in os.walk(self.pdb_file_dir):
             dirs[:] = [d for d in dirs if d != 'depreceated']
@@ -180,7 +182,9 @@ class SnippetSimManage:
                 if file == (molecule_name + ".pdb"):
                     #if molecule_name in file:
                     pdb_file_path = os.path.join(root, file)
-                    return pdb_file_path 
+                    return pdb_file_path
+
+        
                     
     def ac_files_avail(self):
         ac_avail = []
@@ -385,6 +389,23 @@ class SnippetSimManage:
         self.systems_dir = os.path.join(self.pdb_file_dir, 'systems')   
         if not os.path.exists(self.systems_dir):
             os.makedirs(self.systems_dir)
+
+    def simulations_avail(self, system_name):
+        simulation_dir = os.path.join(self.systems_dir, system_name)
+        avail_sims = []
+        for item in os.listdir(simulation_dir):
+            item_path = os.path.join(simulation_dir, item)
+            if os.path.isdir(item_path):
+                avail_sims.append(item_path)      
+        if avail_sims == []:
+            print("No simulations found for the system.")
+            print("")
+            print("Please ensure simulation files are avaialable and system name is correct.")
+            return(None)
+        else:
+            print("Output contains paths to simulation directories.")
+            return(avail_sims)
+            
             
 class BioOilDirs(SnippetSimManage):
 
