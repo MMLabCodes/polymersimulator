@@ -750,13 +750,13 @@ class BuildSimulation():
         
         # DCD trajectory
         #output_dcdname = os.path.join(directories.systems_dir, self.filename, (self.filename + "_anneal"))
-        output_dcdname = os.path.join(self.output_dir, (self.filename + "_anneal_traj_" + str(self.timestamp)))
+        output_dcdname = os.path.join(self.output_dir, (self.filename + "_anneal_" + str(self.timestamp)))
         dcdWriter = DcdWriter(output_dcdname, self.reporter_freq)
         simulation.reporters.append(dcdWriter.dcdReporter)
     
         # Datawriter - This is a more complete data writer than previously used, the file generated is a comma delimited text file
         #output_dataname = os.path.join(directories.systems_dir, self.filename, (self.filename + "_anneal_data"))
-        output_dataname = os.path.join(self.output_dir, (self.filename + "_anneal_data_" + str(self.timestamp)))
+        output_dataname = os.path.join(self.output_dir, (self.filename + "_anneal_" + str(self.timestamp)))
         dataWriter = DataWriter(output_dataname, self.reporter_freq, total_steps)
         simulation.reporters.append(dataWriter.stateDataReporter)
         
@@ -885,18 +885,18 @@ class BuildSimulation():
         
         # Set up reporters
         #output_pdbname = os.path.join(directories.systems_dir, self.filename, (self.filename +  "_" + str(pressure) + "_atm_traj.pdb"))
-        output_pdbname = os.path.join(self.output_dir, (self.filename +  "_" + str(pressure) + "_atm_traj_" + str(self.timestamp) + ".pdb"))
+        output_pdbname = os.path.join(self.output_dir, (self.filename +  "_" + str(pressure) + "_atm_" + str(self.timestamp) + ".pdb"))
         simulation.reporters.append(app.PDBReporter(output_pdbname, self.reporter_freq))
     
         # DCD trajectory
         #output_dcdname = os.path.join(directories.systems_dir, self.filename, (self.filename +  "_" + str(pressure) + "_atm_traj.dcd"))
-        output_dcdname = os.path.join(self.output_dir, (self.filename +  "_" + str(pressure) + "_atm_traj_" + str(self.timestamp)))
+        output_dcdname = os.path.join(self.output_dir, (self.filename +  "_" + str(pressure) + "_atm_" + str(self.timestamp)))
         dcdWriter = DcdWriter(output_dcdname, self.reporter_freq)
         simulation.reporters.append(dcdWriter.dcdReporter)
     
         # Datawriter - This is a more complete data writer than previously used, the file generated is a comma delimited text file
         #output_dataname = os.path.join(directories.systems_dir, self.filename, (self.filename +  "_" + str(pressure) + "_atm_data"))
-        output_dataname = os.path.join(self.output_dir, (self.filename +  "_" + str(pressure) + "_atm_data_" + str(self.timestamp)))
+        output_dataname = os.path.join(self.output_dir, (self.filename +  "_" + str(pressure) + "_atm_" + str(self.timestamp)))
         dataWriter = DataWriter(output_dataname, self.reporter_freq, total_steps)
         simulation.reporters.append(dataWriter.stateDataReporter)
         simulation.step(total_steps)       
@@ -990,18 +990,18 @@ class BuildSimulation():
         # PDB trajectory - this is slighlty redundant with the addition of the DCD trajectory, but it is still useful for 
         #   visualisation of the system and coloring specific residues 
         #output_pdbname = os.path.join(directories.systems_dir, self.filename, (self.filename + "_prod_traj.pdb"))
-        output_pdbname = os.path.join(self.output_dir, (self.filename + "_prod_traj_" + str(self.timestamp) + ".pdb"))
+        output_pdbname = os.path.join(self.output_dir, (self.filename + "_prod_" + str(self.timestamp) + ".pdb"))
         simulation.reporters.append(app.PDBReporter(output_pdbname, self.reporter_freq))
         
         # DCD trajectory
         #output_dcdname = os.path.join(directories.systems_dir, self.filename, (self.filename + "_prod_traj"))
-        output_dcdname = os.path.join(self.output_dir, (self.filename + "_prod_traj_" + str(self.timestamp)))
+        output_dcdname = os.path.join(self.output_dir, (self.filename + "_prod_" + str(self.timestamp)))
         dcdWriter = DcdWriter(output_dcdname, self.reporter_freq)
         simulation.reporters.append(dcdWriter.dcdReporter)
     
         # Datawriter - This is a more complete data writer than previously used, the file generated is a comma delimited text file
         #output_dataname = os.path.join(directories.systems_dir, self.filename, (self.filename + "_prod_data"))
-        output_dataname = os.path.join(self.output_dir, (self.filename + "_prod_data_" + str(self.timestamp)))
+        output_dataname = os.path.join(self.output_dir, (self.filename + "_prod_" + str(self.timestamp)))
         dataWriter = DataWriter(output_dataname, self.reporter_freq, total_steps)
         simulation.reporters.append(dataWriter.stateDataReporter) 
         simulation.step(total_steps)
