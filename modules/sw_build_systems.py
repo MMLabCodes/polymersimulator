@@ -644,7 +644,7 @@ class BuildAmberSystems(BuildSystems):
         return(None)
     
     def is_mol_parametrized(self,  molecule_name):
-        param_mol_dir = os.path.join(elf.manager.molecules_dir, molecule_name)
+        param_mol_dir = os.path.join(self.manager.molecules_dir, molecule_name)
         molecule_dir = os.path.join(self.manager.pdb_file_dir, molecule_name)
         pdb_filepath = os.path.join(param_mol_dir, (molecule_name + ".pdb"))
         mol2_filepath = os.path.join(param_mol_dir, (molecule_name + ".mol2"))
