@@ -643,16 +643,16 @@ class BuildAmberSystems(BuildSystems):
             print("Exception:", e)
         return(None)
     
-    def is_mol_parametrized(self, directories, molecule_name):
-        param_mol_dir = os.path.join(directories.molecules_dir, molecule_name)
-        molecule_dir = os.path.join(directories.pdb_file_dir, molecule_name)
+    def is_mol_parametrized(self,  molecule_name):
+        param_mol_dir = os.path.join(elf.manager.molecules_dir, molecule_name)
+        molecule_dir = os.path.join(self.manager.pdb_file_dir, molecule_name)
         pdb_filepath = os.path.join(param_mol_dir, (molecule_name + ".pdb"))
         mol2_filepath = os.path.join(param_mol_dir, (molecule_name + ".mol2"))
         files_exist = os.path.exists(pdb_filepath) and os.path.exists(mol2_filepath)
         return(files_exist) # This will be true or false
 
-    def is_poly_prepped(self, directories, molecule_name):
-        poly_prepped_dir = os.path.join(directories.molecules_dir, molecule_name)
+    def is_poly_prepped(self, molecule_name):
+        poly_prepped_dir = os.path.join(self.manager.molecules_dir, molecule_name)
         head_prepi_filepath = os.path.join(poly_prepped_dir, ("head_" + molecule_name + ".prepi"))
         mainchain_prepi_filepath = os.path.join(poly_prepped_dir, ("mainchain_" + molecule_name + ".prepi"))
         tail_prepi_filepath = os.path.join(poly_prepped_dir, ("tail_" + molecule_name + ".prepi"))
@@ -1365,8 +1365,8 @@ class BuildAmberSystems(BuildSystems):
         translate_line_22 = "{0.0 " + str(-y_trans) + " " + str(2*-z_trans) + "}"
         translate_line_23 = "{0.0 " + str(-y_trans) + " " + str(2*z_trans) + "}"
 
-        translate_line_24 = "{0.0 0.0" + str(2*-z_trans) + "}"
-        translate_line_25 = "{0.0 0.0" + str(2*z_trans) + "}"
+        translate_line_24 = "{0.0 0.0 " + str(2*-z_trans) + "}"
+        translate_line_25 = "{0.0 0.0 " + str(2*z_trans) + "}"
 
         combine_line = "{" + molecule_name_1 + " " + molecule_name_2 + " " + molecule_name_3 + " " + molecule_name_4 + " " + molecule_name_5 + " " + molecule_name_6 + " " + molecule_name_7 + " " + molecule_name_8 + " " + molecule_name_9 + " " + molecule_name_10 + " " + molecule_name_11 + " " + molecule_name_12 + " " + molecule_name_13 + " " + molecule_name_14 + " " + molecule_name_15 + " " + molecule_name_16 + " " + molecule_name_17 + " " + molecule_name_18 + " " + molecule_name_19 + " " + molecule_name_20 + " " + molecule_name_21 + " " + molecule_name_22 + " " + molecule_name_23 + " " + molecule_name_24 + " " + molecule_name_25 + "}"
 
@@ -1511,7 +1511,7 @@ class BuildAmberSystems(BuildSystems):
         array_pdb_name = system_name + ".pdb"
         array_pdb = os.path.join(output_dir, array_pdb_name)
         x,y,z = self.get_xyz_dists(pdb_file)
-        box_edge_len = int((max(x,y,z))*3)
+        box_edge_len = int((max(x,y,z))*2)
         box_sizes = box_edge_len, box_edge_len, box_edge_len
         file_content=f"""tolerance 2.0
             output {array_pdb}
