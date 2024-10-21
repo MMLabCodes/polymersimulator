@@ -1112,7 +1112,116 @@ class BuildSimulation():
         self.log_info['Thermal Ramp']['Method'] = "heating" if heating==True else "cooling" 
 
         return(simulation, (output_dataname + ".txt"))
+        
+    def strain(self, simulation, total_steps=None, temp=None):
+        """
+        Function to perform a production run simulation with the provided parameters.
+        
+        USAGE: 
+            production_run_sim = sim.anneal(simulation, total_steps, temp)            
+        
+        Recommended USAGE:
+            production_run_sim = sim.anneal(simulation)
+            
+            where annealing parameters are set with the following functions:
+                
+            simulation_object.set_temperature(temperature)
+            simulation_object.set_total_steps(total_steps)
+            
+        Args:
+            simulation (app.Simulation): The simulation object to run the production simulation on.
+            
+            total_steps (int, optional): The total number of steps to run for the production simulation. 
+                Defaults to None, in which case the value is fetched from self.total_steps.
+            
+            temp (float, optional): The temperature for the production simulation in Kelvin. 
+                Defaults to None, in which case the value is fetched from self.temp.
 
+        Returns:
+            A tuple containing the simulation object after the production run and the filename of the data file generated.
+                in the following format:
+                
+            (simulation_object, path_to_data_file)
+
+        Notes:
+            This method performs a production run simulation with the provided simulation object and parameters.
+            It initializes the system with the provided initial conditions and runs the simulation for the specified 
+            number of steps. The system's state is updated throughout the production run, and reporters are set up to 
+            record trajectory and simulation data.
+        """
+        prod_start_time = time.time()
+        if total_steps is None:
+            total_steps = self.total_steps
+        if temp is None:
+            temp = self.temp
+            
+        # Extract positional info
+        state = simulation.context.getState(getPositions=True, getEnergy=True) # Define state object 
+        xyz = state.getPositions() # Obtain positions of the particles from previous step
+        vx, vy, vz = state.getPeriodicBoxVectors() # Obtain periodc box vectors of the previous step
+        
+        # Set up integrator
+        integrator = LangevinIntegrator(temp*kelvin, self.friction_coeff/picoseconds, self.timestep*femtoseconds)
+        
+        if BuildSimulation.type_of_simulation(self) == "AMB":
+            system = self.amb_topology.createSystem(nonbondedMethod=app.PME, nonbondedCutoff=self.nonbondedcutoff*nanometers, constraints=app.HBonds)
+            barostat = MonteCarloBarostat((pressure*atmosphere), (temp*kelvin))
+            syste.addForce(barostat)
+            simulation = app.Simulation(self.amb_topology.topology, system, integrator)
+        
+        if BuildSimulation.type_of_simulation(self) == "ANI":
+            system = self.potential.createSystem(self.ani_topology, nonbondedMethod=app.PME, nonbondedCutoff=self.nonbondedcutoff*nanometers, constraints=app.HBonds)
+            platform = PLatform.getPlatformByName('CUDA')
+            simulation = app.Simulation(self.ani_topology, system, integrator, platform)  
+        
+        # Update positional info
+        simulation.context.setPositions(xyz)
+        simulation.context.setPeriodicBoxVectors(vx, vy, vz)
+        
+        # Set up reporters
+        # PDB trajectory - this is slighlty redundant with the addition of the DCD trajectory, but it is still useful for 
+        #   visualisation of the system and coloring specific residues 
+        #output_pdbname = os.path.join(directories.systems_dir, self.filename, (self.filename + "_prod_traj.pdb"))
+        output_pdbname = os.path.join(self.output_dir, (self.filename + "_strain_" + str(self.timestamp) + ".pdb"))
+        simulation.reporters.append(app.PDBReporter(output_pdbname, self.reporter_freq))
+        
+        # DCD trajectory
+        #output_dcdname = os.path.join(directories.systems_dir, self.filename, (self.filename + "_prod_traj"))
+        output_dcdname = os.path.join(self.output_dir, (self.filename + "_strain_" + str(self.timestamp)))
+        dcdWriter = DcdWriter(output_dcdname, self.reporter_freq)
+        simulation.reporters.append(dcdWriter.dcdReporter)
+    
+        # Datawriter - This is a more complete data writer than previously used, the file generated is a comma delimited text file
+        #output_dataname = os.path.join(directories.systems_dir, self.filename, (self.filename + "_prod_data"))
+        output_dataname = os.path.join(self.output_dir, (self.filename + "_strain_" + str(self.timestamp)))
+        dataWriter = DataWriter(output_dataname, self.reporter_freq, total_steps)
+        simulation.reporters.append(dataWriter.stateDataReporter) 
+        
+        total_strain = 0.1
+        strain_steps = 50
+        strain_increment = total_strain/strain_steps
+
+        for step in range(strain_steps):
+            new_vx = vx * (1 + strain_increment * (step+1))
+            simulation.context.setPeriodicBoxVectors(new_vx, vy, vz)
+            simulation.step(100)
+
+            
+
+        # Now copy all the files into the system directory
+        #destination_dir = os.path.join(directories.systems_dir, self.filename)
+        #shutil.move(output_pdbname, destination_dir)
+        #output_dcdname = self.filename +  "_prod_traj_" + str(self.timestamp) + ".dcd"
+        #shutil.move(output_dcdname, destination_dir)
+        #output_dataname = self.filename +  "_prod_data_" + str(self.timestamp) + ".txt"
+        #shutil.move(output_dataname, destination_dir)
+        prod_end_time = time.time()
+        time_taken = prod_end_time - prod_start_time
+        #self.log_info['Production']['Time taken'] = time_taken
+        #self.log_info['Production']['Simulation time'] = total_steps * self.timestep
+        #self.log_info['Production']['Temperature'] = temp
+        #self.log_info['Production']['Timestep'] = self.timestep
+        return(simulation, (output_dataname + ".txt"))
 
     
     @classmethod
