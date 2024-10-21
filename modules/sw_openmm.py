@@ -777,15 +777,6 @@ class BuildSimulation():
             integrator.setTemperature(start_temp)
             simulation.step(holding_steps)
 
-        # Now copy all the files into the system directory
-        #destination_dir = os.path.join(directories.systems_dir, self.filename)
-        #shutil.move(output_pdbname, destination_dir)
-        #output_dcdname = self.filename +  "_anneal_traj_" + self.timestamp + ".dcd"
-        #shutil.move(output_dcdname, destination_dir)
-        #output_dataname = self.filename +  "_anneal_data_" + self.timestamp + ".txt"
-        #shutil.move(output_dataname, destination_dir)
-        #return(simulation, os.path.join(destination_dir, output_dataname))
-
         anneal_end_time = time.time()  
         time_taken = anneal_end_time - anneal_start_time
 
@@ -797,6 +788,12 @@ class BuildSimulation():
         self.log_info['Annealing']['Steps at plateaus'] = holding_steps
         self.log_info['Annealing']['Steps at incremental temps'] = steps_at_temp
         self.log_info['Annealing']['Timestep'] = self.timestep
+
+        # Write the final structure to pdb
+        self.final_pdbname = os.path.join(self.output_dir, ("final_anneal_" + self.filename + ".pdb"))
+        with open(self.final_pdbname, 'w') as output:
+            PDBFile.writeFile(simulation.topology, state.getPositions(), output)
+        
         return(simulation, (output_dataname + ".txt"))
     
     @classmethod
@@ -901,13 +898,6 @@ class BuildSimulation():
         simulation.reporters.append(dataWriter.stateDataReporter)
         simulation.step(total_steps)       
 
-        # Now copy all the files into the system directory
-        #destination_dir = os.path.join(directories.systems_dir, self.filename)
-        #shutil.move(output_pdbname, destination_dir)
-        #output_dcdname = self.filename +  "_" + str(pressure) + "_atm_traj_" + str(self.timestamp) + ".dcd"
-        #shutil.move(output_dcdname, destination_dir)
-        #output_dataname = self.filename +  "_" + str(pressure) + "_atm_data_" + str(self.timestamp) + ".txt"
-        #shutil.move(output_dataname, destination_dir)
         equili_end_time = time.time()  
         time_taken = equili_end_time - equili_start_time
 
@@ -916,6 +906,12 @@ class BuildSimulation():
         self.log_info['Equilibration']['Temperature'] = temp
         self.log_info['Equilibration']['Pressure'] = pressure
         self.log_info['Equilibration']['Timestep'] = self.timestep
+
+        # Write the final structure to pdb
+        self.final_pdbname = os.path.join(self.output_dir, ("final_" + self.filename + "_" + str(pressure) + "_atm.pdb"))
+        with open(self.final_pdbname, 'w') as output:
+            PDBFile.writeFile(simulation.topology, state.getPositions(), output)
+            
         return(simulation, (output_dataname + ".txt"))
     
     @classmethod
@@ -1006,19 +1002,17 @@ class BuildSimulation():
         simulation.reporters.append(dataWriter.stateDataReporter) 
         simulation.step(total_steps)
 
-        # Now copy all the files into the system directory
-        #destination_dir = os.path.join(directories.systems_dir, self.filename)
-        #shutil.move(output_pdbname, destination_dir)
-        #output_dcdname = self.filename +  "_prod_traj_" + str(self.timestamp) + ".dcd"
-        #shutil.move(output_dcdname, destination_dir)
-        #output_dataname = self.filename +  "_prod_data_" + str(self.timestamp) + ".txt"
-        #shutil.move(output_dataname, destination_dir)
         prod_end_time = time.time()
         time_taken = prod_end_time - prod_start_time
         self.log_info['Production']['Time taken'] = time_taken
         self.log_info['Production']['Simulation time'] = total_steps * self.timestep
         self.log_info['Production']['Temperature'] = temp
         self.log_info['Production']['Timestep'] = self.timestep
+
+        # Write the final structure to pdb
+        self.final_pdbname = os.path.join(self.output_dir, ("final_prod_" + self.filename + ".pdb"))
+        with open(self.final_pdbname, 'w') as output:
+            PDBFile.writeFile(simulation.topology, state.getPositions(), output)
         return(simulation, (output_dataname + ".txt"))
         
     def thermal_ramp(self, simulation, heating, quench_rate, ensemble, start_temp=None, max_temp=None, total_steps=None, pressure=None):
@@ -1111,6 +1105,11 @@ class BuildSimulation():
         self.log_info['Thermal Ramp']['Ensemble'] = ensemble
         self.log_info['Thermal Ramp']['Method'] = "heating" if heating==True else "cooling" 
 
+        # Write the final structure to pdb
+        self.final_pdbname = os.path.join(self.output_dir, ("final_" + output_filename + ".pdb"))
+        with open(self.final_pdbname, 'w') as output:
+            PDBFile.writeFile(simulation.topology, state.getPositions(), output)
+
         return(simulation, (output_dataname + ".txt"))
         
     def strain(self, simulation, total_steps=None, temp=None):
@@ -1198,23 +1197,14 @@ class BuildSimulation():
         simulation.reporters.append(dataWriter.stateDataReporter) 
         
         total_strain = 0.1
-        strain_steps = 50
+        strain_steps = 100
         strain_increment = total_strain/strain_steps
 
         for step in range(strain_steps):
             new_vx = vx * (1 + strain_increment * (step+1))
             simulation.context.setPeriodicBoxVectors(new_vx, vy, vz)
-            simulation.step(100)
+            simulation.step(1000)
 
-            
-
-        # Now copy all the files into the system directory
-        #destination_dir = os.path.join(directories.systems_dir, self.filename)
-        #shutil.move(output_pdbname, destination_dir)
-        #output_dcdname = self.filename +  "_prod_traj_" + str(self.timestamp) + ".dcd"
-        #shutil.move(output_dcdname, destination_dir)
-        #output_dataname = self.filename +  "_prod_data_" + str(self.timestamp) + ".txt"
-        #shutil.move(output_dataname, destination_dir)
         prod_end_time = time.time()
         time_taken = prod_end_time - prod_start_time
         #self.log_info['Production']['Time taken'] = time_taken
