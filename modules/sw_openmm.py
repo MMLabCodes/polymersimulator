@@ -1165,7 +1165,7 @@ class BuildSimulation():
         
         if BuildSimulation.type_of_simulation(self) == "AMB":
             system = self.amb_topology.createSystem(nonbondedMethod=app.PME, nonbondedCutoff=self.nonbondedcutoff*nanometers, constraints=app.HBonds)
-            barostat = MonteCarloBarostat((pressure*atmosphere), (temp*kelvin))
+            barostat = MonteCarloBarostat((self.pressure*atmosphere), (self.temp*kelvin))
             syste.addForce(barostat)
             simulation = app.Simulation(self.amb_topology.topology, system, integrator)
         
