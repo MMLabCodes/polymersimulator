@@ -355,12 +355,524 @@ def gen_2_2_array(self, directories, molecule_name):
     leap_command = "tleap -f " + intleap_path
     subprocess.run(leap_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
+def parametrized_mols_avail(self):
+    '''
+    Old function to retrieve molecules with mol2 files.
+    Replace by the method "SnippetSimManage.mol2_avail()"
+    '''
+    a = False
+    for root, dirs, files in os.walk(self.molecules_dir):
+        dirs[:] = [d for d in dirs if d != 'depreceated']
+        # Check each file in the current directory
+        for file in files:
+            # Check if the file has a .pdb extension
+            if file.endswith(".mol2"):
+                a = True
+                # Construct the full path to the .pdb file
+                pdb_file_path = os.path.join(root, file)
+                # Extract molecule name
+                pdb_file = pdb_file_path.split("/")[-1]
+                print(pdb_file)
+    if a == False:
+        print("No parametrized molecules.")
+
+   def max_pairwise_distance(self, mol):
+        """
+        Calculates the maximum pairwise distance between atoms in a molecule.
+
+        Parameters:
+            - mol (rdkit.Chem.Mol): RDKit molecule object.
+
+        Returns:
+            - float: Maximum pairwise distance between 2 atoms in the molecule.
+
+        Notes:
+            This function will no longer be updated.
+        """
+        warnings.warn(
+            "The max_pairwise_distance method is deprecated and will be removed in a future version. "
+            "Please use the get_xyz_dists method instead.",
+            DeprecationWarning
+        )
+        conformer = mol.GetConformer()
+        num_atoms = mol.GetNumAtoms()
+        # Extract atom coordinates
+        atom_positions = np.zeros((num_atoms, 3))
+        for i in range(num_atoms):
+            pos = conformer.GetAtomPosition(i)
+            atom_positions[i] = (pos.x, pos.y, pos.z)
+        # Calculate pairwise distances
+        distances = np.linalg.norm(atom_positions[:, np.newaxis, :] - atom_positions, axis=2)
+        # Exclude self-distances and get the maximum distance
+        np.fill_diagonal(distances, 0)
+        max_distance = np.max(distances)
+        return max_distance
+
+   def solvate_polymer_pdb(self, molecule_name, polymer_name, buffer=None):
+        # This function will solvate a single polymer
+        # Define directory where prepi files are found
+        molecule_dir = os.path.join(self.manager.molecules_dir, molecule_name)
+
+        if buffer == None:
+            buffer = "10"
+        else:
+            buffer = str(buffer)
+
+        # Change to prepi file directory
+        cd_command = "cd " + molecule_dir
+        try:
+            os.chdir(molecule_dir)
+            print("Current directory:", os.getcwd())
+        except Exception as e:
+            print("Exception:", e)
+
+        # Define prepi filepaths
+        head_prepi_filepath = "head_" + molecule_name + ".prepi"
+        mainchain_prepi_filepath = "mainchain_" + molecule_name + ".prepi"
+        tail_prepi_filepath = "tail_" + molecule_name + ".prepi"
+
+        file_subtype = "_wat_solv"
+        # Define output directory - based on polymer name
+        output_dir = os.path.join(self.manager.systems_dir, polymer_name + file_subtype)
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
+        # Redundant lol
+        mol_name_1 = polymer_name
+
+        # Get box size by taking x coord (its the length of the polymer) and adding a buffer
+        pdb_filepath = os.path.join(self.manager.systems_dir, polymer_name, polymer_name + ".pdb")
+
+        # Define required filepaths   
+        intleap_path = polymer_name + file_subtype + ".intleap"
+        filename = polymer_name + file_subtype + f"_{buffer}"
+        prmtop_filepath =  os.path.join(output_dir, filename + ".prmtop")
+        rst_filepath = os.path.join(output_dir, filename + ".rst7")
+        pdb_outpath = os.path.join(output_dir, filename + ".pdb") 
+        single_chain_pdb_filepath = os.path.join(output_dir, filename + ".pdb")
 
 
+        # Define file content for leap file
+        file_content = f"""source leaprc.gaff
+             source leaprc.water.fb3
+             source leaprc.protein.ff14SB
 
+             loadamberprep {head_prepi_filepath}
+             loadamberprep {mainchain_prepi_filepath}
+             loadamberprep {tail_prepi_filepath}
 
+             {mol_name_1} = loadpdb {pdb_filepath}
 
+             check {mol_name_1}
 
+             solvatebox {mol_name_1} TIP3PBOX {buffer}
+
+             saveamberparm {mol_name_1} {prmtop_filepath} {rst_filepath}
+             savepdb {mol_name_1} {pdb_outpath}
+             quit
+             """
+
+        with open(intleap_path, 'w') as file:
+            file.write(file_content)
+
+        leap_command = "tleap -f " + intleap_path
+
+        try:
+            result = subprocess.run(leap_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            if result.returncode == 0:
+                 # Command executed successfully
+                print("Output:", result.stdout)
+            else:
+                 # Command failed, print error message
+                print("Error:", result.stderr)
+        except Exception as e:
+             # Exception occurred during subprocess execution
+            print("Exception:", e)
+
+        cd_command = "cd " + str(self.manager.main_dir)
+        result = subprocess.run(cd_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        return(filename)
+    
+    def build_3_3_polymer_array_solvated(self, base_molecule_name=None, molecule_name=None, buffer=None):
+        # Thsis function builds arrays of polymers using the pre generated pdb files
+         if molecule_name == None or base_molecule_name == None:
+            print("Please provide 2 arguments as follows: build_3_3_polymer_array(base_molecule_nmae, molecule_name)")
+            print("Base polymer name: A string of the polymer name, i.e. '3HB_trimer'")
+            print("Polymer name: A string of the polymer name, i.e. '3HB_10_polymer'")         
+            return(None)        
+
+         if buffer == None:
+             buffer = "10"
+         else:
+             buffer = str(buffer)
+        
+         pdb_file = self.manager.load_pdb_filepath(molecule_name)
+         base_pdb_file = self.manager.load_pdb_filepath(base_molecule_name)
+         
+         molecule_dir = os.path.join(self.manager.molecules_dir, base_molecule_name)
+         cd_command = "cd " + molecule_dir
+         print(cd_command)
+
+         try:
+             os.chdir(molecule_dir)
+             print("Current directory:", os.getcwd())
+         except Exception as e:
+             print("Exception:", e)
+             
+         head_prepi_filepath = "head_" + base_molecule_name + ".prepi"
+         mainchain_prepi_filepath = "mainchain_" + base_molecule_name + ".prepi"
+         tail_prepi_filepath = "tail_" + base_molecule_name + ".prepi"
+
+         file_subtype = "_3_3_array"
+         output_dir = os.path.join(self.manager.systems_dir, (molecule_name + file_subtype))
+         if not os.path.exists(output_dir):
+             os.makedirs(output_dir)
+
+         x, y, z = self.get_xyz_dists(pdb_file)
+         translate_distance = int((max(x, y))/2) # Removed z as they should not overlap in this distance
+
+         molecule_name_1 = molecule_name + "_1"
+         molecule_name_2 = molecule_name + "_2"
+         molecule_name_3 = molecule_name + "_3"
+         molecule_name_4 = molecule_name + "_4"
+         molecule_name_5 = molecule_name + "_5"
+         molecule_name_6 = molecule_name + "_6"
+         molecule_name_7 = molecule_name + "_7"
+         molecule_name_8 = molecule_name + "_8"
+         molecule_name_9 = molecule_name + "_9"
+
+         translate_line_1 = "{0.0 0.0 0.0}"
+         translate_line_2 = "{" + str(translate_distance) + " 0.0 0.0}"
+         translate_line_3 = "{" + str(-translate_distance) + " 0.0 0.0}"
+
+         translate_line_4 = "{" + str(translate_distance) + " " + str(translate_distance) + " 0.0}"
+         translate_line_5 = "{" + str(-translate_distance) + " " + str(translate_distance) + " 0.0}"
+         translate_line_6 = "{0.0 " + str(translate_distance) + " 0.0}"
+
+         translate_line_7 = "{" + str(translate_distance) + " " + str(-translate_distance) + " 0.0}"  
+         translate_line_8 = "{" + str(-translate_distance) + " " + str(-translate_distance) + " 0.0}"
+         translate_line_9 = "{0.0 " + str(-translate_distance) + " 0.0}"
+
+         combine_line = "{" + molecule_name_1 + " " + molecule_name_2 + " " + molecule_name_3 + " " + molecule_name_4 + " " + molecule_name_5 + " " + molecule_name_6 + " " + molecule_name_7 + " " + molecule_name_8 + " " + molecule_name_9 + "}"
+
+         base_mol_name = molecule_name.split("_")[0]
+         intleap_path = base_mol_name + file_subtype + ".intleap"
+
+         system_name = molecule_name + file_subtype + f"_{buffer}"
+         unsolved_system_name = "unsolved_" + molecule_name + file_subtype
+        
+         prmtop_filepath =  os.path.join(output_dir, system_name + ".prmtop")
+         rst_filepath = os.path.join(output_dir, system_name + ".rst7")
+
+         unsolved_prmtop_filepath =  os.path.join(output_dir, "unsolved_" + molecule_name + file_subtype + ".prmtop")
+         unsolved_rst_filepath = os.path.join(output_dir, "unsolved_" + molecule_name + file_subtype + ".rst7")
+        
+         three_three_array_pdb_filepath = os.path.join(output_dir, system_name + ".pdb")
+         unsolved_three_three_array_pdb_filepath = os.path.join(output_dir, "unsolved_" + molecule_name + file_subtype + ".pdb")
+    
+         head_rescode, mainchain_rescode, tail_rescode = self.manager.retrieve_polymeric_rescodes(base_molecule_name)
+
+         file_content = f"""source leaprc.gaff
+         source leaprc.water.fb3
+         source leaprc.protein.ff14SB
+
+         loadamberprep {head_prepi_filepath}
+         loadamberprep {mainchain_prepi_filepath}
+         loadamberprep {tail_prepi_filepath}
+
+         list
+            
+         {molecule_name_1} = loadpdb {pdb_file}
+         {molecule_name_2} = loadpdb {pdb_file}
+         {molecule_name_3} = loadpdb {pdb_file}
+         {molecule_name_4} = loadpdb {pdb_file}
+         {molecule_name_5} = loadpdb {pdb_file}
+         {molecule_name_6} = loadpdb {pdb_file}
+         {molecule_name_7} = loadpdb {pdb_file}
+         {molecule_name_8} = loadpdb {pdb_file}
+         {molecule_name_9} = loadpdb {pdb_file}
+
+         check {molecule_name_1}
+         
+         translate {molecule_name_1} {translate_line_1}
+         translate {molecule_name_2} {translate_line_2}
+         translate {molecule_name_3} {translate_line_3}
+         translate {molecule_name_4} {translate_line_4}
+         translate {molecule_name_5} {translate_line_5}
+         translate {molecule_name_6} {translate_line_6}
+         translate {molecule_name_7} {translate_line_7}
+         translate {molecule_name_8} {translate_line_8}
+         translate {molecule_name_9} {translate_line_9}
+         
+         system = combine {combine_line}
+         unsolved_system = system
+         setBox unsolved_system vdw 0.0
+         saveamberparm unsolved_system {unsolved_prmtop_filepath} {unsolved_rst_filepath}
+         savepdb unsolved_system {unsolved_three_three_array_pdb_filepath}
+    
+         solvatebox system TIP3PBOX {buffer}
+
+         saveamberparm system {prmtop_filepath} {rst_filepath}
+         savepdb system {three_three_array_pdb_filepath}
+         quit
+         """
+    
+         with open(intleap_path, 'w') as file:
+             file.write(file_content)
+            
+         leap_command = "tleap -f " + intleap_path
+         print(intleap_path)
+         try:
+             result = subprocess.run(leap_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+             if result.returncode == 0:
+                 # Command executed successfully
+                print("Output:", result.stdout)
+             else:
+                 # Command failed, print error message
+                 print("Error:", result.stderr)
+         except Exception as e:
+             # Exception occurred during subprocess execution
+             print("Exception:", e)
+
+         cd_command = "cd " + str(self.manager.main_dir)
+         result = subprocess.run(cd_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+         return(system_name, unsolved_system_name)    
+    
+    def solvate_pckml_3_3_array(self, dirs, molecule_name, base_molecule_name):
+        """
+        Solvates a 3x3 polymer array using tleap and generates the necessary parameter and coordinate files.
+
+        This function prepares a solvated 3x3 array of polymer molecules by executing a series of steps:
+        1. Calculates the dimensions of the polymer array.
+        2. Changes the working directory to the base molecule directory.
+        3. Constructs paths for required files and directories.
+        4. Generates the tleap input script to load the polymer array, solvate it, and save the parameter and coordinate files.
+        5. Executes tleap with the generated input script.
+        6. Changes the working directory back to the main directory.
+
+        Parameters:
+        dirs (object): An object that provides methods for directory and file management.
+        molecule_name (str): The name of the molecule to be used for creating the polymer array.
+        base_molecule_name (str): The base name of the molecule used to identify the polymeric residue codes and file paths.
+
+        Returns:
+        None
+
+        The function performs the following steps:
+        1. Loads the PDB file path and calculates the dimensions of the polymer array.
+        2. Changes the working directory to the base molecule directory and handles any exceptions that may occur.
+        3. Defines the file paths for the head, mainchain, and tail prepi files.
+        4. Creates the output directory if it does not exist.
+        5. Constructs the file paths for the unsolved and solved PDB files, as well as the parameter and restart files.
+        6. Generates the content for the tleap input file, specifying the solvation box size.
+        7. Writes the tleap input file to the output directory.
+        8. Executes the tleap command and handles the output or any errors.
+        9. Changes the working directory back to the main directory.
+
+        Example usage:
+            solvate_pckml_3_3_array(dirs, 'polymer_molecule', 'base_polymer')
+        """
+        pdb_file = dirs.load_pdb_filepath(molecule_name)
+        x,y,z = self.get_xyz_dists(pdb_file)
+        base_molecule_dir = os.path.join(dirs.molecules_dir, base_molecule_name)
+        cd_command = "cd " + base_molecule_dir
+    
+        try:
+            os.chdir(base_molecule_dir)
+            print("Current directory:", os.getcwd())
+        except Exception as e:
+            print("Exception:", e)
+
+        head_prepi_filepath = "head_" + base_molecule_name + ".prepi"
+        mainchain_prepi_filepath = "mainchain_" + base_molecule_name + ".prepi"
+        tail_prepi_filepath = "tail_" + base_molecule_name + ".prepi"
+
+        file_subtype = "_3_3_array"
+        output_dir = os.path.join(dirs.systems_dir, (molecule_name + file_subtype))
+
+        box_sizes = int((x)), int((y)), int((z))
+        box_vol = box_sizes[0]*box_sizes[1]*box_sizes[2]
+
+        unsolved_pdb_name = "unsolved_" + molecule_name + file_subtype + ".pdb"
+        unsolved_pdb_filepath = os.path.join(dirs.systems_dir, (molecule_name + file_subtype), unsolved_pdb_name)
+
+        solved_pdb_name = "solved_" + molecule_name + file_subtype + ".pdb"
+        solved_pdb_filepath = os.path.join(dirs.systems_dir, (molecule_name + file_subtype), solved_pdb_name)
+
+        prmtop_filepath =  os.path.join(output_dir, molecule_name + file_subtype + "_" + str(box_vol) + ".prmtop")
+        rst_filepath = os.path.join(output_dir, molecule_name + file_subtype + "_" + str(box_vol) + ".rst7")
+
+        intleap_filepath =  molecule_name + file_subtype + "_" + str(box_vol) + ".intleap"
+
+        box_dist_line = "{" + str(box_sizes[0]) + " " + str(box_sizes[1]) + " " + str(box_sizes[2]) + "}"
+
+        file_content = f"""source leaprc.gaff
+            source leaprc.water.fb3
+            source leaprc.protein.ff14SB
+
+            loadamberprep {head_prepi_filepath}
+            loadamberprep {mainchain_prepi_filepath}
+            loadamberprep {tail_prepi_filepath}
+
+            list
+
+            array = loadpdb {unsolved_pdb_filepath}
+
+            check array
+
+            solvatebox array TIP3PBOX {box_dist_line}
+
+            saveamberparm array {prmtop_filepath} {rst_filepath}
+            savepdb array {solved_pdb_filepath}
+            quit
+            """
+
+        with open(intleap_filepath, 'w') as file:
+            file.write(file_content)
+
+        leap_command = "tleap -f " + intleap_filepath
+        print(leap_command)
+        try:
+            result = subprocess.run(leap_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            if result.returncode == 0:
+                 # Command executed successfully
+                print("Output:", result.stdout)
+            else:
+                 # Command failed, print error message
+                print("Error:", result.stderr)
+        except Exception as e:
+             # Exception occurred during subprocess execution
+            print("Exception:", e)
+
+        cd_command = "cd " + str(dirs.main_dir)
+        result = subprocess.run(cd_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        return(None)
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
+import nglview as nv
+import MDAnalysis as mda
+from MDAnalysis.lib import distances 
+from MDAnalysis.analysis import rdf
+import MDAnalysisData as data
+import re
+import os
+
+class Analysis():
+    cached_ROG_data = None
+    cached_ROG_average = None
+    cached_COG_data = None
+    cached_COG_average = None
+    
+    
+    def __init__(self):
+        pass
+
+    @staticmethod
+    def plot_ROG(atom_group, atom_group_name, graph_filepath=None):
+        # NOTE: there is an issue when trying to save the graph as a png
+
+        rog = [] # List to storeresults
+        #Os = u.select_atoms('type os') # Select atom types
+
+        # Iterate over each frame and collect ROG
+        for ts in self.u.trajectory:
+            rog.append(atom_group.radius_of_gyration())
+
+        # Plot the frequencies of the residue names
+        plt.plot(rog)
+        plt.figure(figsize=(10, 6))
+        plt.xlabel('frame')
+        plt.ylabel(r"R$_{g}$ ($\AA$)")
+       # plt.title()
+        # Save the plot to a file
+        if graph_filepath == None:
+            # Default path is just used generally and not part of another analysis
+            graph_filepath = os.path.join(os.getcwd(), "ROG_graph")
+            plt.savefig(graph_filepath)
+        else:
+            plt.savefig(graph_filepath)
+        plt.close()
+
+        Analysis.cached_ROG_data = rog
+        Analysis.cached_ROG_average = sum(rog) / len(rog)
+        return(None)
+
+    @staticmethod
+    def plot_COG(atom_group, atom_group_name, graph_filepath=None):
+        cog = [] # List to storeresults
+        #Os = u.select_atoms('type os') # Select atom types
+
+        # Iterate over each frame and collect ROG
+        for ts in self.u.trajectory:
+            cog.append(atom_group.center_of_mass())
+
+        cog = np.array(cog)
+        # Plot the frequencies of the residue names
+        # Now let's plot each coordinate separately
+        plt.plot(cog[:, 0], label='x')
+        plt.plot(cog[:, 1], label='y')
+        plt.plot(cog[:, 2], label='z')
+        plt.figure(figsize=(10, 6))
+        plt.xlabel('frame')
+        plt.ylabel(r"R$_{g}$ ($\AA$)")
+       # plt.title()
+        # Save the plot to a file
+        if graph_filepath == None:
+            # Default path is just used generally and not part of another analysis
+            graph_filepath = os.path.join(os.getcwd(), "ROG_graph")
+            plt.savefig(graph_filepath)
+        else:
+            plt.savefig(graph_filepath)
+        plt.close()
+
+        Analysis.cached_COG_data = cog
+        Analysis.cached_COG_average = (sum(cog[:, 0]) / len(cog[:, 0])), (sum(cog[:, 1]) / len(cog[:, 1])), (sum(cog[:, 2]) / len(cog[:, 2]))
+        return(None)
+
+class SinglePolyAnalysis(Analysis):
+    # Class for intialsing and building files and folders for polymer simulation set up and the like
+    def __init__(self, topology_file, trajectory_file):
+        print("This function is for single solvated polymers")
+        print("Do you wish to continue?")
+        print("Enter: y/n")
+        print("")
+        confirmation = input()
+        if confirmation == "n":
+            print("")
+            print("Instance creation aborted by user.")
+            return      
+        if confirmation == "y":
+            self.u = mda.Universe(topology_file, trajectory_file)
+            self.topology_file = topology_file
+            self.trajectory_file = trajectory_file
+            self.output_filepath = os.path.dirname(self.trajectory_file)
+
+    def extract_filename(self, filepath):
+        # Extract the filename from the full path
+        filename_with_extension = filepath.split('/')[-1]
+    
+        # Remove the date and time (pattern: YYYY-MM-DD_HHMMSS)
+        filename_without_date = re.sub(r'_\d{4}-\d{2}-\d{2}_\d{6}', '', filename_with_extension)
+    
+        # Remove the file extension
+        filename_without_extension = filename_without_date.split('.')[0]
+    
+        return(filename_without_extension)
+        
+    def select_polymers(self):
+        unique_residues = []
+        for residue in self.u.residues:
+            if residue.resname not in unique_residues:
+                unique_residues.append(residue.resname)
+                polymer_atom_group = self.u.select_atoms('not resname WAT')
+    
+        return(polymer_atom_group)
+
+    def plot_ROG(self, atom_group, atom_group_name):
+        graph_filepath = os.path.join(self.output_filepath, (self.extract_filename(self.trajectory_file) + "_" + atom_group_name + "_ROG_graph"))
+        super().plot_ROG(self, atom_group, atom_group_name, graph_filepath)
 
 
 
