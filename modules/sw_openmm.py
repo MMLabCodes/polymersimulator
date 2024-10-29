@@ -551,6 +551,7 @@ class BuildSimulation():
         - ANISimulation: A class representing ANI (Atomic Neural Network Interaction) molecular dynamics simulations.
         - AmberSimulation: A class representing AMBER molecular dynamics simulations.
     """ 
+    savepdb_traj = False
     pressure = 1
     temp = 300
     timestep = 2.0
@@ -743,10 +744,10 @@ class BuildSimulation():
         total_steps = (((max_temp-start_temp)*1000 + holding_steps)*2)*cycles
         
         # Set up reporters
-        # PDB trajectory - this is slighlty redundant with the addition of the DCD trajectory, but it is still useful for        
-        #output_pdbname = os.path.join(directories.systems_dir, self.filename, (self.filename + "_anneal.pdb"))
-        output_pdbname = os.path.join(self.output_dir, (self.filename + "_anneal_" + str(self.timestamp) + ".pdb" ))
-        simulation.reporters.append(app.PDBReporter(output_pdbname, self.reporter_freq))
+        # PDB trajectory - this is slighlty redundant with the addition of the DCD trajectory, but it is still useful for 
+        if self.savepdb_traj == True:
+            output_pdbname = os.path.join(self.output_dir, (self.filename + "_anneal_" + str(self.timestamp) + ".pdb" ))
+            simulation.reporters.append(app.PDBReporter(output_pdbname, self.reporter_freq))
         
         # DCD trajectory
         #output_dcdname = os.path.join(directories.systems_dir, self.filename, (self.filename + "_anneal"))
@@ -881,9 +882,9 @@ class BuildSimulation():
         simulation.context.setVelocitiesToTemperature(temp*kelvin)
         
         # Set up reporters
-        #output_pdbname = os.path.join(directories.systems_dir, self.filename, (self.filename +  "_" + str(pressure) + "_atm_traj.pdb"))
-        output_pdbname = os.path.join(self.output_dir, (self.filename +  "_" + str(pressure) + "_atm_" + str(self.timestamp) + ".pdb"))
-        simulation.reporters.append(app.PDBReporter(output_pdbname, self.reporter_freq))
+        if self.savepdb_traj == True:
+            output_pdbname = os.path.join(self.output_dir, (self.filename +  "_" + str(pressure) + "_atm_" + str(self.timestamp) + ".pdb"))
+            simulation.reporters.append(app.PDBReporter(output_pdbname, self.reporter_freq))
     
         # DCD trajectory
         #output_dcdname = os.path.join(directories.systems_dir, self.filename, (self.filename +  "_" + str(pressure) + "_atm_traj.dcd"))
@@ -984,10 +985,9 @@ class BuildSimulation():
         
         # Set up reporters
         # PDB trajectory - this is slighlty redundant with the addition of the DCD trajectory, but it is still useful for 
-        #   visualisation of the system and coloring specific residues 
-        #output_pdbname = os.path.join(directories.systems_dir, self.filename, (self.filename + "_prod_traj.pdb"))
-        output_pdbname = os.path.join(self.output_dir, (self.filename + "_prod_" + str(self.timestamp) + ".pdb"))
-        simulation.reporters.append(app.PDBReporter(output_pdbname, self.reporter_freq))
+        if self.savepdb_traj == True:
+            output_pdbname = os.path.join(self.output_dir, (self.filename + "_prod_" + str(self.timestamp) + ".pdb"))
+            simulation.reporters.append(app.PDBReporter(output_pdbname, self.reporter_freq))
         
         # DCD trajectory
         #output_dcdname = os.path.join(directories.systems_dir, self.filename, (self.filename + "_prod_traj"))
@@ -1066,8 +1066,9 @@ class BuildSimulation():
         
         # Set up reporters
         # PDB trajectory - this is slighlty redundant with the addition of the DCD trajectory, but it is still useful for 
-        output_pdbname = os.path.join(self.output_dir, (output_filename + ".pdb" ))
-        simulation.reporters.append(app.PDBReporter(output_pdbname, self.reporter_freq))
+        if self.savepdb_traj == True:
+            output_pdbname = os.path.join(self.output_dir, (output_filename + ".pdb" ))
+            simulation.reporters.append(app.PDBReporter(output_pdbname, self.reporter_freq))
         
         # DCD trajectory
         output_dcdname = os.path.join(self.output_dir, output_filename)
@@ -1179,10 +1180,9 @@ class BuildSimulation():
         
         # Set up reporters
         # PDB trajectory - this is slighlty redundant with the addition of the DCD trajectory, but it is still useful for 
-        #   visualisation of the system and coloring specific residues 
-        #output_pdbname = os.path.join(directories.systems_dir, self.filename, (self.filename + "_prod_traj.pdb"))
-        output_pdbname = os.path.join(self.output_dir, (self.filename + "_strain_" + str(self.timestamp) + ".pdb"))
-        simulation.reporters.append(app.PDBReporter(output_pdbname, self.reporter_freq))
+        if self.savepdb_traj == True:
+            output_pdbname = os.path.join(self.output_dir, (self.filename + "_strain_" + str(self.timestamp) + ".pdb"))
+            simulation.reporters.append(app.PDBReporter(output_pdbname, self.reporter_freq))
         
         # DCD trajectory
         #output_dcdname = os.path.join(directories.systems_dir, self.filename, (self.filename + "_prod_traj"))
@@ -1233,6 +1233,17 @@ class BuildSimulation():
     @classmethod
     def display_start_time(cls):
         print("Simulation initiated at: ", cls.timestamp)
+
+    @classmethod
+    def savepdb_trajectories(cls, boolean):
+        if not isinstance(boolean, bool):
+            print("Please pass True or False to this function.")
+            return
+        cls.savepdb_traj = boolean
+        if boolean:
+            print("Simulation will save trajectories in both .pdb and .dcd format.")
+        else:
+            print("Simulation will save trajectories in .dcd format only.")
     
     @classmethod
     def set_temperature(cls, temp): 
