@@ -1,5 +1,6 @@
 from rdkit import Chem
 from rdkit.Chem import Draw, AllChem
+import math
 
 def vol_from_smiles(smiles):
     mol = Chem.AddHs(Chem.MolFromSmiles(smiles))
@@ -11,6 +12,46 @@ def vol_from_mol(mol):
     AllChem.EmbedMolecule(mol)
     volume = AllChem.ComputeMolVolume(mol)   
     return volume
+
+def estimated_volume(pdb_file_path):
+    # Van der Waals radii (in angstroms) for common elements
+    # https://periodictable.com/Properties/A/VanDerWaalsRadius.v.html
+    vdw_radii = {
+        'H': 1.20,  # Hydrogen
+        'C': 1.70,  # Carbon
+        'N': 1.55,  # Nitrogen
+        'O': 1.52,  # Oxygen
+        'P': 1.80,  # Phosphorus
+        'S': 1.80,  # Sulfur
+        'F': 1.47,  # Fluorine
+        'Cl': 1.75, # Chlorine
+        'Br': 1.85, # Bromine
+        'I': 1.98   # Iodine
+    }
+
+    # Load the PDB file
+    mol = Chem.MolFromPDBFile(pdb_file_path, removeHs=False)
+    if not mol:
+        print("Failed to load molecule from PDB.")
+        return None
+
+    # Initialize total volume
+    total_volume = 0.0
+
+    # Iterate over atoms to sum up their volumes
+    for atom in mol.GetAtoms():
+        symbol = atom.GetSymbol()
+        
+        # Check if the atom's VDW radius is in our dictionary
+        if symbol in vdw_radii:
+            radius = vdw_radii[symbol]
+            # Calculate volume of the atom and add to total volume
+            atom_volume = (4/3) * math.pi * (radius ** 3)
+            total_volume += atom_volume
+        else:
+            print(f"Warning: Van der Waals radius not found for atom type '{symbol}'.")
+
+    return total_volume
 
 # Function to calculate volume from a PDB file
 def vol_from_pdb(pdb_file):
