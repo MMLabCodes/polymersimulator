@@ -5,10 +5,12 @@ Created on Tue Jun  4 11:13:57 2024
 @author: danie
 """
 from modules.sw_basic_functions import *
+#from modules.sw_custom_decorators import *
 from collections import defaultdict
 import os as os
 
 import matplotlib.pyplot as plt
+from sklearn.metrics import r2_score
 import seaborn as sns
 import numpy as np
 import nglview as nv
@@ -20,6 +22,15 @@ from MDAnalysis.analysis.polymer import PersistenceLength
 
 import pandas as pd
 
+def initialise_analysis(manager, system_name, base_molecule_name, poly_len, sim_index=0):
+    '''
+    This function will require an update as it only parses one type of simulation stage at the minute
+    '''
+    sim_avail = manager.simulations_avail(system_name)
+    masterclass = master_anal(manager, system_name, base_molecule_name, sim_avail[sim_index], poly_len)
+    universe = Universe(masterclass, 'temp_ramp_cool', '.dcd')
+    return(universe)
+
 class master_anal():
     def __init__(self, manager, system_name, base_molecule_name, simulation_directory, poly_length=None):
         self.manager = manager
@@ -28,6 +39,8 @@ class master_anal():
         self.simulation_directory = simulation_directory
         self.simulation_files = self.group_files()
         self.min_filepath = os.path.join(self.simulation_directory, self.simulation_files["min"][0])
+        self.base_pdb = self.manager.load_pdb_filepath(base_molecule_name)
+        self.base_poly_vol = estimated_volume(self.base_pdb)
         # It is important to note that passing a polymer length is only appropriate where the system contains polymers of the same length
         if poly_length is not None:
             self.poly_length = poly_length
@@ -39,9 +52,8 @@ class master_anal():
             self.poly_length = None 
             self.residue_codes = self.extract_rescodes_and_resnums(self.min_filepath)[1]
             self.system_vol = None
-        self.simulation_steps = list(self.simulation_files.keys())
-        self.base_pdb = self.manager.load_pdb_filepath(base_molecule_name)
-        self.base_poly_vol = vol_from_pdb(self.base_pdb)
+        self.simulation_stages = list(self.simulation_files.keys())
+        
 
         
     def group_files(self):
@@ -100,7 +112,7 @@ class master_anal():
         return num_polymers, polymers_dict, unique_residue_codes   
 
 class Universe():
-    def __init__(self, master_anal, sim_key, traj_format=None):
+    def __init__(self, master_anal, sim_stage, traj_format=None):
         if traj_format is None:
             self.traj_format = ".pdb"
         else:
@@ -109,28 +121,201 @@ class Universe():
                 print("please enter '.pdb' or '.dcd' format.")
             else:
                 self.traj_format = traj_format
-        self.sim_key = sim_key
+        self.sim_stage = sim_stage
         self.masterclass = master_anal
         self.topology = self.masterclass.topology_file
         # True tells 'select_file' we are searching for the traj
         self.trajectory = os.path.join(self.masterclass.simulation_directory, self.select_file(True))
         self.universe = mda.Universe(self.topology, self.trajectory)
-        self.output_filename = os.path.join(self.masterclass.simulation_directory, self.masterclass.system_name + f"_{self.sim_key}")
+        self.output_filename = os.path.join(self.masterclass.simulation_directory, self.masterclass.system_name + f"_{self.sim_stage}")
         # False tells 'select_file' we are searching for the data file
         self.data_file = os.path.join(self.masterclass.simulation_directory, self.select_file(False))
         self.data = pd.read_csv(self.data_file)
 
     def select_file(self, traj):
-        if self.sim_key in self.masterclass.simulation_files:
+        if self.sim_stage in self.masterclass.simulation_files:
             # Filter the files based on the specified extension
             if traj == True:
-                matching_files = [filename for filename in self.masterclass.simulation_files[self.sim_key] if filename.endswith(self.traj_format)]
+                matching_files = [filename for filename in self.masterclass.simulation_files[self.sim_stage] if filename.endswith(self.traj_format)]
             if traj == False:
-                matching_files = [filename for filename in self.masterclass.simulation_files[self.sim_key] if filename.endswith(".txt")]            
+                matching_files = [filename for filename in self.masterclass.simulation_files[self.sim_stage] if filename.endswith(".txt")]            
             
             if matching_files:
                 return matching_files[0]  # Return the first matching file
             else:
                 return f"No files with extension '{extension}' found for key '{self.sim_key}'."
         else:
-            return f"Key '{self.sim_key}' not found in the dictionary."
+            return f"Key '{self.sim_stage}' not found in the dictionary."
+
+    def select_polymer(self, polymer_name, select_rest=False):
+        # Select the first polymer (Polymer_1)
+        first_polymer_indices = self.masterclass.poly_sel_dict[polymer_name]
+
+        # Convert the list of indices into a selection string
+        if select_rest == False:
+            selection_string = "resid " + " ".join(map(str, first_polymer_indices))
+        if select_rest == True:
+            selection_string = "not resid " + " ".join(map(str, first_polymer_indices))          
+        selected_atoms = self.universe.select_atoms(selection_string)
+
+        return(selected_atoms)
+
+def select_not_polymer(polymer_name):
+    # Get the indices of the specified polymer from the masterclass
+    polymer_indices = universe.masterclass.poly_sel_dict[polymer_name]
+
+    # Convert the list of indices into a selection string
+    # Using `not` to exclude the specified residues
+    selection_string = "not resid " + " ".join(map(str, polymer_indices))
+
+    # Use the selection string in MDAnalysis
+    selected_atoms = universe.universe.select_atoms(selection_string)
+
+    return selected_atoms
+
+class Analysis:
+
+    @staticmethod
+    def calc_free_volume(universe, plot=None, bins=25, from_multiple=False):
+        u = universe.universe
+        n_frames = len(u.trajectory)
+        free_volumes = []
+        temperatures = universe.data["Temperature (K)"]  # Assuming temperature data is available
+
+        for ts in u.trajectory:
+            box_vectors = ts.dimensions
+            volume = box_vectors[0] * box_vectors[1] * box_vectors[2]
+            free_volume = volume - universe.masterclass.system_vol
+            free_volumes.append(free_volume)
+
+        avg_free_volume = sum(free_volumes) / len(free_volumes)
+
+        if plot is None or plot is False:
+            print("The returned value is an average volume across this whole simulation stage. Do not report this value if a thermal ramping was used as values will not be representative of the system at any point.")
+            return avg_free_volume
+        else:
+            # Binning the data using np.histogram for both free volumes and temperatures
+            bin_indices = np.digitize(temperatures, bins=np.linspace(200, 700, bins))
+            binned_volumes = []
+            binned_temperatures = []
+
+            for i in range(1, bins + 1):
+                bin_volumes = [free_volumes[j] for j in range(len(bin_indices)) if bin_indices[j] == i]
+                bin_temps = [temperatures[j] for j in range(len(bin_indices)) if bin_indices[j] == i]
+
+                if bin_volumes:
+                    binned_volumes.append(np.mean(bin_volumes))
+                    binned_temperatures.append(np.mean(bin_temps))
+
+            # Return binned data if specified
+            if plot == "multiple":
+                return binned_temperatures, binned_volumes
+
+            # Plot the binned data as a scatter plot
+            plt.scatter(binned_temperatures, binned_volumes, marker='o', label="Data Points")
+
+            # Fit and plot the best-fit line
+            best_degree = 1
+            best_r2 = -np.inf
+            best_fit_line = None
+
+            # Test polynomial fits of degree 1 (linear) to 3
+            for degree in range(1, 4):
+                coeffs = np.polyfit(binned_temperatures, binned_volumes, degree)
+                poly = np.poly1d(coeffs)
+                fit_line = poly(binned_temperatures)
+
+                # Calculate R² score to evaluate the fit
+                r2 = r2_score(binned_volumes, fit_line)
+                if r2 > best_r2:
+                    best_r2 = r2
+                    best_degree = degree
+                    best_fit_line = fit_line
+
+            # Plot the best-fit line
+            plt.plot(binned_temperatures, best_fit_line, label=f"{universe.masterclass.system_name} Best Fit (Degree {best_degree})", color='red')
+
+            # Label the axes
+            plt.xlabel('Temperature (K)')
+            plt.ylabel('Free Volume (Å³)')
+
+            # Add a title
+            plt.title('Binned Free Volume vs Temperature with Best Fits')
+
+            # Add a legend
+            plt.legend()
+
+            # Save the graph
+            savepath = os.path.join(universe.masterclass.simulation_directory, "Binned_Free_Vol_vs_Temp_BestFit.png")
+            plt.savefig(savepath)
+
+            # Show the plot
+            plt.show()
+
+            return binned_temperatures, binned_volumes
+
+    @staticmethod
+    def calc_free_volume_multiple(universe_list, plot=True, bins=25):
+        """
+        This function takes a list of universes, calls the calc_free_volume function for each, 
+        and plots the results on the same graph.
+        
+        :param universe_list: List of universes
+        :param plot: Boolean to indicate if you want to plot or just return the values
+        :param bins: Number of bins for data binning
+        :return: A list of (temperatures, volumes) for each universe
+        """
+        all_binned_temperatures = []
+        all_binned_volumes = []
+        colors = ['blue', 'green', 'orange', 'purple', 'red']  # Define colors for different universes
+        labels = []
+
+        # Loop over each universe
+        for i in range(len(universe_list)):
+            # Call the existing calc_free_volume function
+            binned_temperatures, binned_volumes = Analysis.calc_free_volume(universe_list[i], plot="multiple", bins=bins)
+            all_binned_temperatures.append(binned_temperatures)
+            all_binned_volumes.append(binned_volumes)
+
+            # Add label for the universe for plotting
+            labels.append(universe_list[i].masterclass.system_name)
+
+            # Plot the volumes for this universe
+            plt.scatter(binned_temperatures, binned_volumes, color=colors[i % len(colors)], label=universe_list[i].masterclass.system_name)
+
+            # Fit and plot the best-fit line for this universe
+            best_degree = 1
+            best_r2 = -np.inf
+            best_fit_line = None
+
+            # Test polynomial fits of degree 1 (linear) to 3
+            for degree in range(1, 4):
+                coeffs = np.polyfit(binned_temperatures, binned_volumes, degree)
+                poly = np.poly1d(coeffs)
+                fit_line = poly(binned_temperatures)
+
+                # Calculate R² score to evaluate the fit
+                r2 = r2_score(binned_volumes, fit_line)
+                if r2 > best_r2:
+                    best_r2 = r2
+                    best_degree = degree
+                    best_fit_line = fit_line
+
+            # Plot the best-fit line
+            plt.plot(binned_temperatures, best_fit_line, color=colors[i % len(colors)])
+
+        # Label the axes
+        plt.xlabel('Temperature (K)')
+        plt.ylabel('Free Volume (Å³)')
+
+        # Add a title
+        plt.title('Free Volume vs Temperature')
+
+        # Add a legend
+        plt.legend()
+
+        # Save the graph
+        savepath = os.path.join(universe_list[0].masterclass.simulation_directory, "Multi_Universe_Free_Vol_vs_Temp.png")
+        plt.savefig(savepath)
+
+        return all_binned_temperatures, all_binned_volumes
