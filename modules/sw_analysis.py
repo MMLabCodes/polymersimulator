@@ -337,31 +337,48 @@ class Analysis:
         return all_binned_temperatures, all_binned_volumes
 
     @staticmethod
-    def plot_ROG(universe, atom_group, atom_group_name, graph_filname="_ROG_graph"):
+    def plot_ROG(universe_object, atom_group, atom_group_name, graph_filename=None, graph_title=None):
+        if graph_filename == None:
+            graph_filename = "_ROG_graph"
+        if graph_title == None:
+            graph_title = "ROG_graph"
+        
         # universe = mdanalysis univers
         # atom_group = mdanalysis atom group
         # atom_group_name = str of atom_group_identifier (i.e. "_polymer", "_polymer_backbone", ect..)
 
         rog = []
 
-        for ts in universe.trajectory:
+        for ts in universe_object.universe.trajectory:
             rog.append(atom_group.radius_of_gyration())
 
         plt.plot(rog, linewidth=0.2)
-        plt.xlabel('frame')
+        plt.xlabel('Time (fs)')
         plt.ylabel(r"R$_{g}$ ($\AA$)")
         plt.ylim(bottom=0)
         plt.ylim(top=20)
-        if not hasattr(universe, 'output_filename'):
+        plt.title(graph_title)
+        if hasattr(universe_object, "output_filename"):
+            # Default path is just used generally and not part of another analysis
+            graph_filepath = universe_object.output_filename + graph_filename
+        else:
             # Default path is just used generally and not part of another analysis
             graph_filepath = os.path.join(os.getcwd(), "ROG_graph")
-            print(graph_filepath)
-        else:
-            graph_filepath = unvierse.output_filename + graph_filename
+        
         plt.savefig(graph_filepath)
         avg_rog = sum(rog) / len(rog)
         return(avg_rog, rog)
 
+    @staticmethod
+    def plot_ROG_5_5_array(universe_object):
+        graph_title = universe_object.masterclass.system_name + "_" + universe_object.sim_stage
+        avg_rogs = []
+        for i in range(25):
+            selected_atoms = universe_object.select_polymer("Polymer_" + str(i+1))
+            rog_anal = Analysis.plot_ROG(universe_object.universe, selected_atoms, ("Polymer_" + str(i+1)), "_5_5_array")
+            avg_rogs.append(rog_anal[0])
+
+        return(None)
 
 
 
