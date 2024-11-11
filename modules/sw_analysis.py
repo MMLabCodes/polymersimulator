@@ -10,6 +10,7 @@ from collections import defaultdict
 import os as os
 
 import matplotlib.pyplot as plt
+import matplotlib.cm as cm
 from sklearn.metrics import r2_score
 import seaborn as sns
 import numpy as np
@@ -259,7 +260,7 @@ class Analysis:
         """
         This function takes a list of universes, calls the calc_free_volume function for each, 
         and plots the results on the same graph.
-        
+
         :param universe_list: List of universes
         :param plot: Boolean to indicate if you want to plot or just return the values
         :param bins: Number of bins for data binning
@@ -267,8 +268,9 @@ class Analysis:
         """
         all_binned_temperatures = []
         all_binned_volumes = []
-        colors = ['blue', 'green', 'orange', 'purple', 'red']  # Define colors for different universes
-        labels = []
+        
+        # Generate colors from a colormap based on the number of universes
+        colormap = cm.get_cmap('inferno', len(universe_list))  # Choose a colormap like 'viridis'
 
         # Loop over each universe
         for i in range(len(universe_list)):
@@ -277,11 +279,15 @@ class Analysis:
             all_binned_temperatures.append(binned_temperatures)
             all_binned_volumes.append(binned_volumes)
 
-            # Add label for the universe for plotting
-            labels.append(universe_list[i].masterclass.system_name)
+            # Assign a unique color from the colormap
+            color = colormap(i)
 
-            # Plot the volumes for this universe
-            plt.scatter(binned_temperatures, binned_volumes, color=colors[i % len(colors)], label=universe_list[i].masterclass.system_name)
+            # Plot the volumes for this universe using crosses as markers
+            plt.scatter(
+                binned_temperatures, binned_volumes, 
+                color=color, label=universe_list[i].masterclass.system_name, 
+                marker='x'
+            )
 
             # Fit and plot the best-fit line for this universe
             best_degree = 1
@@ -302,7 +308,7 @@ class Analysis:
                     best_fit_line = fit_line
 
             # Plot the best-fit line
-            plt.plot(binned_temperatures, best_fit_line, color=colors[i % len(colors)])
+            plt.plot(binned_temperatures, best_fit_line, color=color)
 
         # Label the axes
         plt.xlabel('Temperature (K)')
@@ -311,11 +317,21 @@ class Analysis:
         # Add a title
         plt.title('Free Volume vs Temperature')
 
-        # Add a legend
-        plt.legend()
+        # Add a legend to the right side of the plot
+        plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+
+        # Adjust layout to ensure the legend doesn't overlap with the plot
+       # plt.tight_layout(rect=[0, 0, 0.85, 1])
 
         # Save the graph
         savepath = os.path.join(universe_list[0].masterclass.simulation_directory, "Multi_Universe_Free_Vol_vs_Temp.png")
         plt.savefig(savepath)
+
+        # Show plot if requested
+        if plot:
+            plt.show()
+
+        # Return all data for potential further analysis
+        return all_binned_temperatures, all_binned_volumes
 
         return all_binned_temperatures, all_binned_volumes
