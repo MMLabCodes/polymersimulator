@@ -335,3 +335,62 @@ class Analysis:
         return all_binned_temperatures, all_binned_volumes
 
         return all_binned_temperatures, all_binned_volumes
+
+    @staticmethod
+    def plot_ROG(universe, atom_group, atom_group_name, graph_filname="_ROG_graph"):
+        # universe = mdanalysis univers
+        # atom_group = mdanalysis atom group
+        # atom_group_name = str of atom_group_identifier (i.e. "_polymer", "_polymer_backbone", ect..)
+
+        rog = []
+
+        for ts in universe.trajectory:
+            rog.append(atom_group.radius_of_gyration())
+
+        plt.plot(rog, linewidth=0.2)
+        plt.xlabel('frame')
+        plt.ylabel(r"R$_{g}$ ($\AA$)")
+        plt.ylim(bottom=0)
+        plt.ylim(top=20)
+        if not hasattr(universe, 'output_filename'):
+            # Default path is just used generally and not part of another analysis
+            graph_filepath = os.path.join(os.getcwd(), "ROG_graph")
+            print(graph_filepath)
+        else:
+            graph_filepath = unvierse.output_filename + graph_filename
+        plt.savefig(graph_filepath)
+        avg_rog = sum(rog) / len(rog)
+        return(avg_rog, rog)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
