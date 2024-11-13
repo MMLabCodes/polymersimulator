@@ -337,7 +337,7 @@ class Analysis:
         return all_binned_temperatures, all_binned_volumes
 
     @staticmethod
-    def plot_ROG(universe_object, atom_group, atom_group_name, graph_filename=None, graph_title=None):
+    def plot_ROG(universe_object, atom_group, graph_filename=None, graph_title=None):
         if graph_filename == None:
             graph_filename = "_ROG_graph"
         if graph_title == None:
@@ -375,7 +375,7 @@ class Analysis:
         avg_rogs = []
         for i in range(25):
             selected_atoms = universe_object.select_polymer("Polymer_" + str(i+1))
-            rog_anal = Analysis.plot_ROG(universe_object.universe, selected_atoms, ("Polymer_" + str(i+1)), "_5_5_array")
+            rog_anal = Analysis.plot_ROG(universe_object, selected_atoms, "_5_5_array_ROG", graph_title)
             avg_rogs.append(rog_anal[0])
 
         return(None)
