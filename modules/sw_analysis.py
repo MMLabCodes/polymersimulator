@@ -380,6 +380,36 @@ class Analysis:
 
         return(None)
 
+    @staticmethod
+    def calc_end_to_end_dist(atom_group):
+        start_pos = atom_group.positions[0]
+        end_pos = atom_group.positions[-1]
+        dist = distances.distance_array(start_pos, end_pos)[0][0]
+        return(dist)
+
+    @staticmethod
+    def plot_end_to_end_dists_5_5_array(universe_object):
+        dists = []
+        for i in range(len(universe_object.masterclass.poly_sel_dict)):
+            poly = universe_object.select_polymer("Polymer_" + str(i+1))
+            dist = Analysis.calc_end_to_end_dist(poly)
+            dists.append(dist)
+
+        plt.figure(figsize=(8,6))
+        plt.plot(range(1, len(dists) + 1), dists, marker='o', linestyle='-', color='b', label='End-to-end Distance')
+
+        plt.xlabel("Polymer Index")
+        plt.ylabel("End-to-End Distance (Å)")
+        plt.title(universe_object.masterclass.system_name + "_end_to_end_dists")
+        plt.legend()
+        plt.grid(True)
+        graph_filepath = os.path.join(universe_object.masterclass.simulation_directory, (universe_object.masterclass.system_name + "_5_5_array_end_to_end"))
+        plt.savefig(graph_filepath)
+        plt.show()
+        return(dists)
+    
+        
+
 
 
 
