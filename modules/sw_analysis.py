@@ -409,6 +409,61 @@ class Analysis:
         plt.savefig(graph_filepath)
         plt.show()
         return(dists)
+
+    @staticmethod
+    def plot_end_to_end_dists_5_5_array_statistics(list_of_universe_objects, graph_filename=None, graph_title=None):
+        if graph_title == None:
+            graph_title = "End-to-End Distances with Mean and Standard Deviation for Each System"
+            graph_filepath = os.path.join(os.getcwd(), "End-to-End_graph")
+        if graph_title != None:
+            graph_title = graph_title
+            graph_filepath = os.path.join(list_of_universe_objects[0].masterclass.manager.systems_dir, graph_filename)
+
+        system_distances = {}
+
+        for i in range(len(list_of_universe_objects)):
+            dists = Analysis.plot_end_to_end_dists_5_5_array(list_of_universe_objects[i])
+            system_distances[list_of_universe_objects[i].masterclass.system_name] = dists
+    
+        polymer_codes = [universe.masterclass.polymer_code for universe in list_of_universe_objects]
+
+        # Prepare data for plotting
+        system_names = list(system_distances.keys())  # List of system names for the x-axis
+        distance_values = list(system_distances.values())  # List of distance lists for each system
+
+        # Calculate mean and standard deviation for each system
+        means = [np.mean(dists) for dists in distance_values]
+        std_devs = [np.std(dists) for dists in distance_values]
+
+        # Set up the plot
+        plt.figure(figsize=(10, 6))
+
+        # Scatter plot of individual distances for each system, without adding to the legend
+        for i, distances in enumerate(distance_values):
+            x_vals = [i + 1] * len(distances)  # 1-based indexing for x values
+            plt.scatter(x_vals, distances, alpha=0.6, label="_nolegend_")
+
+        # Plot the means with standard deviation error bars and include in legend
+        plt.errorbar(range(1, len(system_names) + 1), means, yerr=std_devs, fmt='o', color='red', 
+             capsize=5, label='Mean ± Std Dev')
+
+        # Customize the plot
+        plt.xticks(range(1, len(system_names) + 1), polymer_codes, rotation=90)
+        plt.xlabel("Polymer")
+        plt.ylabel("End-to-End Distance (Å)")
+        plt.title(graph_title)
+
+        # Place the legend outside the plot on the right
+        plt.legend(loc='best', borderaxespad=0.)
+
+        plt.grid(axis='y', linestyle='--', alpha=0.7)
+        plt.tight_layout()  # Adjust layout to prevent clipping of tick labels
+        plt.savefig(graph_filepath)
+    
+        # Display the plot
+        plt.show()
+        return(system_distances)
+    
     
         
 
