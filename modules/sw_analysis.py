@@ -35,6 +35,7 @@ def initialise_analysis(manager, system_name, base_molecule_name, poly_len, sim_
 class master_anal():
     def __init__(self, manager, system_name, base_molecule_name, simulation_directory, poly_length=None):
         self.manager = manager
+        self.polymer_code = base_molecule_name.split("_")[0]
         self.system_name = system_name
         self.topology_file = self.manager.load_amber_filepaths(system_name)[0]
         self.simulation_directory = simulation_directory
@@ -388,13 +389,14 @@ class Analysis:
         return(dist)
 
     @staticmethod
-    def plot_end_to_end_dists_5_5_array(universe_object):
+    def plot_end_to_end_dists_5_5_array(universe_object, plot=False):
         dists = []
         for i in range(len(universe_object.masterclass.poly_sel_dict)):
             poly = universe_object.select_polymer("Polymer_" + str(i+1))
             dist = Analysis.calc_end_to_end_dist(poly)
             dists.append(dist)
-
+        if plot == False:
+            return(dists)
         plt.figure(figsize=(8,6))
         plt.plot(range(1, len(dists) + 1), dists, marker='o', linestyle='-', color='b', label='End-to-end Distance')
 
