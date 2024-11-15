@@ -23,6 +23,9 @@ from MDAnalysis.analysis.polymer import PersistenceLength
 
 import pandas as pd
 
+import warnings
+warnings.filterwarnings("ignore", message="DCDReader currently makes independent timesteps")
+
 def initialise_analysis(manager, system_name, base_molecule_name, poly_len, sim_index=0):
     '''
     This function will require an update as it only parses one type of simulation stage at the minute
@@ -412,28 +415,36 @@ class Analysis:
 
     @staticmethod
     def plot_end_to_end_dists_5_5_array_statistics(list_of_universe_objects, graph_filename=None, graph_title=None):
-        if graph_title == None:
+        if graph_title is None:
             graph_title = "End-to-End Distances with Mean and Standard Deviation for Each System"
             graph_filepath = os.path.join(os.getcwd(), "End-to-End_graph")
-        if graph_title != None:
-            graph_title = graph_title
+        else:
             graph_filepath = os.path.join(list_of_universe_objects[0].masterclass.manager.systems_dir, graph_filename)
 
         system_distances = {}
 
+        # Build the system_distances dictionary with distances as a list
         for i in range(len(list_of_universe_objects)):
             dists = Analysis.plot_end_to_end_dists_5_5_array(list_of_universe_objects[i])
-            system_distances[list_of_universe_objects[i].masterclass.system_name] = dists
+            system_name = list_of_universe_objects[i].masterclass.system_name
+            system_distances[system_name] = {
+                "distances": dists  # Store distances as part of a dictionary
+        }
     
         polymer_codes = [universe.masterclass.polymer_code for universe in list_of_universe_objects]
 
         # Prepare data for plotting
         system_names = list(system_distances.keys())  # List of system names for the x-axis
-        distance_values = list(system_distances.values())  # List of distance lists for each system
+        distance_values = [system_distances[sys]["distances"] for sys in system_names]  # Extract distances
 
         # Calculate mean and standard deviation for each system
         means = [np.mean(dists) for dists in distance_values]
         std_devs = [np.std(dists) for dists in distance_values]
+
+        # Add mean and standard deviation to the dictionary
+        for i, system_name in enumerate(system_names):
+            system_distances[system_name]["mean"] = means[i]
+            system_distances[system_name]["std_dev"] = std_devs[i]
 
         # Set up the plot
         plt.figure(figsize=(10, 6))
@@ -445,7 +456,7 @@ class Analysis:
 
         # Plot the means with standard deviation error bars and include in legend
         plt.errorbar(range(1, len(system_names) + 1), means, yerr=std_devs, fmt='o', color='red', 
-             capsize=5, label='Mean ± Std Dev')
+                 capsize=5, label='Mean ± Std Dev')
 
         # Customize the plot
         plt.xticks(range(1, len(system_names) + 1), polymer_codes, rotation=90)
@@ -453,16 +464,34 @@ class Analysis:
         plt.ylabel("End-to-End Distance (Å)")
         plt.title(graph_title)
 
-        # Place the legend outside the plot on the right
+        # Place the legend inside the plot
         plt.legend(loc='best', borderaxespad=0.)
 
         plt.grid(axis='y', linestyle='--', alpha=0.7)
         plt.tight_layout()  # Adjust layout to prevent clipping of tick labels
         plt.savefig(graph_filepath)
-    
+
         # Display the plot
         plt.show()
-        return(system_distances)
+
+        # Convert the system_distances dictionary to a DataFrame
+        data = {
+            "System": [],
+            "Polymer_Code": [],
+            "Mean_Distance": [],
+            "Std_Dev_Distance": [],
+            "All_Distances": [],
+        }
+        for i, system_name in enumerate(system_names):
+            data["System"].append(system_name)
+            data["Polymer_Code"].append(polymer_codes[i])
+            data["Mean_Distance"].append(system_distances[system_name]["mean"])
+            data["Std_Dev_Distance"].append(system_distances[system_name]["std_dev"])
+            data["All_Distances"].append(system_distances[system_name]["distances"])
+
+        df = pd.DataFrame(data)
+
+        return df
     
     
         
