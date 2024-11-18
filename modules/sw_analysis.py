@@ -165,6 +165,32 @@ class Universe():
 
         return(selected_atoms)
 
+    def select_backbone(self, polymer_name):
+        backbone_smarts = ["[O][C][C][O]", "[O][C][C][C][O]", "[O][C][C][C][C][O]", "[O][C][C][C][C][C][O]", "[O][C][C][C][C][C][C][O]",  "[O][C][C][C][C][C][C][C][O]"]
+        
+        # Select the first polymer (Polymer_1)
+        first_polymer_indices = self.masterclass.poly_sel_dict[polymer_name]
+        selection_string = "resid " + " ".join(map(str, first_polymer_indices))
+        selected_atoms = self.universe.select_atoms(selection_string)
+
+        backbone_results = []
+        for smarts in backbone_smarts:
+            backbone = selected_atoms.select_atoms("smarts {}".format(smarts))
+            backbone_results.append(backbone)
+
+        for result in backbone_results:
+            if result.n_atoms == 0:
+                pass
+            else:
+                return(result)
+
+        print("No backbone identified, consider adding a backbone pattern to this functions source code")
+        return(None)
+
+        
+        
+        
+
 def select_not_polymer(polymer_name):
     # Get the indices of the specified polymer from the masterclass
     polymer_indices = universe.masterclass.poly_sel_dict[polymer_name]
