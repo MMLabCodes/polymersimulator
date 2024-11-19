@@ -565,7 +565,7 @@ class Analysis:
         if plot == False:
             return(pls, pbs)
         plt.figure(figsize=(8,6))
-        plt.plot(range(1, len(dists) + 1), dists, marker='o', linestyle='-', color='b', label='End-to-end Distance')
+        plt.plot(range(1, len(pls) + 1), pls, marker='o', linestyle='-', color='b', label='End-to-end Distance')
 
         plt.xlabel("Polymer Index")
         plt.ylabel("Persitence length (Å)")
