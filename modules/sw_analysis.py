@@ -562,20 +562,40 @@ class Analysis:
     @staticmethod
     def plot_PL_5_5_array(universe_object, plot=False):
         pls, pbs = Analysis.calculate_PL_5_5_array(universe_object)
-        if plot == False:
-            return(pls, pbs)
-        plt.figure(figsize=(8,6))
-        plt.plot(range(1, len(pls) + 1), pls, marker='o', linestyle='-', color='b', label='End-to-end Distance')
-
+        if not plot:
+            return pls, pbs
+    
+        # Plot for persistence lengths (PLs)
+        plt.figure(figsize=(8, 6))
+        plt.plot(range(1, len(pls) + 1), pls, marker='o', linestyle='-', color='b', label='End-to-End Distance')
         plt.xlabel("Polymer Index")
-        plt.ylabel("Persitence length (Å)")
+        plt.ylabel("Persistence Length (Å)")
         plt.title(universe_object.masterclass.system_name + "_persistence_lengths")
         plt.legend()
         plt.grid(True)
-        graph_filepath = os.path.join(universe_object.masterclass.simulation_directory, (universe_object.masterclass.system_name + "_5_5_array_persistence_lengths"))
-        plt.savefig(graph_filepath)
+        graph_filepath_pls = os.path.join(
+            universe_object.masterclass.simulation_directory,
+            universe_object.masterclass.system_name + "_5_5_array_persistence_lengths.png"
+        )
+        plt.savefig(graph_filepath_pls)
         plt.show()
-        return(pls, pbs)
+    
+        # Plot for bond lengths (PBs)
+        plt.figure(figsize=(8, 6))
+        plt.plot(range(1, len(pbs) + 1), pbs, marker='o', linestyle='-', color='g', label='Bond Lengths')
+        plt.xlabel("Polymer Index")
+        plt.ylabel("Bond Length (Å)")
+        plt.title(universe_object.masterclass.system_name + "_bond_lengths")
+        plt.legend()
+        plt.grid(True)
+        graph_filepath_pbs = os.path.join(
+            universe_object.masterclass.simulation_directory,
+            universe_object.masterclass.system_name + "_5_5_array_bond_lengths.png"
+        )
+        plt.savefig(graph_filepath_pbs)
+        plt.show()
+    
+        return pls, pbs
         
 
 
