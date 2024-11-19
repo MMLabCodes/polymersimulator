@@ -545,7 +545,37 @@ class Analysis:
         
             plt.savefig(graph_filepath)
         
-        return(pl.lp, pl.lb)    
+        return(pl.lp, pl.lb) 
+
+    @staticmethod
+    def calculate_PL_5_5_array(universe_object):
+        pls = []
+        pbs = []
+        for i in range(len(universe_object.masterclass.poly_sel_dict)):
+            backbone = universe_object.select_backbone("Polymer_" + str(i+1))
+            lp, lb = Analysis.plot_PL(universe_object, backbone)
+            pls.append(lp)
+            pbs.append(lb)
+    
+        return(pls, pbs)
+    
+    @staticmethod
+    def plot_PL_5_5_array(universe_object, plot=False):
+        pls, pbs = Analysis.calculate_PL_5_5_array(universe_object)
+        if plot == False:
+            return(dists)
+        plt.figure(figsize=(8,6))
+        plt.plot(range(1, len(dists) + 1), dists, marker='o', linestyle='-', color='b', label='End-to-end Distance')
+
+        plt.xlabel("Polymer Index")
+        plt.ylabel("Persitence length (Å)")
+        plt.title(universe_object.masterclass.system_name + "_persistence_lengths")
+        plt.legend()
+        plt.grid(True)
+        graph_filepath = os.path.join(universe_object.masterclass.simulation_directory, (universe_object.masterclass.system_name + "_5_5_array_persistence_lengths"))
+        plt.savefig(graph_filepath)
+        plt.show()
+        return(pls, pbs)
         
 
 
