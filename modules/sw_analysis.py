@@ -412,7 +412,7 @@ class Analysis:
             rog_anal = Analysis.plot_ROG(universe_object, selected_atoms, "_5_5_array_ROG", graph_title)
             avg_rogs.append(rog_anal[0])
 
-        return(None)
+        return(avg_rogs)
 
     @staticmethod
     def calc_end_to_end_dist(atom_group):
