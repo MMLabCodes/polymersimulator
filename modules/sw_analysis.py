@@ -20,6 +20,7 @@ from MDAnalysis.lib import distances
 from MDAnalysis.analysis import rdf
 import MDAnalysisData as data
 from MDAnalysis.analysis.polymer import PersistenceLength
+from MDAnalysis.analysis import polymer
 
 import pandas as pd
 
@@ -286,7 +287,7 @@ class Analysis:
             return binned_temperatures, binned_volumes
 
     @staticmethod
-    def calc_free_volume_multiple(universe_list, plot=True, bins=25):
+    def calc_free_volume_multiple(universe_list, graph_title=None, plot=True, bins=25):
         """
         This function takes a list of universes, calls the calc_free_volume function for each, 
         and plots the results on the same graph.
@@ -300,7 +301,7 @@ class Analysis:
         all_binned_volumes = []
         
         # Generate colors from a colormap based on the number of universes
-        colormap = cm.get_cmap('inferno', len(universe_list))  # Choose a colormap like 'viridis'
+        colormap = cm.get_cmap('viridis', len(universe_list))  # Choose a colormap like 'viridis'
 
         # Loop over each universe
         for i in range(len(universe_list)):
@@ -345,7 +346,10 @@ class Analysis:
         plt.ylabel('Free Volume (Å³)')
 
         # Add a title
-        plt.title('Free Volume vs Temperature')
+        if graph_title == None:
+            graph_title = "Free Volume vs Temperature"
+            graph_filename = "Free_volume_vs_temperature"
+        plt.title(graph_title)
 
         # Add a legend to the right side of the plot
         plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
@@ -354,7 +358,9 @@ class Analysis:
        # plt.tight_layout(rect=[0, 0, 0.85, 1])
 
         # Save the graph
-        savepath = os.path.join(universe_list[0].masterclass.simulation_directory, "Multi_Universe_Free_Vol_vs_Temp.png")
+        if graph_title != None:
+            graph_filename = graph_title.replace(" ", "_")
+        savepath = os.path.join(universe_list[0].masterclass.simulation_directory, graph_filename)
         plt.savefig(savepath)
 
         # Show plot if requested
@@ -362,8 +368,6 @@ class Analysis:
             plt.show()
 
         # Return all data for potential further analysis
-        return all_binned_temperatures, all_binned_volumes
-
         return all_binned_temperatures, all_binned_volumes
 
     @staticmethod
@@ -518,8 +522,30 @@ class Analysis:
         df = pd.DataFrame(data)
 
         return df
-    
-    
+        
+    @staticmethod   
+    def plot_PL(universe_object, atom_group, graph_filename=None, graph_title=None, plot=False):
+        if graph_filename == None:
+            graph_filename = "_PL_graph"
+        if graph_title == None:
+            graph_title = "PL_graph"
+            
+        pl = polymer.PersistenceLength([atom_group])
+        pl.run()
+
+        if plot == True:
+            pl.plot()
+            plt.title(graph_title)
+            if hasattr(universe_object, "output_filename"):
+                # Default path is just used generally and not part of another analysis
+                graph_filepath = universe_object.output_filename + graph_filename
+            else:
+                # Default path is just used generally and not part of another analysis
+                graph_filepath = os.path.join(os.getcwd(), "pl_graph")
+        
+            plt.savefig(graph_filepath)
+        
+        return(pl.lp, pl.lb)    
         
 
 
