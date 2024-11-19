@@ -563,7 +563,7 @@ class Analysis:
     def plot_PL_5_5_array(universe_object, plot=False):
         pls, pbs = Analysis.calculate_PL_5_5_array(universe_object)
         if plot == False:
-            return(dists)
+            return(pls, pbs)
         plt.figure(figsize=(8,6))
         plt.plot(range(1, len(dists) + 1), dists, marker='o', linestyle='-', color='b', label='End-to-end Distance')
 
