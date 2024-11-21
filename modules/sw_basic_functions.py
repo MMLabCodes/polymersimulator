@@ -51,7 +51,7 @@ def estimated_volume(pdb_file_path):
         else:
             print(f"Warning: Van der Waals radius not found for atom type '{symbol}'.")
 
-    return total_volume
+    return total_volume/2
 
 # Function to calculate volume from a PDB file
 def vol_from_pdb(pdb_file):
@@ -101,3 +101,22 @@ def write_output(filepath, lines):
         f.write('\n')
     f.close()   
     return()
+
+def get_homo_lumo_from_xyz(xyz_filepath):
+    atomic_numbers = {'C': 6, 'H': 1, 'O': 8, 'S':16, 'F':9, 'N':14, 'Cl':17}
+    atoms = []
+
+    with open(xyz_filepath, 'r') as xyz_file:
+        for i, line in enumerate(xyz_file):
+            if i == 0:
+                continue
+            if i == 1:
+                continue
+            else: 
+                atom = (line.split(" ")[0]).strip()
+                atoms.append(atom)
+                
+    atomic_num = sum(atomic_numbers[atom] for atom in atoms)
+    homo_num = int(atomic_num/2 - 1)
+    lumo_num = homo_num + 1
+    return(homo_num, lumo_num)
