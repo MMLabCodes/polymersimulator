@@ -41,8 +41,15 @@ class master_anal():
         self.manager = manager
         self.polymer_code = base_molecule_name.split("_")[0]
         self.system_name = system_name
+        self.base_molecule_name = base_molecule_name
         self.topology_file = self.manager.load_amber_filepaths(system_name)[0]
         self.simulation_directory = simulation_directory
+        self.extracted_poly_coords_dir = os.path.join(self.simulation_directory, "extracted_poly_coords")
+        if not os.path.exists(self.extracted_poly_coords_dir):
+            os.makedirs(self.extracted_poly_coords_dir)
+        self.poly_dft_input_dir = os.path.join(self.simulation_directory, "poly_DFT_inputs")
+        if not os.path.exists(self.poly_dft_input_dir):
+            os.makedirs(self.poly_dft_input_dir)
         self.simulation_files = self.group_files()
         self.min_filepath = os.path.join(self.simulation_directory, self.simulation_files["min"][0])
         self.base_pdb = self.manager.load_pdb_filepath(base_molecule_name)
