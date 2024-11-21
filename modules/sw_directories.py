@@ -78,10 +78,6 @@ class SnippetSimManage:
         if not os.path.exists(self.systems_dir):
             os.makedirs(self.systems_dir)
 
-        self.dft_manager_dir = os.path.join(main_dir, "dft_manage_dir")
-        if not os.path.exists(self.dft_manager_dir):
-            os.makedirs(self.dft_manager_dir)
-
     def mol2_files_avail(self):
         mol2_avail = []
         # Walk through the directory tree recursively
