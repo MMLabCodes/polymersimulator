@@ -530,7 +530,7 @@ class DFT_manager(SnippetSimManage):
             for job in jobs_to_queue:
                 file.write(job + "\n")
 
-    def check_and_submit_jobs():
+    def check_and_submit_jobs(selfs):
         while True:
             running_jobs = self.get_running_jobs_count()
 
@@ -555,7 +555,7 @@ class DFT_manager(SnippetSimManage):
                     continue
                     
 
-    def get_running_jobs_count():
+    def get_running_jobs_count(self):
         pass
     
     def read_job_queue(self):
