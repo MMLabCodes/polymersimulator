@@ -580,7 +580,7 @@ class DFT_manager(SnippetSimManage):
 
         return(xyz_path, inp_path)
 
-    def submit_jobs(self, inp_path, xyz_path):
+    def submit_job(self, inp_path, xyz_path):
         # Submit job and capture the output
         process = subprocess.Popen(["bash", cls.runorca_path, inp_path, xyz_path, str(cls.nprocs)], stdout = subprocess.PIPE)
         output = process.stdout.read().decode('utf-8')
