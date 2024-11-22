@@ -7,9 +7,11 @@ Created on Wed Mar 13 14:18:48 2024
 import os 
 import csv
 import time
-import ew
+import re
 import subprocess
 import shutil
+
+from modules.sw_file_formatter import DFT_input_generator
 '''
 SnippetSim Directories Module
 
@@ -573,7 +575,7 @@ class DFT_manager(SnippetSimManage):
 
     def submit_jobs(self, inp_path, xyz_path):
         # Submit job and capture the output
-        process = subprocess.Popen(["bash"], cls.runorca_path, inp_path, xyz_path, str(cls.nprocs)], stdout = subprocess.PIPE)
+        process = subprocess.Popen(["bash", cls.runorca_path, inp_path, xyz_path, str(cls.nprocs)], stdout = subprocess.PIPE)
         output = process.stdout.read().decode('utf-8')
 
         # Extract the SLURM job number from the output
