@@ -572,7 +572,7 @@ class DFT_manager(SnippetSimManage):
                 file.write(job + "\n")
 
     def inputs_from_queue(self, job_from_queue):
-        input_dir, job_name = job.split(" ")[0], job.split(" ")[1][:-2] # -2 gets rid of the /n in the list
+        input_dir, job_name = job_from_queue.split(" ")[0], job_from_queue.split(" ")[1][:-2] # -2 gets rid of the /n in the list
         xyz_name = job_name + ".xyz"
         inp_name = job_name + ".inp"
         xyz_path = os.path.join(input_dir, xyz_name)
