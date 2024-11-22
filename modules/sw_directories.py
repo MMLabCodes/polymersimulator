@@ -556,7 +556,10 @@ class DFT_manager(SnippetSimManage):
                     
 
     def get_running_jobs_count(self):
-        pass
+        result = subprocess.run(["squeue", "-u", "s.983045", "-h", "-t", "RUNNING,PENDING", "-p", "s_compute_chem"], stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+        output = result.stdout.strip().decode('utf-8')
+        job_lines = output.split("\n")
+        return(len(job_lines))
     
     def read_job_queue(self):
         with open(self.queue_file, "r") as file:
