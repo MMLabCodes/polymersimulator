@@ -50,6 +50,9 @@ class master_anal():
         self.poly_dft_input_dir = os.path.join(self.simulation_directory, "poly_DFT_inputs")
         if not os.path.exists(self.poly_dft_input_dir):
             os.makedirs(self.poly_dft_input_dir)
+        self.poly_dft_output_dir = os.path.join(self.simulation_directory, "poly_DFT_outputs")
+        if not os.path.exists(self.poly_dft_output_dir):
+            os.makedirs(self.poly_dft_output_dir)
         self.simulation_files = self.group_files()
         self.min_filepath = os.path.join(self.simulation_directory, self.simulation_files["min"][0])
         self.base_pdb = self.manager.load_pdb_filepath(base_molecule_name)
@@ -604,7 +607,64 @@ class Analysis:
     
         return pls, pbs
         
+class universe_coord_extraction():
+    # This class can extract coordinates and atom types of from mdanalysis universes and can write them to xyz files
+    # Optional ability to make orca input files too
 
+    def __init__(self):
+        pass
+ 
+
+    @staticmethod
+    def mdanalysis_info_2_xyz(atom_types, coordinates, filepath):
+        """
+        Converts atom types and coordinates into an XYZ file format and saves it.
+    
+        Parameters:
+            atom_types (list of str): List of atom type strings (e.g., 'h', 'c', 'o').
+            coordinates (list of lists): List of coordinates, where each coordinate is [x, y, z].
+            filepath (str): Path to save the XYZ file.
+        """
+        lines = []
+    
+        # Number of atoms
+        no_atoms = len(atom_types)
+        lines.append(f"{no_atoms}\n")  # First line: Number of atoms
+        lines.append("\n")  # Second line: Blank comment line
+    
+        # Map lowercase atom types to proper case
+        atom_map = {"h": "H", "c": "C", "o": "O"}
+    
+        # Generate the lines for each atom
+        for i in range(len(atom_types)):
+            atom_type = atom_types[i][0].lower()  # Convert to lowercase for mapping
+            atom_name = atom_map.get(atom_type, atom_type.upper())  # Fallback to uppercase if not in map
+            x, y, z = coordinates[i]  # Unpack coordinates
+            line = f"{atom_name:<2} {x:12.6f} {y:12.6f} {z:12.6f}\n"  # Format the line
+            lines.append(line)
+    
+        # Write to the file
+        with open(filepath, 'w') as file:
+            file.writelines(lines)
+
+        #print(f"XYZ file written to {filepath}")
+        return(filepath)
+
+    @staticmethod
+    def save_polymers_xyz(universe_object, gen_orca_input=False):
+        for i in range(len(universe_object.masterclass.poly_sel_dict)):
+            polymer_name = "Polymer_" + str(i+1)
+            poly = universe_object.select_polymer(polymer_name)
+            coords, atom_types = poly.positions, poly.atoms.types
+
+            xyz_filepath = os.path.join(universe_object.masterclass.poly_dft_input_dir, universe_object.masterclass.base_molecule_name + "_" + str(i+1) +  ".xyz")
+            universe_coord_extraction.mdanalysis_info_2_xyz(atom_types, coords, xyz_filepath)
+            if gen_orca_input == True:
+                from modules.sw_file_formatter import DFT_input_generator
+                input_filepath = os.path.join(universe_object.masterclass.poly_dft_input_dir, universe_object.masterclass.base_molecule_name + "_" + str(i+1) + ".inp")
+                DFT_input_generator.generate_input(xyz_filepath, input_filepath, universe_object.masterclass.base_molecule_name + "_" + str(i+1))
+               # print(f"Orca input file written to {input_filepath}")
+        return(None)
 
 
 
