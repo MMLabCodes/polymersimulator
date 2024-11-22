@@ -457,3 +457,132 @@ class BioOilDirs(SnippetSimManage):
                     # Extract filename
                     csv_file = csv_file_path.split("/")[-1]
                     print(csv_file)
+
+class DFT_manager(SnippetSimManage):
+
+    max_jobs = 8
+    nprocs = 10
+    # Where runorca script is located
+    runorca_path = "/scratch/scw1976/dan/polymersimulator-main/bin/runorca.sh"
+
+    # Where fukui calculator script is located
+    fukui_path = "/scratch/scw1976/dan/polymersimulator-main/bin/fukui.sh"
+
+    # Where running jobs are located
+    running_path = "/scratch/s.983045"
+
+    # Need to include these in the classes
+    orbital_editor = "/scratch/s.983045/bio_oil_modelling/scripts/orbital_cube_editor.py"
+    orca_resubmission_handler = "/scratch/s.983045/bio_oil_modelling/scripts/job_resubmitter.py"
+    orca_data_collater = "/scratch/s.983045/bio_oil_modelling/scripts/orca_data_collater.py"
+
+    def __init__(self, main_dir, *args, **kwargs):
+        """
+        Initialize PolymerSimulatorDirs object.
+
+        Args:
+            main_dir (str): The main directory for polymer simulation setup.
+                            Example: '/path/to/main/dir/'
+
+        Raises:
+            FileNotFoundError: If main_dir does not exist.
+        """
+        # Call the parent class's __init__ method with all arguments
+        super().__init__(main_dir, *args, **kwargs)
+        
+        if not os.path.exists(main_dir):
+            raise FileNotFoundError
+
+        self.dft_manager_dir = os.path.join(main_dir, "dft_manage_dir")
+        if not os.path.exists(self.dft_manager_dir):
+            os.makedirs(self.dft_manager_dir)
+
+        self.submitted_jobs_file = os.path.join(self.dft_manager_dir, "submitted_jobs.txt")
+        if not os.path.exists(self.submitted_jobs_file):
+            with open(self.submitted_jobs_file, "w") as file:
+                pass
+
+        self.queue_file = os.path.join(self.dft_manager_dir, "job_queue.txt")
+        if not os.path.exists(self.queue_file):
+            with open(self.queue_file, "w") as file:
+                pass
+
+        self.job_paths_file = os.path.join(self.dft_manager_dir, "job_paths.txt")
+        if not os.path.exists(self.job_paths_file):
+            with open(self.job_paths_file, "w") as file:
+                pass
+
+    def job_queuer(self, input_directory):
+        jobs_to_queue = []
+        for file in os.listdir(input_directory):
+            filename = file.split(".")[0]
+            string_to_append = input_directory + " " + filename
+            if string_to_append not in jobs_to_queue:
+                jobs_to_queue.append(string_to_append)
+        
+        with open(self.queue_file, "a") as file:
+            for job in jobs_to_queue:
+                file.write(job + "\n")
+
+    def check_and_submit_jobs():
+        while True:
+            running_jobs = get_running_jobs_count()
+
+            # Function to transfer results from any finished back
+
+            # Resubmission function - can be added later
+
+            if running_jobs < cls.max_jobs:
+                job_queue = self.read_job_queue()
+
+                if len(job_queue) > 0:
+                    job = job_queue.pop[0]
+                    xyz, inp = self.inputs_from_queue(job)
+                    job_number = submit_job(inp, xyz, cls.nprocs)
+
+                    move_to_submitted_jobs(job, job_number)
+
+                    write_job_queue(job_queue)
+                    
+
+    def get_running_jobs_count():
+        pass
+    
+    def read_job_queue(self):
+        with open(self.queue_file, "r") as file:
+            job_queue = [line for line in file.readlines()]
+        return(job_queue)
+
+    def write_job_queue(self, job_queue):
+        with open(self.queue_file, "w") as file:
+            for job in job_queue:
+                file.write(job + "\n")
+
+    def inputs_from_queue(self, job_from_queue):
+        input_dir, job_name = job.split(" ")[0], job.split(" ")[1][:-2] # -2 gets rid of the /n in the list
+        xyz_name = job_name + ".xyz"
+        inp_name = job_name + ".inp"
+        xyz_path = os.path.join(input_dir, xyz_name)
+        inp_path = os.path.join(input_dir, inp_name)
+
+        return(xyz_path, inp_path)
+
+    def submit_jobs(self, inp_path, xyz_path):
+        # Submit job and capture the output
+        process = subprocess.Popen(["bash"], cls.runorca_path, inp_path, xyz_path, str(cls.nprocs)], stdout = subprocess.PIPE)
+        output = process.stdout.read().decode('utf-8')
+
+        # Extract the SLURM job number from the output
+        job_number_match = re.search(r"Submitted batch job (\d+)", output)
+        if job_number_match:
+            job_number = job_number_match.group(1)
+            return(job_number)
+
+    def move_to_submitted_jobs(self, job, job_number):
+        timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+
+        with open(self.submitted_jobs_file, "a") as file:
+            file.write(f"{timestamp} Job number: {job_number} Job name: {job}\n")
+        with open(self.job_paths_file, "a") as file:
+            job_path = os.path.join(cls.running_path, job_number)
+            file.write(job_path + "\n")
