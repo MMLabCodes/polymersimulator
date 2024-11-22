@@ -584,7 +584,7 @@ class DFT_manager(SnippetSimManage):
         if nprocs == None:
             nprocs = self.nprocs
         # Submit job and capture the output
-        process = subprocess.Popen(["bash", cls.runorca_path, inp_path, xyz_path, str(nprocs)], stdout = subprocess.PIPE)
+        process = subprocess.Popen(["bash", self.runorca_path, inp_path, xyz_path, str(nprocs)], stdout = subprocess.PIPE)
         output = process.stdout.read().decode('utf-8')
 
         # Extract the SLURM job number from the output
