@@ -538,13 +538,13 @@ class DFT_manager(SnippetSimManage):
 
             # Resubmission function - can be added later
 
-            if running_jobs < cls.max_jobs:
+            if running_jobs < self.max_jobs:
                 job_queue = self.read_job_queue()
 
                 if len(job_queue) > 0:
                     job = job_queue.pop[0]
                     xyz, inp = self.inputs_from_queue(job)
-                    job_number = self.submit_job(inp, xyz, cls.nprocs)
+                    job_number = self.submit_job(inp, xyz, self.nprocs)
 
                     self.move_to_submitted_jobs(job, job_number)
 
