@@ -532,7 +532,7 @@ class DFT_manager(SnippetSimManage):
 
     def check_and_submit_jobs():
         while True:
-            running_jobs = get_running_jobs_count()
+            running_jobs = self.get_running_jobs_count()
 
             # Function to transfer results from any finished back
 
@@ -544,11 +544,15 @@ class DFT_manager(SnippetSimManage):
                 if len(job_queue) > 0:
                     job = job_queue.pop[0]
                     xyz, inp = self.inputs_from_queue(job)
-                    job_number = submit_job(inp, xyz, cls.nprocs)
+                    job_number = self.submit_job(inp, xyz, cls.nprocs)
 
-                    move_to_submitted_jobs(job, job_number)
+                    self.move_to_submitted_jobs(job, job_number)
 
-                    write_job_queue(job_queue)
+                    self.write_job_queue(job_queue)
+
+                else:
+                    time.sleep(60)
+                    continue
                     
 
     def get_running_jobs_count():
