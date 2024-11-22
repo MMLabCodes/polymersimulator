@@ -542,7 +542,7 @@ class DFT_manager(SnippetSimManage):
                 job_queue = self.read_job_queue()
 
                 if len(job_queue) > 0:
-                    job = job_queue.pop[0]
+                    job = job_queue.pop(0)
                     xyz, inp = self.inputs_from_queue(job)
                     job_number = self.submit_job(inp, xyz, self.nprocs)
 
