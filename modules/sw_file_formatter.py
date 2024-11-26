@@ -83,3 +83,11 @@ class DFT_input_generator():
     @classmethod
     def set_nprocs(cls, nprocs):
         cls.nprocs = nprocs
+
+    @classmethod
+    def print_parameters(cls):
+        print("Current parameters of DFT_input_generator:")
+        print(f"Functional: {cls.functional}")
+        print(f"Basis set: {cls.basis_set}")
+        print(f"Geometry optimization: {cls.opt}")
+        print(f"Dispersion correction: {cls.dispersion_correction}")
