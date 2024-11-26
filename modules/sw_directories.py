@@ -523,12 +523,17 @@ class DFT_manager(SnippetSimManage):
             with open(self.job_paths_file, "w") as file:
                 pass
 
-    def job_queuer(self, input_directory):
+        self.error_jobs_file = os.path.join(self.dft_manager_dir, "job_errors.txt")
+        if not os.path.exists(self.error_jobs_file):
+            with open(self.error_jobs_file, "w") as file:
+                pass
+
+    def job_queuer(self, input_directory, output_directory):
         jobs_to_queue = []
         for file in os.listdir(input_directory):
             if os.path.isfile(os.path.join(input_directory, file)):
                 filename = file.split(".")[0]
-                string_to_append = input_directory + " " + filename
+                string_to_append = input_directory + " " + filename + " " + output_directory
                 if string_to_append not in jobs_to_queue:
                     jobs_to_queue.append(string_to_append)
         
@@ -549,12 +554,15 @@ class DFT_manager(SnippetSimManage):
 
                 if len(job_queue) > 0:
                     job = job_queue.pop(0)
-                    inp_dir, xyz, inp = self.inputs_from_queue(job)
+                    inp_dir, xyz, inp, out_dir = self.inputs_from_queue(job)
                     job_number = self.submit_job(inp_dir, inp, xyz, self.nprocs)
-
-                    self.move_to_submitted_jobs(os.path.join(inp_dir, job_number))
+                    
+                    job_name = xyz.split(".")[0]
+                    self.move_to_submitted_jobs(inp_dir, out_dir, job_name, job_number)
 
                     self.write_job_queue(job_queue)
+
+                    seld.check_submitted_jobs()
 
                 else:
                     time.sleep(60)
@@ -578,14 +586,15 @@ class DFT_manager(SnippetSimManage):
                 file.write(job)
 
     def inputs_from_queue(self, job_from_queue):
-        input_dir, job_name = job_from_queue.split(" ")[0], job_from_queue.split(" ")[1].strip()
+        input_dir, job_name, output_dir = job_from_queue.split(" ")[0], job_from_queue.split(" ")[1].strip(), job_from_queue.split(" ")[2]
         xyz_name = f"{job_name}.xyz"
         inp_name = f"{job_name}.inp"
         print(f"xyz_file: {xyz_name}")
         print(f"inp_file: {inp_name}")
         print(f"input_dir: {input_dir}")
+        print(f"output_dir: {output_dir}")
 
-        return(input_dir, xyz_name, inp_name)
+        return(input_dir, xyz_name, inp_name, output_dir)
 
     def submit_job(self, input_dir, inp_path, xyz_path, nprocs=None):
         if nprocs is None:
@@ -626,12 +635,83 @@ class DFT_manager(SnippetSimManage):
             print(f"Failed to submit job: {e}")
             return None
 
-    def move_to_submitted_jobs(self, job, job_number):
+    def move_to_submitted_jobs(self, inp_dir, out_dir, job_name, job_number):
         timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
 
         with open(self.submitted_jobs_file, "a") as file:
-            file.write(f"{timestamp} Job number: {job_number} Job name: {job}")
+            file.write(f"{timestamp} Job number: {job_number} Job name: {job_name}\n")
         with open(self.job_paths_file, "a") as file:
             print(f"The directory for running calcualtions is: {self.running_path}. This jobs number is {job_number}.")
-            job_path = os.path.join(self.running_path, job_number)
-            file.write(job_path + "\n")
+            job_path = os.path.join(os.path.join(inp_dir, job_number))
+            file.write(job_path + " " + out_dir + "\n") # Format is; "final_job_path output_directory"
+
+    def check_submitted_jobs(self):
+        with open(self.submitted_jobs_file, "w") as file:
+            finished_jobs = []
+            running_jobs = []
+            error_jobs = []
+            job_paths = [filepath.split(" ")[0] for filepath in file.readlines()]
+            out_paths = [filepath.split(" ")[1] for filepath in file.readlines()]
+
+            for i in range(len(job_paths)):
+                job_path = job_paths[i]
+                out_path = out_paths[i]
+                if os.path.isdir(job_path):
+                    for file in os.listdir(job_path):
+                        if file.endswith(".out"):
+                            output_filepath = os.path.join(job_path, file)
+                            molecule_name = file.split(".")[0]
+                            try:
+                                with open(output_filepath, 'r') as file:
+                                    if "ORCA TERMINATED NORMALLY" in file.read():
+                                        self.process_result(molecule_name, job_path, out_path)
+                                        finished_jobs.append(job_path)
+                                    else:
+                                        error_jobs.append(job_path)
+                else:
+                    running_jobs.append((job_path + " " + out_path))
+
+            with open(self.submitted_jobs_file, "w") as file:
+                for item in running_jobs:
+                    file.write(item + "\n")
+
+            with open(self.error_jobs_file, "a") as file:
+                for item in error_jobs:
+                    file.write(item + "\n")
+
+            with open(self.processed_jobs_file, "a") as file:
+                for item in finished_jobs:
+                    file.write(item + "\n")
+
+    def process_result(self, molecule_name, job_path, out_path):
+        for file in os.listdir(job_path):
+            output_filename = molecule_name + ".out"
+        
+            if file.endswith(".homo.cube"):
+                homo_path = os.path.join(job_path, file)
+            if file.endswith("lumo.cube"):
+                lumo_path = os.path.join(job_path, file)
+            fukui_filename = f"{molecule_name}_fukui.cube"
+        
+            fukui_destination = os.path.join(out_path, "final_fukuis")
+            if not os.path.exists(fukui_destination):
+                os.makedirs(fukui_destination)
+
+            output_destination = os.path.join(out_path, "output_files")
+            if not os.path.exists(output_destination):
+                os.makedirs(output_destination)
+
+        subprocess.run(["python3", self.orbital_editor, homo_path])
+        subprocess.run(["python3", self.orbital_editor, lumo_path])
+
+        os.chdir(job_path)
+    
+        subprocess.run(["bash", self.fukui_path, homo_path, lumo_path, molecule_name])
+        shutil.move(fukui_filename, fukui_destination)
+        shutil.move(output_filename, output_destination)
+
+        os.chdir(output_destination)
+        print(os.getcwd())
+        # DO orca data collation here
+
+        os.chdir(self.main_dir)
