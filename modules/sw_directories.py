@@ -668,6 +668,8 @@ class DFT_manager(SnippetSimManage):
                                         finished_jobs.append(job_path)
                                     else:
                                         error_jobs.append(job_path)
+                            except Exception as e:
+                                print(f"Error reading file {file_path}: {e}")
                 else:
                     running_jobs.append((job_path + " " + out_path))
 
