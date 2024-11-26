@@ -508,6 +508,11 @@ class DFT_manager(SnippetSimManage):
             with open(self.submitted_jobs_file, "w") as file:
                 pass
 
+        self.processed_jobs_file = os.path.join(self.dft_manager_dir, "processed_jobs.txt")
+        if not os.path.exists(self.processed_jobs_file):
+            with open(self.processed_jobs_file, "w") as file:
+                pass
+
         self.queue_file = os.path.join(self.dft_manager_dir, "job_queue.txt")
         if not os.path.exists(self.queue_file):
             with open(self.queue_file, "w") as file:
@@ -521,10 +526,11 @@ class DFT_manager(SnippetSimManage):
     def job_queuer(self, input_directory):
         jobs_to_queue = []
         for file in os.listdir(input_directory):
-            filename = file.split(".")[0]
-            string_to_append = input_directory + " " + filename
-            if string_to_append not in jobs_to_queue:
-                jobs_to_queue.append(string_to_append)
+            if os.path.isfile(os.path.join(input_directory, file)):
+                filename = file.split(".")[0]
+                string_to_append = input_directory + " " + filename
+                if string_to_append not in jobs_to_queue:
+                    jobs_to_queue.append(string_to_append)
         
         with open(self.queue_file, "a") as file:
             for job in jobs_to_queue:
@@ -543,10 +549,10 @@ class DFT_manager(SnippetSimManage):
 
                 if len(job_queue) > 0:
                     job = job_queue.pop(0)
-                    xyz, inp = self.inputs_from_queue(job)
-                    job_number = self.submit_job(inp, xyz, self.nprocs)
+                    inp_dir, xyz, inp = self.inputs_from_queue(job)
+                    job_number = self.submit_job(inp_dir, inp, xyz, self.nprocs)
 
-                    self.move_to_submitted_jobs(job, job_number)
+                    self.move_to_submitted_jobs(os.path.join(inp_dir, job_number))
 
                     self.write_job_queue(job_queue)
 
@@ -569,35 +575,63 @@ class DFT_manager(SnippetSimManage):
     def write_job_queue(self, job_queue):
         with open(self.queue_file, "w") as file:
             for job in job_queue:
-                file.write(job + "\n")
+                file.write(job)
 
     def inputs_from_queue(self, job_from_queue):
-        input_dir, job_name = job_from_queue.split(" ")[0], job_from_queue.split(" ")[1][:-2] # -2 gets rid of the /n in the list
-        xyz_name = job_name + ".xyz"
-        inp_name = job_name + ".inp"
-        xyz_path = os.path.join(input_dir, xyz_name)
-        inp_path = os.path.join(input_dir, inp_name)
+        input_dir, job_name = job_from_queue.split(" ")[0], job_from_queue.split(" ")[1].strip()
+        xyz_name = f"{job_name}.xyz"
+        inp_name = f"{job_name}.inp"
+        print(f"xyz_file: {xyz_name}")
+        print(f"inp_file: {inp_name}")
+        print(f"input_dir: {input_dir}")
 
-        return(xyz_path, inp_path)
+        return(input_dir, xyz_name, inp_name)
 
-    def submit_job(self, inp_path, xyz_path, nprocs=None):
-        if nprocs == None:
+    def submit_job(self, input_dir, inp_path, xyz_path, nprocs=None):
+        if nprocs is None:
             nprocs = self.nprocs
-        # Submit job and capture the output
-        process = subprocess.Popen(["bash", self.runorca_path, inp_path, xyz_path, str(nprocs)], stdout = subprocess.PIPE)
-        output = process.stdout.read().decode('utf-8')
 
-        # Extract the SLURM job number from the output
-        job_number_match = re.search(r"Submitted batch job (\d+)", output)
-        if job_number_match:
-            job_number = job_number_match.group(1)
-            return(job_number)
+        try:
+            os.chdir(input_dir)
+            # Submit job and capture the output
+            process = subprocess.Popen(
+                ["bash", self.runorca_path, inp_path, xyz_path, str(nprocs)],
+                stdout=subprocess.PIPE,  # Capture standard output
+                stderr=subprocess.PIPE   # Capture standard error
+            )
+            stdout, stderr = process.communicate()  # Wait for the process to complete
+            stdout = stdout.decode('utf-8').strip()  # Decode stdout
+            stderr = stderr.decode('utf-8').strip()  # Decode stderr
+
+            # Debugging output for troubleshooting
+            print("STDOUT:", stdout)
+            print("STDERR:", stderr)
+
+            os.chdir(self.main_dir)
+            
+            # Check for errors in STDERR
+            if stderr:
+                print("Error detected in STDERR.")
+                raise RuntimeError(f"Error during job submission: {stderr}")
+
+            # Match job number from STDOUT
+            job_number_match = re.search(r"Submitted batch job (\d+)", stdout)
+            if job_number_match:
+                job_number = job_number_match.group(1)
+                return job_number
+            else:
+                raise ValueError("No job number found in the submission output.")
+
+        except Exception as e:
+            print(f"Failed to submit job: {e}")
+            return None
 
     def move_to_submitted_jobs(self, job, job_number):
         timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
 
         with open(self.submitted_jobs_file, "a") as file:
-            file.write(f"{timestamp} Job number: {job_number} Job name: {job}\n")
+            file.write(f"{timestamp} Job number: {job_number} Job name: {job}")
         with open(self.job_paths_file, "a") as file:
-            job_path = os.path.join(cls.running_path, job_number)
+            print(f"The directory for running calcualtions is: {self.running_path}. This jobs number is {job_number}.")
+            job_path = os.path.join(self.running_path, job_number)
             file.write(job_path + "\n")
