@@ -421,12 +421,13 @@ class BuildSystems():
 
         # Define the target axis, which is along the z-axis ([0, 0, 1])
         z_axis = np.array([0, 0, 1])
+        x_axis = np.array([1, 0, 0])
 
         # Get the principal axis that we want to align with the z-axis (typically the first one, corresponding to the largest eigenvalue)
         principal_axis_to_align = principal_axes[0]
 
         # Compute the rotation needed to align the principal axis with the z-axis
-        rotation, _ = R.align_vectors([principal_axis_to_align], [z_axis])
+        rotation, _ = R.align_vectors([principal_axis_to_align], [x_axis])
 
         # Apply the rotation to the entire molecule
         ag.positions = rotation.apply(ag.positions)
@@ -827,6 +828,7 @@ class BuildAmberSystems(BuildSystems):
              list
 
              polymer = sequence {polymer_command}
+             setBox polymer vdw 0.0
              saveamberparm polymer {prmtop_filepath} {rst_filepath}
              savepdb polymer {pdb_filepath}
              quit
@@ -1284,7 +1286,6 @@ class BuildAmberSystems(BuildSystems):
         base_pdb_file = self.manager.load_pdb_filepath(base_molecule_name)
          
         molecule_dir = os.path.join(self.manager.molecules_dir, base_molecule_name)
-        cd_command = "cd " + molecule_dir
 
         try:
             os.chdir(molecule_dir)
@@ -1966,6 +1967,70 @@ class BuildAmberSystems(BuildSystems):
         result = subprocess.run(cd_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         return(system_name, unsolved_system_name)
 
+    def solvate_frame_from_sim(self, base_molecule_name, system_name, pdb_file, box):
+    
+        molecule_dir = os.path.join(self.manager.molecules_dir, base_molecule_name)
+        cd_command = "cd " + molecule_dir
+        try:
+            os.chdir(molecule_dir)
+        except Exception as e:
+            print("Exception:", e)
+    
+        mainchain_prepi_filepath = "mainchain_" + base_molecule_name + ".prepi"
+        head_prepi_filepath = "head_" + base_molecule_name + ".prepi"
+        tail_prepi_filepath = "tail_" + base_molecule_name + ".prepi"
+        
+        output_dir = os.path.join(self.manager.systems_dir, system_name)
+        print(output_dir)
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
+        x_vec = box[0]
+        y_vec = box[1]
+        z_vec = box[2]
+
+        box_set_line = "set system box {" + str(int(x_vec)+1) + " " + str(int(y_vec)+1) + " " + str(int(z_vec)+1) + " 90.0 90.0 90.0}"
+
+        intleap_path = system_name + ".intleap"
+        prmtop_path = os.path.join(output_dir, system_name + ".prmtop")
+        rst_path = os.path.join(output_dir, system_name + "rst7")
+        solvated_pdb = os.path.join(output_dir, system_name + ".pdb")
+    
+    
+        file_content = f"""source leaprc.gaff
+        source leaprc.water.fb3
+    
+        loadamberprep {head_prepi_filepath}
+        loadamberprep {mainchain_prepi_filepath}
+        loadamberprep {tail_prepi_filepath}
+        list
+        system = loadpdb {pdb_file}
+        solvatebox system TIP3PBOX 0.0
+
+        saveamberparm system {prmtop_path} {rst_path}
+        savepdb system {solvated_pdb}
+        quit
+        """
+        with open(intleap_path, 'w') as file:
+            file.write(file_content)
+            
+        leap_command = "tleap -f " + intleap_path
+        try:
+            result = subprocess.run(leap_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            if result.returncode == 0:
+                # Command executed successfully
+                print("Output:", result.stdout)
+            else:
+                # Command failed, print error message
+                print("Error:", result.stderr)
+        except Exception as e:
+            # Exception occurred during subprocess execution
+            print("Exception:", e)
+
+        cd_command = "cd " + str(self.manager.main_dir)
+        result = subprocess.run(cd_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        return(system_name)
+        
 #class BuildBioOilSystems(BuildSystems):
 #    def __init__:
  #       pass
