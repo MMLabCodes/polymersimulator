@@ -405,7 +405,7 @@ class BuildSystems():
         print("from a PDB or XYZ file.")
            
     @staticmethod
-    def align_molecule(input_pdb):
+    def align_molecule(input_pdb, axis_to_align=None):
         # Packages used only in this method are imported here
         import MDAnalysis as mda
         import numpy as np
@@ -422,12 +422,22 @@ class BuildSystems():
         # Define the target axis, which is along the z-axis ([0, 0, 1])
         z_axis = np.array([0, 0, 1])
         x_axis = np.array([1, 0, 0])
-
+        y_axis = np.array([0, 1, 0])
+        
         # Get the principal axis that we want to align with the z-axis (typically the first one, corresponding to the largest eigenvalue)
         principal_axis_to_align = principal_axes[0]
 
         # Compute the rotation needed to align the principal axis with the z-axis
-        rotation, _ = R.align_vectors([principal_axis_to_align], [x_axis])
+        if axis_to_align == "Z":
+            axis = z_axis
+        elif axis_to_align == "X":
+            axis = x_axis
+        elif axis_to_align == "Y":
+            axis = y_axis
+        else:
+            print("Please provide arugment as: 'X' OR 'Y' OR 'Z'")
+            
+        rotation, _ = R.align_vectors([principal_axis_to_align], [axis])
 
         # Apply the rotation to the entire molecule
         ag.positions = rotation.apply(ag.positions)
