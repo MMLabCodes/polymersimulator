@@ -1272,7 +1272,7 @@ class BuildAmberSystems(BuildSystems):
             system = self.generate_3_3_polymer_array_random(base_molecule_name, molecule_name)
             self.gen_amber_params_4_pckml_array(system, base_molecule_name)
             
-    def generate_5_5_polymer_array_crystal(self, base_molecule_name=None, molecule_name=None):
+    def generate_5_5_polymer_array_crystal(self, base_molecule_name=None, molecule_name=None, crystal_trans=None):
         # Thsis function builds arrays of polymers using the pre generated pdb files
         if molecule_name == None or base_molecule_name == None:
          # UPDATE THIS
@@ -1306,8 +1306,12 @@ class BuildAmberSystems(BuildSystems):
         x, y, z = self.get_xyz_dists(base_pdb_file)
 
         translate_distance = int((max(x, y))/2) # Removed z as they should not overlap in this distance
-        z_trans = int((z/2)+2)
-        y_trans = int((y/2)+2)
+        if crystal_trans is None:
+            z_trans = int((z/2)+2)
+            y_trans = int((y/2)+2)
+        else:
+            z_trans = int((z/2)+crystal_trans)
+            y_trans = int((y/2)+crystal_trans)
 
         molecule_name_1 = molecule_name + "_1"
         molecule_name_2 = molecule_name + "_2"
@@ -1542,9 +1546,9 @@ class BuildAmberSystems(BuildSystems):
         self.add_ter_to_pckml_result(array_pdb, base_molecule_name)
         return(system_name)
         
-    def generate_polymer_5_5_array(self, base_molecule_name, molecule_name, method):
+    def generate_polymer_5_5_array(self, base_molecule_name, molecule_name, method, crystal_trans=None):
         if method == "crystal":
-            self.generate_5_5_polymer_array_crystal(base_molecule_name, molecule_name)
+            self.generate_5_5_polymer_array_crystal(base_molecule_name, molecule_name, crystal_trans)
         if method == "random":
             system = self.generate_5_5_polymer_array_random(base_molecule_name, molecule_name)
             self.gen_amber_params_4_pckml_array(system, base_molecule_name)  
