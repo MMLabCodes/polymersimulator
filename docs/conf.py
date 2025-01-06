@@ -24,3 +24,5 @@ html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
 
 master_doc = 'index'
+
+autodic_default_options = {'members':True, 'undoc-members':True, 'show-inheritance':True}
