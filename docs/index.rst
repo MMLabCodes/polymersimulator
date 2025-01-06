@@ -13,4 +13,5 @@ Welcome to Polymer Simulator's documentation!
    introduction
    installation
    usage
+   eggs
    contributing
