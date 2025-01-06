@@ -15,5 +15,16 @@ Creating an environment
 
 To create an environment, open the command prompt (ubuntu if you are using windows) and execute the following:
 
-''conda create --name AmberTools23''
-''conda activate AmberTools23''
+..literal-block::
+
+	conda create --name AmberTools23
+	conda activate AmberTools23
+
+*Note: You do not have to call your environment **AmberTools23** as long as the name makes sense to you*
+
+Now the packages and different dependancies can be installed. These are all located in the **environment.yml** file in the **docs** folder of the github repository.
+This file can be used to install of the required pacakges.
+
+..literal-block::
+	
+	conda env update --file docs/environment.yml
