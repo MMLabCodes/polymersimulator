@@ -12,6 +12,7 @@ Contents
 
    introduction
    installation
+   packagecontents
    usage
    api
    contributing

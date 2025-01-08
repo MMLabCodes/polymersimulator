@@ -34,7 +34,7 @@ Testing
 
 To ensure some key packages are installed it is important to run some tests. Execute the commands below and compare with the images.
 
-Antechamber is part of AmberTools and carries out the parameterization of the molecules//polymers.
+**Antechamber** is part of AmberTools and carries out the parameterization of the molecules//polymers.
 
 ..literal-block::
 	
@@ -44,7 +44,7 @@ If antechamber is available, you will see something similar to the following:
 
 .. image:: images/antechamber.PNG
 
-Tleap is an AmberTools programme that allows for the building of systems and generation of topology and coordinate files for 
+**Tleap** is an AmberTools programme that allows for the building of systems and generation of topology and coordinate files for 
 
 ..literal-block::
 	
@@ -76,7 +76,7 @@ With the python interpreter still open, check if the openmm python packages can 
 
 You may see the following warning:
 
-.. image:: images/openmm_warning.png
+.. image:: images/openmm_warning.PNG
 
 This warning can be ignored, 'import openmm' is a better practice than the command above but importing from simtk will still load the openmm package.
 
