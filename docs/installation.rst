@@ -11,7 +11,7 @@ Miniconda: https://docs.anaconda.com/miniconda/install/ (recommended for use wit
 **Ubuntu** is a linux system emulator which is required to run some of the programmes utilised by this python package - please install miniconda using the ubuntu command line.
 
 Creating an environment
-=======================
+-----------------------
 
 To create an environment, open the command prompt (ubuntu if you are using windows) and execute the following:
 
