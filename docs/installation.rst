@@ -124,6 +124,20 @@ Now you can navigate to your home directory and execute the following commands:
 
 The final 'cd' command navigate to the directory containing the notebooks and scripts required for the tutorials.
 
+Jupyter Notebook tutorials
+--------------------------
+
+There are a series of jupyter notebooks that contain tutorials and are aptly labelled. A section can be found explaining the contents of each notebook.
+To launch jupyter notebooks execute the following in the command line (ubuntu in windows):
+
+..literal-block::
+	
+	jupyter notebook
+
+This will launch a local jupyter notebook server and a series of URLs will be returned. Copy the **first link** containing ('localhost:8888') and copy//paste into a browser.
+From there, refer to the section in this documentation about different tutorials.
+
+
 
 
 
