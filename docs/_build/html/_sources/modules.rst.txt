@@ -14,3 +14,4 @@ modules
    sw_file_formatter
    sw_openmm
    sw_orca
+   modules

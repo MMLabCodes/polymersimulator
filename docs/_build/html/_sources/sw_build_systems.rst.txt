@@ -1,5 +1,5 @@
 sw_build_systems Documentation
-====================
+==============================
 
 This section includes the documentation for the **sw_build_systems** module.
 
