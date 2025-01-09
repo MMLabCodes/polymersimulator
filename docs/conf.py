@@ -3,6 +3,17 @@ import sys
 sys.path.insert(0, os.path.abspath('../'))  # Adjusting to root project directory
 sys.path.insert(0, os.path.abspath('../modules/'))  # Correcting to the directory of the modules
 
+#from sw_openmm import *
+#from sw_build_systems import *
+#from sw_analysis import *
+#from sw_basic_functions import *
+#from sw_complex_fluid_models import *
+#from sw_custom_decorators import *
+#from sw_directories import *
+#from sw_file_formatter import *
+#from sw_depreceated import *
+#from sw_orca import *
+
 # Project information
 project = 'Polymer Simulator'
 copyright = '2025, Daniel J. York'

@@ -415,41 +415,41 @@ def solvate_polymer_pdb(self, molecule_name, polymer_name, buffer=None):
 
     if buffer == None:
          buffer = "10"
-     else:
+    else:
          buffer = str(buffer)
 
      # Change to prepi file directory
-     cd_command = "cd " + molecule_dir
-     try:
+    cd_command = "cd " + molecule_dir
+    try:
         os.chdir(molecule_dir)
         print("Current directory:", os.getcwd())
     except Exception as e:
            print("Exception:", e)
 
-     # Define prepi filepaths
-     head_prepi_filepath = "head_" + molecule_name + ".prepi"
-     mainchain_prepi_filepath = "mainchain_" + molecule_name + ".prepi"
-     tail_prepi_filepath = "tail_" + molecule_name + ".prepi"
+    # Define prepi filepaths
+    head_prepi_filepath = "head_" + molecule_name + ".prepi"
+    mainchain_prepi_filepath = "mainchain_" + molecule_name + ".prepi"
+    tail_prepi_filepath = "tail_" + molecule_name + ".prepi"
 
-     file_subtype = "_wat_solv"
-      # Define output directory - based on polymer name
-      output_dir = os.path.join(self.manager.systems_dir, polymer_name + file_subtype)
-      if not os.path.exists(output_dir):
-         os.makedirs(output_dir)
+    file_subtype = "_wat_solv"
+    # Define output directory - based on polymer name
+    output_dir = os.path.join(self.manager.systems_dir, polymer_name + file_subtype)
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
 
     # Redundant lol
-     mol_name_1 = polymer_name
+    mol_name_1 = polymer_name
 
-     # Get box size by taking x coord (its the length of the polymer) and adding a buffer
-     pdb_filepath = os.path.join(self.manager.systems_dir, polymer_name, polymer_name + ".pdb")
+    # Get box size by taking x coord (its the length of the polymer) and adding a buffer
+    pdb_filepath = os.path.join(self.manager.systems_dir, polymer_name, polymer_name + ".pdb")
 
-     # Define required filepaths   
-     intleap_path = polymer_name + file_subtype + ".intleap"
-     filename = polymer_name + file_subtype + f"_{buffer}"
-     prmtop_filepath =  os.path.join(output_dir, filename + ".prmtop")
-     rst_filepath = os.path.join(output_dir, filename + ".rst7")
-     pdb_outpath = os.path.join(output_dir, filename + ".pdb") 
-     single_chain_pdb_filepath = os.path.join(output_dir, filename + ".pdb")
+    # Define required filepaths   
+    intleap_path = polymer_name + file_subtype + ".intleap"
+    filename = polymer_name + file_subtype + f"_{buffer}"
+    prmtop_filepath =  os.path.join(output_dir, filename + ".prmtop")
+    rst_filepath = os.path.join(output_dir, filename + ".rst7")
+    pdb_outpath = os.path.join(output_dir, filename + ".pdb") 
+    single_chain_pdb_filepath = os.path.join(output_dir, filename + ".pdb")
 
 
     # Define file content for leap file
