@@ -16,10 +16,30 @@ from rdkit.Chem import AllChem
 from rdkit.Chem.rdmolfiles import MolFromPDBFile
 
 class BuildSystems():
+    """
+    This class provides methods for building and simulating molecular systems, including:
+    - Converting SMILES strings to PDB files
+    - Generating residue codes
+    - Running Packmol simulations
+    - Calculating XYZ distances
+    - Aligning molecular structures
 
+    It also interfaces with a CSV file to manage residue codes and allows various helper
+    functions for molecular manipulation and simulation setup.
+
+    Attributes:
+        packmol_path (str): Path to the Packmol executable.
+        manager (object): Manager object for interacting with the directories and files.
+    """
     packmol_path = "/home/dan/packmol-20.14.4-docs1/packmol-20.14.4-docs1/packmol"
     
     def __init__(self, manager):
+        """
+        Initializes the BuildSystems class with the specified manager object.
+
+        Args:
+            manager (object): Manager object to handle file paths and directories.
+        """        
         self.manager = manager
     
     def SmilesToPDB(self, smiles_string, output_file):
@@ -177,7 +197,15 @@ class BuildSystems():
         return new_code
 
     def GenRescode_4_PolyUnits(self, name):
-        # Name should be of a trimer
+        """
+        Generates residue codes for polymeric units (e.g., trimers) and updates the residue codes database.
+
+        Args:
+            name (str): Name of the trimer molecule.
+
+        Returns:
+            None. Updates the residue code database and prints assigned residue codes.
+        """
         if "trimer" not in name:
             print("Polymeric unit generation requires trimers. Please consult the build systems guide for information on how to do this")
             return()
@@ -406,7 +434,16 @@ class BuildSystems():
            
     @staticmethod
     def align_molecule(input_pdb, axis_to_align=None):
-        # Packages used only in this method are imported here
+        """
+        Aligns the molecule structure to a given axis (X, Y, or Z).
+
+        Args:
+            input_file (str): Path to a PDB file containing the molecule.
+            axis (str): The axis ("X", "Y", or "Z") to align the molecule to.
+
+        Returns:
+            None. The structure is aligned and saved.
+        """
         import MDAnalysis as mda
         import numpy as np
         from scipy.spatial.transform import Rotation as R

@@ -14,6 +14,7 @@ Contents
    installation
    packagecontents
    sw_openmm
+   sw_build_systems
    usage
    api
    contributing
