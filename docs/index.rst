@@ -15,6 +15,10 @@ Contents
    packagecontents
    sw_openmm
    sw_build_systems
+   sw_analysis
+   sw_basic_functions
+   sw_complex_fluid_models
+   sw_orca
    usage
    api
    contributing
