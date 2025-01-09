@@ -4,9 +4,9 @@
 # Required
 version: 2
 
-# Set the Python version and other tools you might need
+# Set the OS, Python version and other tools you might need
 build:
-  image: ubuntu-22.04  # Use the Docker image name here, not 'os'
+  os: ubuntu-22.04
   tools:
     python: "3.12"
     # You can also specify other tool versions:
@@ -32,18 +32,4 @@ sphinx:
 # See https://docs.readthedocs.io/en/stable/guides/reproducible-builds.html
 python:
   install:
-    - requirements: docs/requirements.txt  # Install dependencies from requirements.txt file
-    # You can also explicitly install any missing dependencies if required:
-    - pip install openbabel  # Ensure openbabel is installed for the build
-
-# Custom build environment steps (before and after installation)
-build:
-  before_install:
-    # Update the system and install dependencies that are needed for the build
-    - sudo apt-get update
-    - sudo apt-get install -y openbabel  # Install Open Babel and any required system dependencies
-
-  # Optionally you can define any additional commands needed during the build
-  commands:
-    - pip install .  # Install your project if needed
-    - make html  # This will build the Sphinx documentation
+    - requirements: docs/requirements.txt
