@@ -3,8 +3,12 @@ sphinx-rtd-theme
 parmed
 numpy
 pandas>=2.0.0
-
 matplotlib
-
-
 rdkit
+os
+subprocess
+sklearn
+seaborn
+nglview
+MDAnalysis
+import re
