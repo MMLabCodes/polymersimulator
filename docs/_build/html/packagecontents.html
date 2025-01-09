@@ -1,0 +1,200 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Package Contents &mdash; Polymer Simulator 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=01f34227"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Module Documentation" href="sw_openmm.html" />
+    <link rel="prev" title="Installation" href="installation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Polymer Simulator
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Package Contents</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#sw-directories">sw_directories</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sw-basic-functions">sw_basic_functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sw-build-systems">sw_build_systems</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sw-openmm">sw_openmm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sw-analysis">sw_analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sw-orca">sw_orca</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sw_openmm.html">Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sw_build_systems.html">sw_build_systems Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Polymer Simulator</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Package Contents</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/packagecontents.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="package-contents">
+<h1>Package Contents<a class="headerlink" href="#package-contents" title="Link to this heading"></a></h1>
+<p>With the amount of code in this package, it is useful to introduce the different python modules and functionalites within the package before diving in depth into how to use them with further documentation and tutorials.</p>
+<p><em>Note: All modules are prefixed by “sw_” in homage to the use of supercomputing wales in its initial creation.</em></p>
+<section id="sw-directories">
+<h2>sw_directories<a class="headerlink" href="#sw-directories" title="Link to this heading"></a></h2>
+<p><strong>sw_directories</strong> is a filepath manager and is the workhorse of this package. This package is designed so that all of the code
+functions by being executed within the base directory.</p>
+<p>In this vein, there are a range of functions that locate specific types of and/or specific files. The module is class based and the initial class instance
+contains filepaths to varying directory locations around the package (which enables the file finding) so generated files can be found in an intuitive location.</p>
+<p>There are other functionalities of this python module that will recieve documentation at a later date but this includes a class for:</p>
+<ul class="simple">
+<li><p>managing a DFT job within supercomputing wales</p></li>
+<li><p>organising files for generation of data-driven representative models for biocrude oils.</p></li>
+</ul>
+</section>
+<section id="sw-basic-functions">
+<h2>sw_basic_functions<a class="headerlink" href="#sw-basic-functions" title="Link to this heading"></a></h2>
+<p><strong>sw_basic_functions</strong> includes basic functions that are seemingly random but have uses across all modules within this package.</p>
+<p>This module simply imports other functions such as:</p>
+<ul class="simple">
+<li><p>estimating volume of a molecule (from SMILES//pdb//RDkit mol object)</p></li>
+<li><p>identifying structural information within a molecule</p></li>
+</ul>
+</section>
+<section id="sw-build-systems">
+<h2>sw_build_systems<a class="headerlink" href="#sw-build-systems" title="Link to this heading"></a></h2>
+<p>This is a class based module with a lot of content. It’s main functionality is to build systems for molecular dynamics simulation.</p>
+<p>There are two classes here; <strong>BuildSystems</strong> and <strong>BuildAmberSystems</strong></p>
+<p><strong>BuildSystems</strong> contains functions such as:</p>
+<ul class="simple">
+<li><p>SMILES to pdb file</p></li>
+<li><p>calling packmol</p></li>
+<li><p>retrieving xyz distances of a molecule</p></li>
+<li><p>assigning generated molecules unique residue codes and storing them in a database</p></li>
+</ul>
+<p><strong>BuildAmberSystems</strong> inherits all of the functionality of <strong>BuildSystems</strong> but uses AmberTools to carry out a range of other functionalities.</p>
+<p>For example:</p>
+<ul class="simple">
+<li><p>Parameterize molecules</p></li>
+<li><p>Parameterize polymers</p></li>
+<li><p>Build polymers</p></li>
+<li><p>Build  systems of multiple polymers</p></li>
+</ul>
+</section>
+<section id="sw-openmm">
+<h2>sw_openmm<a class="headerlink" href="#sw-openmm" title="Link to this heading"></a></h2>
+<p>This is a class based module and carries out molecular dynamics simulations. It is built on top of the existing openmm python module.
+There are some legacy functions that will not be supported in this documentation. The main class in this module is the <strong>BuildSimulation</strong> class.</p>
+<p>Whilst <strong>BuildSimulation</strong> is the main class, this class is a base for the ones you will need to use, these are <strong>AmberSimulation</strong> and <strong>AniSimulation</strong>.
+These 2 classes inherit class methods to carry out molecular dynamic simulations from the <strong>BuildSimulation</strong> class.</p>
+<p><strong>AmberSimulation</strong> is a class that uses amber topology and coordinae files to carry out molecular dynamic simulations.</p>
+<p><strong>ANISimulation</strong> is a class that uses a pdb file to build and carry out molecular dynamic simulations - it is currently not supported//working.</p>
+<p><strong>BuildSimulation</strong> contains many different molecular dynamic functions such as:</p>
+<ul class="simple">
+<li><p>Energy minimization</p></li>
+<li><p>Simple NVT//NPT simulations</p></li>
+<li><p>Annealing in NVT</p></li>
+<li><p>Thermal ramping//deramping in NVT//NPT</p></li>
+<li><p>Easy ways to change simulation parameters</p></li>
+<li><p>Saving of output file</p></li>
+</ul>
+<p><em>Note: the **sw_directories*</em> module handles the location of any output files*</p>
+</section>
+<section id="sw-analysis">
+<h2>sw_analysis<a class="headerlink" href="#sw-analysis" title="Link to this heading"></a></h2>
+<p>This is a class based module and is the most complex in its usage - it is best learnt with the different tutorials.</p>
+<p>It analyses output trajectories from different stages of a simulation and has a variety of uses:</p>
+<ul class="simple">
+<li><p>Calculating free volume</p></li>
+<li><p>Calculating radius of gyration</p></li>
+<li><p>Calculating end to end distances of polymers</p></li>
+<li><p>Calculating persistence length of polymers</p></li>
+<li><p>Extracting coordinates of molecules for further study</p></li>
+</ul>
+</section>
+<section id="sw-orca">
+<h2>sw_orca<a class="headerlink" href="#sw-orca" title="Link to this heading"></a></h2>
+<p>This is a classed based module and contains one class <strong>orca_molecule</strong>.</p>
+<p>This class extracts information from a .csv containing DFT information and allows this information to be passed to other modules.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="sw_openmm.html" class="btn btn-neutral float-right" title="Module Documentation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Daniel J. York.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

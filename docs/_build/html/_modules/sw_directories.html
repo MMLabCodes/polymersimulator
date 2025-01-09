@@ -1,0 +1,1037 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>sw_directories &mdash; Polymer Simulator 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Polymer Simulator
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../packagecontents.html">Package Contents</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sw_openmm.html">Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sw_build_systems.html">sw_build_systems Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Polymer Simulator</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Module code</a></li>
+      <li class="breadcrumb-item active">sw_directories</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for sw_directories</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Created on Wed Mar 13 14:18:48 2024</span>
+
+<span class="sd">@author: danie</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">os</span> 
+<span class="kn">import</span> <span class="nn">csv</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+
+<span class="kn">from</span> <span class="nn">modules.sw_file_formatter</span> <span class="kn">import</span> <span class="n">DFT_input_generator</span>
+<span class="kn">from</span> <span class="nn">modules.sw_basic_functions</span> <span class="kn">import</span> <span class="n">get_homo_lumo_from_xyz</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">SnippetSim Directories Module</span>
+
+<span class="sd">This module defines the SnippetSimManage class, which is used for initializing</span>
+<span class="sd">and organizing directories for polymer simulation setup. It creates specific</span>
+<span class="sd">directories such as &#39;python_scripts&#39;, &#39;pdb_files&#39;, &#39;molecules&#39;, &#39;systems&#39;, and manages</span>
+<span class="sd">files like &#39;residue_codes.csv&#39;.</span>
+
+<span class="sd">Attributes:</span>
+<span class="sd">    main_dir (str): The main directory for snippet simulation setup.</span>
+
+<span class="sd">Example:</span>
+<span class="sd">    &gt;&gt;&gt; from PolymerSimulatorDirs import PolymerSimulatorDirs</span>
+<span class="sd">    &gt;&gt;&gt; polymer_dirs = PolymerSimulatorDirs(&#39;/path/to/main/dir/&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; print(polymer_dirs.pdb_file_dir)</span>
+<span class="sd">    &#39;/path/to/main/dir/pdb_files&#39;</span>
+
+<span class="sd">Note:</span>
+<span class="sd">    The main_dir must be provided as a valid path and must already exist.</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<div class="viewcode-block" id="SnippetSimManage">
+<a class="viewcode-back" href="../sw_directories.html#sw_directories.SnippetSimManage">[docs]</a>
+<span class="k">class</span> <span class="nc">SnippetSimManage</span><span class="p">:</span>
+    <span class="n">packmol_path</span> <span class="o">=</span> <span class="s2">&quot;/home/dan/packmol-20.14.4-docs1/packmol-20.14.4-docs1/packmol&quot;</span>
+    <span class="c1"># Class for intialsing and building files and folders for polymer simulation set up and the like</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">main_dir</span><span class="p">):</span> 
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize SnippetSimManage object.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            main_dir (str): The main directory for polymer simulation setup.</span>
+<span class="sd">                            Example: &#39;/path/to/main/dir/&#39;</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            FileNotFoundError: If main_dir does not exist.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">main_dir</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The specified main directory &#39;</span><span class="si">{</span><span class="n">main_dir</span><span class="si">}</span><span class="s2">&#39; does not exist.&quot;</span><span class="p">)</span>       
+        <span class="bp">self</span><span class="o">.</span><span class="n">main_dir</span> <span class="o">=</span> <span class="n">main_dir</span> 
+        
+        <span class="c1"># Get path to python script directory and check if exists</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">python_script_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">main_dir</span><span class="p">,</span> <span class="s1">&#39;python_scripts&#39;</span><span class="p">)</span>        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">python_script_dir</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">python_script_dir</span><span class="p">)</span>
+         
+        <span class="c1"># Get path to pdb file directory and check if exists</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pdb_file_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">main_dir</span><span class="p">,</span> <span class="s1">&#39;pdb_files&#39;</span><span class="p">)</span>      
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pdb_file_dir</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pdb_file_dir</span><span class="p">)</span>     
+         
+        <span class="c1"># Get path to csv to pdb file directory and check if exists</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">csv_to_pdb_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">main_dir</span><span class="p">,</span> <span class="s1">&#39;csvs_to_pdb&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">csv_to_pdb_dir</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">csv_to_pdb_dir</span><span class="p">)</span>
+         
+        <span class="c1"># Get path to residue code csv and check if exists</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">residue_code_csv</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pdb_file_dir</span><span class="p">,</span> <span class="s1">&#39;residue_codes.csv&#39;</span><span class="p">)</span>       
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">residue_code_csv</span><span class="p">):</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">residue_code_csv</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+                <span class="k">pass</span> <span class="c1"># Don&#39;t want to do anything with it, just generate it</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">pass</span> <span class="c1"># Pass as the file already exists</span>
+        
+        <span class="c1"># Get path to molecules directory and check if exists - this will contain the parameters and pdb for individual molecules</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">molecules_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pdb_file_dir</span><span class="p">,</span> <span class="s1">&#39;molecules&#39;</span><span class="p">)</span>     
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">molecules_dir</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">molecules_dir</span><span class="p">)</span>
+
+        
+        <span class="c1"># Get path to systems directory and check if exists - this will contain the parameters and pdb for systems for md simulations</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">systems_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pdb_file_dir</span><span class="p">,</span> <span class="s1">&#39;systems&#39;</span><span class="p">)</span>   
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">systems_dir</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">systems_dir</span><span class="p">)</span>
+
+<div class="viewcode-block" id="SnippetSimManage.mol2_files_avail">
+<a class="viewcode-back" href="../sw_directories.html#sw_directories.SnippetSimManage.mol2_files_avail">[docs]</a>
+    <span class="k">def</span> <span class="nf">mol2_files_avail</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">mol2_avail</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># Walk through the directory tree recursively</span>
+        <span class="k">for</span> <span class="n">root</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pdb_file_dir</span><span class="p">):</span>
+            <span class="n">dirs</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dirs</span> <span class="k">if</span> <span class="n">d</span> <span class="o">!=</span> <span class="s1">&#39;depreceated&#39;</span><span class="p">]</span>
+            <span class="c1"># Check each file in the current directory</span>
+            <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+                <span class="c1"># Check if the file has a .pdb extension</span>
+                <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.mol2&quot;</span><span class="p">):</span>
+                    <span class="c1"># Construct the full path to the .pdb file</span>
+                    <span class="n">mol2_filepath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
+                    <span class="n">mol2_avail</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mol2_filepath</span><span class="p">)</span>
+                    <span class="c1"># Extract molecule name</span>
+                    <span class="n">mol2_file</span> <span class="o">=</span> <span class="n">mol2_filepath</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="c1">#print(mol2_file)</span>
+        <span class="k">return</span><span class="p">(</span><span class="n">mol2_avail</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SnippetSimManage.load_mol2_filepath">
+<a class="viewcode-back" href="../sw_directories.html#sw_directories.SnippetSimManage.load_mol2_filepath">[docs]</a>
+    <span class="k">def</span> <span class="nf">load_mol2_filepath</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">molecule_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">molecule_name</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Please provide the name of the system you are retrieving files as follows: &#39;mol2_file = directories.load_mol2_filepath(&#39;ethane&#39;)&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Change ethane for the name of the desired system&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;NOTE: The mol2 file of the requested molecule must be generated with tleap prior to use of this function&quot;</span><span class="p">)</span>
+            <span class="k">return</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+        <span class="c1"># Walk through the directory tree recursively</span>
+        <span class="k">for</span> <span class="n">root</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pdb_file_dir</span><span class="p">):</span>
+            <span class="n">dirs</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dirs</span> <span class="k">if</span> <span class="n">d</span> <span class="o">!=</span> <span class="s1">&#39;depreceated&#39;</span><span class="p">]</span>
+            <span class="c1"># Check each file in the current directory</span>
+            <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+                <span class="c1"># Check if the file has a .pdb extension</span>
+                <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.mol2&quot;</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">molecule_name</span> <span class="o">+</span> <span class="s2">&quot;.mol2&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="n">file</span><span class="p">:</span>
+                        <span class="c1">#print(file)</span>
+                        <span class="n">mol2_file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
+                        <span class="k">return</span> <span class="n">mol2_file_path</span> </div>
+
+
+<div class="viewcode-block" id="SnippetSimManage.load_pckml_filepath">
+<a class="viewcode-back" href="../sw_directories.html#sw_directories.SnippetSimManage.load_pckml_filepath">[docs]</a>
+    <span class="k">def</span> <span class="nf">load_pckml_filepath</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">system_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">system_name</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Please provide the name of the system you are retrieving files as follows: &#39;pckml_file = directories.load_pckml_filepath(&#39;pb_ph_41&#39;)&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;NOTE: Packmol input files must be written manually.&quot;</span><span class="p">)</span>
+            <span class="k">return</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+        <span class="c1"># Walk through the directory tree recursively</span>
+        <span class="k">for</span> <span class="n">root</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pdb_file_dir</span><span class="p">):</span>
+            <span class="n">dirs</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dirs</span> <span class="k">if</span> <span class="n">d</span> <span class="o">!=</span> <span class="s1">&#39;depreceated&#39;</span><span class="p">]</span>
+            <span class="c1"># Check each file in the current directory</span>
+            <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+                <span class="c1"># Check if the file has a .pdb extension</span>
+                <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.pckml&quot;</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">system_name</span> <span class="o">+</span> <span class="s2">&quot;.pckml&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="n">file</span><span class="p">:</span>
+                        <span class="n">pckml_file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
+                        <span class="k">return</span> <span class="n">pckml_file_path</span> </div>
+
+                        
+<div class="viewcode-block" id="SnippetSimManage.pckml_files_avail">
+<a class="viewcode-back" href="../sw_directories.html#sw_directories.SnippetSimManage.pckml_files_avail">[docs]</a>
+    <span class="k">def</span> <span class="nf">pckml_files_avail</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">pckml_avail</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># Walk through the directory tree recursively</span>
+        <span class="k">for</span> <span class="n">root</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pdb_file_dir</span><span class="p">):</span>
+            <span class="n">dirs</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dirs</span> <span class="k">if</span> <span class="n">d</span> <span class="o">!=</span> <span class="s1">&#39;depreceated&#39;</span><span class="p">]</span>
+            <span class="c1"># Check each file in the current directory</span>
+            <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+                <span class="c1"># Check if the file has a .pdb extension</span>
+                <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.pckml&quot;</span><span class="p">):</span>
+                    <span class="c1"># Construct the full path to the .pdb file</span>
+                    <span class="n">pckml_filepath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
+                    <span class="n">pckml_avail</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pckml_filepath</span><span class="p">)</span>
+                    <span class="c1"># Extract molecule name</span>
+                    <span class="n">pckml_file</span> <span class="o">=</span> <span class="n">pckml_filepath</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="c1">#print(pckml_file)</span>
+        <span class="k">return</span><span class="p">(</span><span class="n">pckml_avail</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SnippetSimManage.pdb_files_avail">
+<a class="viewcode-back" href="../sw_directories.html#sw_directories.SnippetSimManage.pdb_files_avail">[docs]</a>
+    <span class="k">def</span> <span class="nf">pdb_files_avail</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">pdb_avail</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># Walk through the directory tree recursively</span>
+        <span class="k">for</span> <span class="n">root</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pdb_file_dir</span><span class="p">):</span>
+            <span class="n">dirs</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dirs</span> <span class="k">if</span> <span class="n">d</span> <span class="o">!=</span> <span class="s1">&#39;depreceated&#39;</span><span class="p">]</span>
+            <span class="c1"># Check each file in the current directory</span>
+            <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+                <span class="c1"># Check if the file has a .pdb extension</span>
+                <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.pdb&quot;</span><span class="p">):</span>
+                    <span class="c1"># Construct the full path to the .pdb file</span>
+                    <span class="n">pdb_filepath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
+                    <span class="n">pdb_avail</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pdb_filepath</span><span class="p">)</span>
+                    <span class="c1"># Extract molecule name</span>
+                    <span class="n">pdb_file</span> <span class="o">=</span> <span class="n">pdb_filepath</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="c1">#print(pdb_file)</span>
+        <span class="k">return</span><span class="p">(</span><span class="n">pdb_avail</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SnippetSimManage.load_pdb_filepath">
+<a class="viewcode-back" href="../sw_directories.html#sw_directories.SnippetSimManage.load_pdb_filepath">[docs]</a>
+    <span class="k">def</span> <span class="nf">load_pdb_filepath</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">molecule_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">molecule_name</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Please provide the name of the system you are retrieving files as follows: &#39;pdb_file = directories.load_pdb_filepath(&#39;ethane&#39;)&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Change ethane for the name of the desired system&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;NOTE: If requesting a system for molecular dynamics - PDB files of a system must be generated using tleap prior to this step&quot;</span><span class="p">)</span>
+            <span class="k">return</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+
+         
+        <span class="c1"># Walk through the directory tree recursively</span>
+        <span class="k">for</span> <span class="n">root</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pdb_file_dir</span><span class="p">):</span>
+            <span class="n">dirs</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dirs</span> <span class="k">if</span> <span class="n">d</span> <span class="o">!=</span> <span class="s1">&#39;depreceated&#39;</span><span class="p">]</span>
+            <span class="c1"># Check each file in the current directory</span>
+            <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+                <span class="c1"># Check if the file has a .pdb extension</span>
+                <span class="c1">#if file.endswith(&quot;.pdb&quot;):</span>
+                <span class="k">if</span> <span class="n">file</span> <span class="o">==</span> <span class="p">(</span><span class="n">molecule_name</span> <span class="o">+</span> <span class="s2">&quot;.pdb&quot;</span><span class="p">):</span>
+                    <span class="c1">#if molecule_name in file:</span>
+                    <span class="n">pdb_file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="n">pdb_file_path</span></div>
+
+
+        
+                    
+<div class="viewcode-block" id="SnippetSimManage.ac_files_avail">
+<a class="viewcode-back" href="../sw_directories.html#sw_directories.SnippetSimManage.ac_files_avail">[docs]</a>
+    <span class="k">def</span> <span class="nf">ac_files_avail</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">ac_avail</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># Walk through the directory tree recursively</span>
+        <span class="k">for</span> <span class="n">root</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pdb_file_dir</span><span class="p">):</span>
+            <span class="n">dirs</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dirs</span> <span class="k">if</span> <span class="n">d</span> <span class="o">!=</span> <span class="s1">&#39;depreceated&#39;</span><span class="p">]</span>
+            <span class="c1"># Check each file in the current directory</span>
+            <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+                <span class="c1"># Check if the file has a .ac extension</span>
+                <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.ac&quot;</span><span class="p">):</span>
+                    <span class="c1"># Construct the full path to the .ac file</span>
+                    <span class="n">ac_filepath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
+                    <span class="n">ac_avail</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ac_filepath</span><span class="p">)</span>
+                    <span class="c1"># Extract molecule name</span>
+                    <span class="n">ac_file</span> <span class="o">=</span> <span class="n">ac_filepath</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="c1">#print(ac_file)</span>
+        <span class="k">return</span><span class="p">(</span><span class="n">ac_avail</span><span class="p">)</span></div>
+
+                
+            
+<div class="viewcode-block" id="SnippetSimManage.amber_systems_avail">
+<a class="viewcode-back" href="../sw_directories.html#sw_directories.SnippetSimManage.amber_systems_avail">[docs]</a>
+    <span class="k">def</span> <span class="nf">amber_systems_avail</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">amber_system_avail</span> <span class="o">=</span><span class="p">[]</span>
+        <span class="k">for</span> <span class="n">root</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">systems_dir</span><span class="p">):</span>
+            <span class="n">dirs</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dirs</span> <span class="k">if</span> <span class="n">d</span> <span class="o">!=</span> <span class="s1">&#39;depreceated&#39;</span><span class="p">]</span>
+            <span class="c1"># Check each file in the current directory</span>
+            <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+                <span class="c1"># Check if the file has a .pdb extension</span>
+                <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.prmtop&quot;</span><span class="p">):</span>
+                    <span class="n">a</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="c1"># Construct the full path to the .pdb file</span>
+                    <span class="n">prmtop_filepath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
+                    <span class="c1"># Extract molecule name</span>
+                    <span class="n">prmtop_file</span> <span class="o">=</span> <span class="n">prmtop_filepath</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="n">amber_system_avail</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">prmtop_file</span><span class="p">)</span>
+                    <span class="c1">#print(pdb_file)</span>
+                <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.rst7&quot;</span><span class="p">):</span>
+                    <span class="n">a</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="c1"># Construct the full path to the .pdb file</span>
+                    <span class="n">rst7_filepath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
+                    <span class="n">amber_system_avail</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rst7_filepath</span><span class="p">)</span>
+                    <span class="c1"># Extract molecule name</span>
+                    <span class="n">rst7_file</span> <span class="o">=</span> <span class="n">rst7_filepath</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="c1">#print(pdb_file)</span>
+        <span class="k">if</span> <span class="n">a</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Remember you need both .prmtop and .rst7 files to run a simulation&quot;</span><span class="p">)</span>    
+            <span class="k">return</span><span class="p">(</span><span class="n">amber_system_avail</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">a</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No parametrized molecules.&quot;</span><span class="p">)</span>
+            <span class="k">return</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SnippetSimManage.load_amber_filepaths">
+<a class="viewcode-back" href="../sw_directories.html#sw_directories.SnippetSimManage.load_amber_filepaths">[docs]</a>
+    <span class="k">def</span> <span class="nf">load_amber_filepaths</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">system_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">prmtop_file_path</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">coord_file_path</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">system_name</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Please provide the name of the system you are retrieving files as follows: &#39;topology_file, coordinate_file = directories.retrieve_top_crds(&#39;ethane&#39;)&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Change ethane for the name of the desired system&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;NOTE: Amber files must be generated using tleap prior to this step&quot;</span><span class="p">)</span>
+            <span class="k">return</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">root</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">systems_dir</span><span class="p">):</span>
+            <span class="n">dirs</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dirs</span> <span class="k">if</span> <span class="n">d</span> <span class="o">!=</span> <span class="s1">&#39;depreceated&#39;</span><span class="p">]</span>
+            <span class="c1"># Check each file in the current directory</span>
+            <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+                <span class="c1"># Check if the file has a .pdb extension</span>
+                <span class="c1">#if file.endswith(&quot;.prmtop&quot;) and system_name in file: </span>
+                <span class="k">if</span> <span class="n">file</span> <span class="o">==</span> <span class="p">(</span><span class="n">system_name</span> <span class="o">+</span> <span class="s2">&quot;.prmtop&quot;</span><span class="p">):</span>
+                    <span class="c1"># Construct the full path to the .pdb file</span>
+                    <span class="n">prmtop_file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
+                <span class="c1">#if file.endswith(&quot;.rst7&quot;) and system_name in file:</span>
+                <span class="k">if</span> <span class="n">file</span> <span class="o">==</span> <span class="p">(</span><span class="n">system_name</span> <span class="o">+</span> <span class="s2">&quot;.rst7&quot;</span><span class="p">):</span>
+                    <span class="c1"># Construct the full path to the .pdb file</span>
+                    <span class="n">coord_file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">prmtop_file_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">coord_file_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="k">return</span><span class="p">(</span><span class="n">prmtop_file_path</span><span class="p">,</span> <span class="n">coord_file_path</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Files not found. Check name of molecule/system and if files have been generated.&quot;</span><span class="p">)</span>
+            <span class="k">return</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SnippetSimManage.retrieve_files_for_MDanalysis">
+<a class="viewcode-back" href="../sw_directories.html#sw_directories.SnippetSimManage.retrieve_files_for_MDanalysis">[docs]</a>
+    <span class="k">def</span> <span class="nf">retrieve_files_for_MDanalysis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">system_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">prmtop_file_path</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">system_name</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Please provide the name of the system you are retrieving files for.&quot;</span><span class="p">)</span>
+            <span class="k">return</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">root</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">systems_dir</span><span class="p">):</span>
+            <span class="n">dirs</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dirs</span> <span class="k">if</span> <span class="n">d</span> <span class="o">!=</span> <span class="s1">&#39;depreceated&#39;</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">file</span> <span class="o">==</span> <span class="p">(</span><span class="n">system_name</span> <span class="o">+</span> <span class="s2">&quot;.prmtop&quot;</span><span class="p">):</span>
+                    <span class="n">prmtop_file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
+                    
+        <span class="n">folders</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">systems_dir</span><span class="p">)</span>
+        <span class="n">anneal_files</span><span class="p">,</span> <span class="n">equili_files</span><span class="p">,</span> <span class="n">prod_files</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">folder</span> <span class="ow">in</span> <span class="n">folders</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">folder</span> <span class="o">==</span> <span class="n">system_name</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span>
+                <span class="n">folder_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">systems_dir</span><span class="p">,</span> <span class="n">folder</span><span class="p">)</span>
+                <span class="n">folder_contents</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">folder_path</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">folder_contents</span><span class="p">:</span>
+                        <span class="n">item_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folder_path</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">item_path</span><span class="p">):</span>
+                            <span class="n">output_contents</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">item_path</span><span class="p">)</span>
+                            <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">output_contents</span><span class="p">:</span>
+                                <span class="nb">print</span><span class="p">(</span><span class="n">item_path</span><span class="p">)</span>
+                                <span class="k">if</span> <span class="s2">&quot;.dcd&quot;</span> <span class="ow">in</span> <span class="n">file</span><span class="p">:</span>
+                                    <span class="k">if</span> <span class="s2">&quot;anneal&quot;</span> <span class="ow">in</span> <span class="n">file</span><span class="p">:</span>
+                                        <span class="n">anneal_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">item_path</span><span class="p">,</span> <span class="n">file</span><span class="p">))</span>
+                                    <span class="k">if</span> <span class="s2">&quot;atm&quot;</span> <span class="ow">in</span> <span class="n">file</span><span class="p">:</span>
+                                        <span class="n">equili_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">item_path</span><span class="p">,</span> <span class="n">file</span><span class="p">))</span>
+                                    <span class="k">if</span> <span class="s2">&quot;prod&quot;</span> <span class="ow">in</span> <span class="n">file</span><span class="p">:</span>
+                                        <span class="n">prod_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">item_path</span><span class="p">,</span> <span class="n">file</span><span class="p">))</span>
+                                <span class="k">if</span> <span class="s2">&quot;.pdb&quot;</span> <span class="ow">in</span> <span class="n">file</span><span class="p">:</span>
+                                    <span class="k">if</span> <span class="s2">&quot;anneal&quot;</span> <span class="ow">in</span> <span class="n">file</span><span class="p">:</span>
+                                        <span class="n">anneal_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">item_path</span><span class="p">,</span> <span class="n">file</span><span class="p">))</span>
+                                    <span class="k">if</span> <span class="s2">&quot;atm&quot;</span> <span class="ow">in</span> <span class="n">file</span><span class="p">:</span>
+                                        <span class="n">equili_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">item_path</span><span class="p">,</span> <span class="n">file</span><span class="p">))</span>
+                                    <span class="k">if</span> <span class="s2">&quot;prod&quot;</span> <span class="ow">in</span> <span class="n">file</span><span class="p">:</span>
+                                        <span class="n">prod_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">item_path</span><span class="p">,</span> <span class="n">file</span><span class="p">))</span>
+            
+        
+        <span class="k">return</span><span class="p">(</span><span class="n">prmtop_file_path</span><span class="p">,</span> <span class="n">anneal_files</span><span class="p">,</span> <span class="n">equili_files</span><span class="p">,</span> <span class="n">prod_files</span><span class="p">)</span></div>
+
+        
+    
+<div class="viewcode-block" id="SnippetSimManage.bash_submission">
+<a class="viewcode-back" href="../sw_directories.html#sw_directories.SnippetSimManage.bash_submission">[docs]</a>
+    <span class="k">def</span> <span class="nf">bash_submission</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+
+        <span class="c1"># Need an if instance for whether its amber or ani</span>
+    
+<div class="viewcode-block" id="SnippetSimManage.unpack_csv">
+<a class="viewcode-back" href="../sw_directories.html#sw_directories.SnippetSimManage.unpack_csv">[docs]</a>
+    <span class="nd">@staticmethod</span>  <span class="c1"># Dont take instance or class - can run this without an instance   </span>
+    <span class="k">def</span> <span class="nf">unpack_csv</span><span class="p">(</span><span class="n">csv_with_mol_info</span><span class="p">):</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">smiles</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">csv_with_mol_info</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">csv_file</span><span class="p">:</span>
+            <span class="n">csv_reader</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">reader</span><span class="p">(</span><span class="n">csv_file</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">csv_reader</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="n">names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="n">smiles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">names</span><span class="p">,</span> <span class="n">smiles</span></div>
+
+        
+<div class="viewcode-block" id="SnippetSimManage.retrieve_polymeric_rescodes">
+<a class="viewcode-back" href="../sw_directories.html#sw_directories.SnippetSimManage.retrieve_polymeric_rescodes">[docs]</a>
+    <span class="k">def</span> <span class="nf">retrieve_polymeric_rescodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">molecule_name</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">residue_code_csv</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+            <span class="n">head_code</span><span class="p">,</span> <span class="n">mainchain_code</span><span class="p">,</span> <span class="n">tail_code</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">file</span><span class="p">:</span>
+                <span class="n">parts</span> <span class="o">=</span> <span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">))</span> <span class="o">&gt;=</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">parts</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="p">(</span><span class="s2">&quot;head_&quot;</span> <span class="o">+</span> <span class="n">molecule_name</span><span class="p">):</span>
+                    <span class="n">head_code</span> <span class="o">=</span> <span class="n">parts</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)[</span><span class="mi">2</span><span class="p">]</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">))</span> <span class="o">&gt;=</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">parts</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="p">(</span><span class="s2">&quot;mainchain_&quot;</span> <span class="o">+</span> <span class="n">molecule_name</span><span class="p">):</span>
+                    <span class="n">mainchain_code</span> <span class="o">=</span> <span class="n">parts</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)[</span><span class="mi">2</span><span class="p">]</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">))</span> <span class="o">&gt;=</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">parts</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="p">(</span><span class="s2">&quot;tail_&quot;</span> <span class="o">+</span> <span class="n">molecule_name</span><span class="p">):</span>
+                    <span class="n">tail_code</span> <span class="o">=</span> <span class="n">parts</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)[</span><span class="mi">2</span><span class="p">]</span>    
+        <span class="k">return</span><span class="p">(</span><span class="n">head_code</span><span class="p">,</span> <span class="n">mainchain_code</span><span class="p">,</span> <span class="n">tail_code</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="SnippetSimManage.retrieve_rescode">
+<a class="viewcode-back" href="../sw_directories.html#sw_directories.SnippetSimManage.retrieve_rescode">[docs]</a>
+    <span class="k">def</span> <span class="nf">retrieve_rescode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">molecule_name</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">residue_code_csv</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+            <span class="n">rescode</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">file</span><span class="p">:</span>
+                <span class="n">parts</span> <span class="o">=</span> <span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">))</span> <span class="o">&gt;=</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">parts</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="p">(</span><span class="n">molecule_name</span><span class="p">):</span>
+                    <span class="n">rescode</span> <span class="o">=</span> <span class="n">parts</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="k">return</span><span class="p">(</span><span class="n">rescode</span><span class="p">)</span>
+
+
+        
+    <span class="c1"># Need to add stuff for md results and the like</span>
+    <span class="c1"># Need to add a way to import the bash submission scripts - will get to this at some point</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">main_dir</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The specified main directory &#39;</span><span class="si">{</span><span class="n">main_dir</span><span class="si">}</span><span class="s2">&#39; does not exist.&quot;</span><span class="p">)</span>       
+        <span class="bp">self</span><span class="o">.</span><span class="n">main_dir</span> <span class="o">=</span> <span class="n">main_dir</span> 
+        
+        <span class="c1"># Get path to python script directory and check if exists</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">python_script_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">main_dir</span><span class="p">,</span> <span class="s1">&#39;python_scripts&#39;</span><span class="p">)</span>        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">python_script_dir</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">python_script_dir</span><span class="p">)</span>
+         
+        <span class="c1"># Get path to pdb file directory and check if exists</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pdb_file_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">main_dir</span><span class="p">,</span> <span class="s1">&#39;pdb_files&#39;</span><span class="p">)</span>      
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pdb_file_dir</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pdb_file_dir</span><span class="p">)</span>     
+         
+        <span class="c1"># Get path to csv to pdb file directory and check if exists</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">csv_to_pdb_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">main_dir</span><span class="p">,</span> <span class="s1">&#39;csvs_to_pdb&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">csv_to_pdb_dir</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">csv_to_pdb_dir</span><span class="p">)</span>
+         
+        <span class="c1"># Get path to residue code csv and check if exists</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">residue_code_csv</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pdb_file_dir</span><span class="p">,</span> <span class="s1">&#39;residue_codes.csv&#39;</span><span class="p">)</span>       
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">residue_code_csv</span><span class="p">):</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">residue_code_csv</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+                <span class="k">pass</span> <span class="c1"># Don&#39;t want to do anything with it, just generate it</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">pass</span> <span class="c1"># Pass as the file already exists</span>
+        
+        <span class="c1"># Get path to molecules directory and check if exists - this will contain the parameters and pdb for individual molecules</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">molecules_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pdb_file_dir</span><span class="p">,</span> <span class="s1">&#39;molecules&#39;</span><span class="p">)</span>     
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">molecules_dir</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">molecules_dir</span><span class="p">)</span>
+
+        
+        <span class="c1"># Get path to systems directory and check if exists - this will contain the parameters and pdb for systems for md simulations</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">systems_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pdb_file_dir</span><span class="p">,</span> <span class="s1">&#39;systems&#39;</span><span class="p">)</span>   
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">systems_dir</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">systems_dir</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SnippetSimManage.simulations_avail">
+<a class="viewcode-back" href="../sw_directories.html#sw_directories.SnippetSimManage.simulations_avail">[docs]</a>
+    <span class="k">def</span> <span class="nf">simulations_avail</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">system_name</span><span class="p">):</span>
+        <span class="n">simulation_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">systems_dir</span><span class="p">,</span> <span class="n">system_name</span><span class="p">)</span>
+        <span class="n">avail_sims</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">simulation_dir</span><span class="p">):</span>
+            <span class="n">item_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">simulation_dir</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">item_path</span><span class="p">):</span>
+                <span class="n">avail_sims</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item_path</span><span class="p">)</span>      
+        <span class="k">if</span> <span class="n">avail_sims</span> <span class="o">==</span> <span class="p">[]:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No simulations found for the system.&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Please ensure simulation files are avaialable and system name is correct.&quot;</span><span class="p">)</span>
+            <span class="k">return</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Output contains paths to simulation directories.&quot;</span><span class="p">)</span>
+            <span class="k">return</span><span class="p">(</span><span class="n">avail_sims</span><span class="p">)</span></div>
+</div>
+
+            
+
+<span class="c1">#class PolymerConformerDFT(SnipperSimManage):</span>
+    <span class="c1">#def __init__(self, </span>
+
+<div class="viewcode-block" id="BioOilDirs">
+<a class="viewcode-back" href="../sw_directories.html#sw_directories.BioOilDirs">[docs]</a>
+<span class="k">class</span> <span class="nc">BioOilDirs</span><span class="p">(</span><span class="n">SnippetSimManage</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">main_dir</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize PolymerSimulatorDirs object.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            main_dir (str): The main directory for polymer simulation setup.</span>
+<span class="sd">                            Example: &#39;/path/to/main/dir/&#39;</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            FileNotFoundError: If main_dir does not exist.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Call the parent class&#39;s __init__ method with all arguments</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">main_dir</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">main_dir</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">FileNotFoundError</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">bio_oil_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">main_dir</span><span class="p">,</span> <span class="s1">&#39;bio_oil&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bio_oil_dir</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bio_oil_dir</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">bio_oil_systems_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bio_oil_dir</span><span class="p">,</span> <span class="s1">&#39;systems&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bio_oil_systems_dir</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bio_oil_systems_dir</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">bio_oil_GC_data</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bio_oil_dir</span><span class="p">,</span> <span class="s1">&#39;GC_data&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bio_oil_GC_data</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bio_oil_GC_data</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">bio_oil_models_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bio_oil_dir</span><span class="p">,</span> <span class="s1">&#39;models&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bio_oil_models_dir</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bio_oil_models_dir</span><span class="p">)</span>
+
+<div class="viewcode-block" id="BioOilDirs.GC_data_avail">
+<a class="viewcode-back" href="../sw_directories.html#sw_directories.BioOilDirs.GC_data_avail">[docs]</a>
+    <span class="k">def</span> <span class="nf">GC_data_avail</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+        <span class="c1"># Walk through the directory tree recursively</span>
+        <span class="k">for</span> <span class="n">root</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bio_oil_GC_data</span><span class="p">):</span>
+            <span class="c1"># Exclude &#39;depreceated&#39; directories</span>
+            <span class="n">dirs</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dirs</span> <span class="k">if</span> <span class="n">d</span> <span class="o">!=</span> <span class="s1">&#39;depreceated&#39;</span><span class="p">]</span>
+        
+            <span class="c1"># Check each file in the current directory</span>
+            <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+                <span class="c1"># Check if the file has a .csv extension</span>
+                <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.csv&quot;</span><span class="p">):</span>
+                    <span class="c1"># Construct the full path to the .csv file</span>
+                    <span class="n">csv_file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
+                    <span class="c1"># Extract filename</span>
+                    <span class="n">csv_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">csv_file_path</span><span class="p">)</span>
+
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="c1"># Read the CSV file</span>
+                        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">csv_file_path</span><span class="p">)</span>
+
+                        <span class="c1"># Drop any columns without headers (unnamed columns)</span>
+                        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="o">~</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;Unnamed&#39;</span><span class="p">)]</span>
+
+                        <span class="c1"># Check for null values in the remaining columns</span>
+                        <span class="k">if</span> <span class="n">df</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>  <span class="c1"># Check for any NaN in valid columns</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">csv_file</span><span class="si">}</span><span class="s2"> - Incomplete&quot;</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="n">csv_file</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error reading </span><span class="si">{</span><span class="n">csv_file</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="DFT_manager">
+<a class="viewcode-back" href="../sw_directories.html#sw_directories.DFT_manager">[docs]</a>
+<span class="k">class</span> <span class="nc">DFT_manager</span><span class="p">(</span><span class="n">SnippetSimManage</span><span class="p">):</span>
+    <span class="n">max_jobs</span> <span class="o">=</span> <span class="mi">8</span>
+    <span class="n">nprocs</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="n">runorca_path</span> <span class="o">=</span> <span class="s2">&quot;/scratch/scw1976/dan/polymersimulator-main/bin/runorca.sh&quot;</span>
+    <span class="n">fukui_path</span> <span class="o">=</span> <span class="s2">&quot;/scratch/scw1976/dan/polymersimulator-main/bin/fukui.sh&quot;</span>
+    <span class="n">running_path</span> <span class="o">=</span> <span class="s2">&quot;/scratch/s.983045&quot;</span>
+    <span class="n">orbital_editor</span> <span class="o">=</span> <span class="s2">&quot;/scratch/s.983045/bio_oil_modelling/scripts/orbital_cube_editor.py&quot;</span>
+    <span class="n">orca_resubmission_handler</span> <span class="o">=</span> <span class="s2">&quot;/scratch/s.983045/bio_oil_modelling/scripts/job_resubmitter.py&quot;</span>
+    <span class="n">orca_data_collater</span> <span class="o">=</span> <span class="s2">&quot;/scratch/s.983045/bio_oil_modelling/scripts/orca_data_collater.py&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">main_dir</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">main_dir</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">main_dir</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Main directory </span><span class="si">{</span><span class="n">main_dir</span><span class="si">}</span><span class="s2"> does not exist.&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">dft_manager_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">main_dir</span><span class="p">,</span> <span class="s2">&quot;dft_manage_dir&quot;</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dft_manager_dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">submitted_jobs_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_empty_file</span><span class="p">(</span><span class="s2">&quot;submitted_jobs.txt&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">processed_jobs_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_empty_file</span><span class="p">(</span><span class="s2">&quot;processed_jobs.txt&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">queue_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_empty_file</span><span class="p">(</span><span class="s2">&quot;job_queue.txt&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">job_paths_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_empty_file</span><span class="p">(</span><span class="s2">&quot;job_paths.txt&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">error_jobs_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_empty_file</span><span class="p">(</span><span class="s2">&quot;job_errors.txt&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_create_empty_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="n">filepath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dft_manager_dir</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
+            <span class="nb">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">filepath</span>
+
+<div class="viewcode-block" id="DFT_manager.job_queuer">
+<a class="viewcode-back" href="../sw_directories.html#sw_directories.DFT_manager.job_queuer">[docs]</a>
+    <span class="k">def</span> <span class="nf">job_queuer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_directory</span><span class="p">,</span> <span class="n">output_directory</span><span class="p">):</span>
+        <span class="n">jobs_to_queue</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">input_directory</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">input_directory</span><span class="p">,</span> <span class="n">file</span><span class="p">)):</span>
+                <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">file</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># Safe split for filename</span>
+                <span class="n">job_entry</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">input_directory</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">output_directory</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="k">if</span> <span class="n">job_entry</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">jobs_to_queue</span><span class="p">:</span>
+                    <span class="n">jobs_to_queue</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">job_entry</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">queue_file</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">job</span> <span class="ow">in</span> <span class="n">jobs_to_queue</span><span class="p">:</span>
+                <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">job</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DFT_manager.check_and_submit_jobs">
+<a class="viewcode-back" href="../sw_directories.html#sw_directories.DFT_manager.check_and_submit_jobs">[docs]</a>
+    <span class="k">def</span> <span class="nf">check_and_submit_jobs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">running_jobs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_running_jobs_count</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">running_jobs</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_jobs</span><span class="p">:</span>
+                <span class="n">job_queue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_job_queue</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">job_queue</span><span class="p">:</span>
+                    <span class="n">job</span> <span class="o">=</span> <span class="n">job_queue</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                    <span class="n">inp_dir</span><span class="p">,</span> <span class="n">xyz</span><span class="p">,</span> <span class="n">inp</span><span class="p">,</span> <span class="n">out_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs_from_queue</span><span class="p">(</span><span class="n">job</span><span class="p">)</span>
+                    <span class="n">job_number</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">submit_job</span><span class="p">(</span><span class="n">inp_dir</span><span class="p">,</span> <span class="n">inp</span><span class="p">,</span> <span class="n">xyz</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nprocs</span><span class="p">)</span>
+
+                    <span class="k">if</span> <span class="n">job_number</span><span class="p">:</span>  <span class="c1"># Ensure job was submitted successfully</span>
+                        <span class="n">job_name</span> <span class="o">=</span> <span class="n">xyz</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">move_to_submitted_jobs</span><span class="p">(</span><span class="n">inp_dir</span><span class="p">,</span> <span class="n">out_dir</span><span class="p">,</span> <span class="n">job_name</span><span class="p">,</span> <span class="n">job_number</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">write_job_queue</span><span class="p">(</span><span class="n">job_queue</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">job_queue</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">check_submitted_jobs</span><span class="p">()</span>
+                    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">60</span><span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">check_submitted_jobs</span><span class="p">()</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Job queue full. Processing...&quot;</span><span class="p">)</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">60</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DFT_manager.get_running_jobs_count">
+<a class="viewcode-back" href="../sw_directories.html#sw_directories.DFT_manager.get_running_jobs_count">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_running_jobs_count</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+                <span class="p">[</span><span class="s2">&quot;squeue&quot;</span><span class="p">,</span> <span class="s2">&quot;-u&quot;</span><span class="p">,</span> <span class="s2">&quot;s.983045&quot;</span><span class="p">,</span> <span class="s2">&quot;-h&quot;</span><span class="p">,</span> <span class="s2">&quot;-t&quot;</span><span class="p">,</span> <span class="s2">&quot;RUNNING,PENDING&quot;</span><span class="p">,</span> <span class="s2">&quot;-p&quot;</span><span class="p">,</span> <span class="s2">&quot;s_compute_chem&quot;</span><span class="p">],</span>
+                <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
+                <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">output</span><span class="o">.</span><span class="n">splitlines</span><span class="p">())</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error fetching running jobs: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="mi">0</span></div>
+
+
+<div class="viewcode-block" id="DFT_manager.read_job_queue">
+<a class="viewcode-back" href="../sw_directories.html#sw_directories.DFT_manager.read_job_queue">[docs]</a>
+    <span class="k">def</span> <span class="nf">read_job_queue</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">queue_file</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">file</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="DFT_manager.write_job_queue">
+<a class="viewcode-back" href="../sw_directories.html#sw_directories.DFT_manager.write_job_queue">[docs]</a>
+    <span class="k">def</span> <span class="nf">write_job_queue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job_queue</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">queue_file</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+            <span class="n">file</span><span class="o">.</span><span class="n">writelines</span><span class="p">(</span><span class="n">job_queue</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DFT_manager.inputs_from_queue">
+<a class="viewcode-back" href="../sw_directories.html#sw_directories.DFT_manager.inputs_from_queue">[docs]</a>
+    <span class="k">def</span> <span class="nf">inputs_from_queue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job_from_queue</span><span class="p">):</span>
+        <span class="n">input_dir</span><span class="p">,</span> <span class="n">job_name</span><span class="p">,</span> <span class="n">output_dir</span> <span class="o">=</span> <span class="n">job_from_queue</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+        <span class="n">xyz_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">job_name</span><span class="si">}</span><span class="s2">.xyz&quot;</span>
+        <span class="n">inp_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">job_name</span><span class="si">}</span><span class="s2">.inp&quot;</span>
+        <span class="k">return</span> <span class="n">input_dir</span><span class="p">,</span> <span class="n">xyz_name</span><span class="p">,</span> <span class="n">inp_name</span><span class="p">,</span> <span class="n">output_dir</span></div>
+
+
+<div class="viewcode-block" id="DFT_manager.submit_job">
+<a class="viewcode-back" href="../sw_directories.html#sw_directories.DFT_manager.submit_job">[docs]</a>
+    <span class="k">def</span> <span class="nf">submit_job</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_dir</span><span class="p">,</span> <span class="n">inp_path</span><span class="p">,</span> <span class="n">xyz_path</span><span class="p">,</span> <span class="n">nprocs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">nprocs</span> <span class="o">=</span> <span class="n">nprocs</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">nprocs</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">input_dir</span><span class="p">)</span>
+            <span class="n">process</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span>
+                <span class="p">[</span><span class="s2">&quot;bash&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">runorca_path</span><span class="p">,</span> <span class="n">inp_path</span><span class="p">,</span> <span class="n">xyz_path</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">nprocs</span><span class="p">)],</span>
+                <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
+                <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">stdout</span><span class="p">,</span> <span class="n">stderr</span> <span class="o">=</span> <span class="n">process</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
+            <span class="n">stdout</span> <span class="o">=</span> <span class="n">stdout</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="n">stderr</span> <span class="o">=</span> <span class="n">stderr</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">stderr</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error during job submission: </span><span class="si">{</span><span class="n">stderr</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="n">match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;Submitted batch job (\d+)&quot;</span><span class="p">,</span> <span class="n">stdout</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No job number found in the submission output.&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to submit job: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">main_dir</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DFT_manager.move_to_submitted_jobs">
+<a class="viewcode-back" href="../sw_directories.html#sw_directories.DFT_manager.move_to_submitted_jobs">[docs]</a>
+    <span class="k">def</span> <span class="nf">move_to_submitted_jobs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp_dir</span><span class="p">,</span> <span class="n">out_dir</span><span class="p">,</span> <span class="n">job_name</span><span class="p">,</span> <span class="n">job_number</span><span class="p">):</span>
+        <span class="n">timestamp</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">submitted_jobs_file</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+            <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">timestamp</span><span class="si">}</span><span class="s2"> Job number: </span><span class="si">{</span><span class="n">job_number</span><span class="si">}</span><span class="s2"> Job name: </span><span class="si">{</span><span class="n">job_name</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">job_paths_file</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+            <span class="n">job_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">inp_dir</span><span class="p">,</span> <span class="n">job_number</span><span class="p">)</span>
+            <span class="n">job_entry</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">job_path</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">out_dir</span><span class="si">}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">job_entry</span><span class="p">:</span>
+                <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">job_entry</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DFT_manager.check_submitted_jobs">
+<a class="viewcode-back" href="../sw_directories.html#sw_directories.DFT_manager.check_submitted_jobs">[docs]</a>
+    <span class="k">def</span> <span class="nf">check_submitted_jobs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Checks the status of submitted jobs and processes results.</span>
+<span class="sd">        Classifies jobs into finished, running, or errored based on the `.out` file content.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">job_paths_file</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+            <span class="n">lines</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+
+        <span class="n">finished_jobs</span><span class="p">,</span> <span class="n">running_jobs</span><span class="p">,</span> <span class="n">error_jobs</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">line</span><span class="p">:</span>  <span class="c1"># Skip blank lines</span>
+                <span class="k">continue</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># Parse job and output directories</span>
+                <span class="n">job_path</span><span class="p">,</span> <span class="n">out_path</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Job path is: </span><span class="si">{</span><span class="n">job_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Out path is: </span><span class="si">{</span><span class="n">out_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+                <span class="c1"># Check if job directory exists</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">job_path</span><span class="p">):</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Job path not found, assuming still running: </span><span class="si">{</span><span class="n">job_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="n">running_jobs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+                    <span class="k">continue</span>
+
+                <span class="c1"># Look for `.out` files in the job directory</span>
+                <span class="n">out_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">file</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">job_path</span><span class="p">)</span> <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.out&quot;</span><span class="p">)]</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">out_files</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No `.out` files found in </span><span class="si">{</span><span class="n">job_path</span><span class="si">}</span><span class="s2">, assuming still running.&quot;</span><span class="p">)</span>
+                    <span class="n">running_jobs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+                    <span class="k">continue</span>
+
+                <span class="c1"># Process `.out` files</span>
+                <span class="k">for</span> <span class="n">out_file</span> <span class="ow">in</span> <span class="n">out_files</span><span class="p">:</span>
+                    <span class="n">out_file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">job_path</span><span class="p">,</span> <span class="n">out_file</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Output filepath </span><span class="si">{</span><span class="n">out_file_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">out_file_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                            <span class="n">content</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+                            <span class="c1"># Check if the job terminated normally</span>
+                            <span class="k">if</span> <span class="s2">&quot;ORCA TERMINATED NORMALLY&quot;</span> <span class="ow">in</span> <span class="n">content</span><span class="p">:</span>
+                                <span class="n">molecule_name</span> <span class="o">=</span> <span class="n">out_file</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.out&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+                                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processing result for </span><span class="si">{</span><span class="n">molecule_name</span><span class="si">}</span><span class="s2"> in </span><span class="si">{</span><span class="n">job_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">process_result</span><span class="p">(</span><span class="n">molecule_name</span><span class="p">,</span> <span class="n">job_path</span><span class="p">,</span> <span class="n">out_path</span><span class="p">)</span>
+                                <span class="n">finished_jobs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Job error detected in </span><span class="si">{</span><span class="n">out_file_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                                <span class="n">error_jobs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error reading or processing file </span><span class="si">{</span><span class="n">out_file_path</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                        <span class="n">error_jobs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+
+            <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error parsing job line &#39;</span><span class="si">{</span><span class="n">line</span><span class="si">}</span><span class="s2">&#39;: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">continue</span>
+
+        <span class="c1"># Update the jobs file with new classifications</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_jobs_files</span><span class="p">(</span><span class="n">running_jobs</span><span class="p">,</span> <span class="n">finished_jobs</span><span class="p">,</span> <span class="n">error_jobs</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span> <span class="nf">_update_jobs_files</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">running_jobs</span><span class="p">,</span> <span class="n">finished_jobs</span><span class="p">,</span> <span class="n">error_jobs</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">job_paths_file</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+            <span class="n">file</span><span class="o">.</span><span class="n">writelines</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">job</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">job</span> <span class="ow">in</span> <span class="n">running_jobs</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">error_jobs_file</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+            <span class="n">file</span><span class="o">.</span><span class="n">writelines</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">job</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">job</span> <span class="ow">in</span> <span class="n">error_jobs</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">processed_jobs_file</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+            <span class="n">file</span><span class="o">.</span><span class="n">writelines</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">job</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">job</span> <span class="ow">in</span> <span class="n">finished_jobs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="DFT_manager.process_result">
+<a class="viewcode-back" href="../sw_directories.html#sw_directories.DFT_manager.process_result">[docs]</a>
+    <span class="k">def</span> <span class="nf">process_result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">molecule_name</span><span class="p">,</span> <span class="n">job_path</span><span class="p">,</span> <span class="n">out_path</span><span class="p">):</span>
+
+        <span class="n">output_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">job_path</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">molecule_name</span><span class="si">}</span><span class="s2">.out&quot;</span><span class="p">)</span>
+        <span class="n">xyz_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">job_path</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">molecule_name</span><span class="si">}</span><span class="s2">.xyz&quot;</span><span class="p">)</span>    
+        <span class="n">fukui_filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">molecule_name</span><span class="si">}</span><span class="s2">.fukui.cube&quot;</span>
+
+        <span class="c1"># Prepare destination directories</span>
+        <span class="n">fukui_destination</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">out_path</span><span class="p">,</span> <span class="s2">&quot;final_fukuis&quot;</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">fukui_destination</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">output_destination</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">out_path</span><span class="p">,</span> <span class="s2">&quot;output_files&quot;</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">output_destination</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">results_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_destination</span><span class="p">,</span> <span class="s2">&quot;DFT_results.csv&quot;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">results_file</span><span class="p">):</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">results_file</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+                <span class="n">writer</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">DictWriter</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">fieldnames</span><span class="o">=</span><span class="p">[</span>
+                    <span class="s1">&#39;Molecule&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;Total energy (eV)&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;HOMO (eV)&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;LUMO (eV)&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;Chemical hardness&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;Dipole moment&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;Polarizability&#39;</span><span class="p">])</span>
+                <span class="n">writer</span><span class="o">.</span><span class="n">writeheader</span><span class="p">()</span>
+
+        <span class="c1"># Locate HOMO and LUMO files</span>
+        <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">job_path</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.homo.cube&quot;</span><span class="p">):</span>
+                <span class="n">homo_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">job_path</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.lumo.cube&quot;</span><span class="p">):</span>
+                <span class="n">lumo_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">job_path</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
+        
+        <span class="c1"># Extract data from orca output</span>
+        <span class="n">scf_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extract_SCF_energy</span><span class="p">(</span><span class="n">output_filename</span><span class="p">)</span>
+        <span class="n">homo</span><span class="p">,</span> <span class="n">lumo</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">homo</span><span class="p">,</span> <span class="n">lumo</span> <span class="o">=</span> <span class="n">get_homo_lumo_from_xyz</span><span class="p">(</span><span class="n">xyz_filename</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error in homo lumo: </span><span class="si">{</span><span class="n">homo</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">lumo</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">homo_energy</span><span class="p">,</span> <span class="n">lumo_energy</span><span class="p">,</span> <span class="n">chem_hardness</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extract_orbital_energies_and_hardness</span><span class="p">(</span><span class="n">output_filename</span><span class="p">,</span> <span class="n">homo</span><span class="p">,</span> <span class="n">lumo</span><span class="p">)</span>
+        <span class="n">polar</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extract_polarizability</span><span class="p">(</span><span class="n">output_filename</span><span class="p">)</span>
+        <span class="n">dipole_moment</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extract_dipole</span><span class="p">(</span><span class="n">output_filename</span><span class="p">)</span>
+        
+        <span class="n">final_dat_dict</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;Molecule&#39;</span><span class="p">:</span> <span class="n">molecule_name</span><span class="p">,</span>
+            <span class="s1">&#39;Total energy (eV)&#39;</span><span class="p">:</span> <span class="n">scf_energy</span><span class="p">,</span>
+            <span class="s1">&#39;HOMO (eV)&#39;</span><span class="p">:</span> <span class="n">homo_energy</span><span class="p">,</span>
+            <span class="s1">&#39;LUMO (eV)&#39;</span><span class="p">:</span> <span class="n">lumo_energy</span><span class="p">,</span>
+            <span class="s1">&#39;Chemical hardness&#39;</span><span class="p">:</span> <span class="n">chem_hardness</span><span class="p">,</span>
+            <span class="s1">&#39;Dipole moment&#39;</span><span class="p">:</span> <span class="n">dipole_moment</span><span class="p">,</span>
+            <span class="s1">&#39;Polarizability&#39;</span><span class="p">:</span> <span class="n">polar</span>       
+            <span class="p">}</span>
+        
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">results_file</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+            <span class="n">writer</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">DictWriter</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">fieldnames</span><span class="o">=</span><span class="n">final_dat_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+            <span class="n">writer</span><span class="o">.</span><span class="n">writerow</span><span class="p">(</span><span class="n">final_dat_dict</span><span class="p">)</span>
+            
+
+        <span class="c1"># Now we do the fukui</span>
+        <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="s2">&quot;python3&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">orbital_editor</span><span class="p">,</span> <span class="n">homo_path</span><span class="p">],</span> <span class="n">check</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="s2">&quot;python3&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">orbital_editor</span><span class="p">,</span> <span class="n">lumo_path</span><span class="p">],</span> <span class="n">check</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Generate Fukui file</span>
+        <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="s2">&quot;bash&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fukui_path</span><span class="p">,</span> <span class="n">homo_path</span><span class="p">,</span> <span class="n">lumo_path</span><span class="p">,</span> <span class="n">molecule_name</span><span class="p">],</span> <span class="n">check</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Move the Fukui file</span>
+        <span class="n">fukui_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">fukui_filename</span><span class="p">)</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">fukui_path</span><span class="p">,</span> <span class="n">fukui_destination</span><span class="p">)</span>
+
+        <span class="n">shutil</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">output_filename</span><span class="p">,</span> <span class="n">output_destination</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DFT_manager.extract_SCF_energy">
+<a class="viewcode-back" href="../sw_directories.html#sw_directories.DFT_manager.extract_SCF_energy">[docs]</a>
+    <span class="k">def</span> <span class="nf">extract_SCF_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_filename</span><span class="p">):</span>
+        <span class="n">search_string</span> <span class="o">=</span> <span class="s2">&quot;TOTAL SCF ENERGY&quot;</span>
+        <span class="n">energy_in_ev</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="n">scf_lines</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">output_filename</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+            <span class="n">lines</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">)):</span>  <span class="c1"># Correctly indented the loop</span>
+                <span class="k">if</span> <span class="s2">&quot;TOTAL SCF ENERGY&quot;</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="n">lines</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">3</span><span class="p">])</span>  <span class="c1"># Assuming energy is 3 lines below</span>
+                    <span class="n">scf_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lines</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">3</span><span class="p">])</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;SCF lines: </span><span class="si">{</span><span class="n">scf_lines</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">energy_in_ev</span> <span class="o">=</span> <span class="p">(</span><span class="n">scf_lines</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;eV&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Final energy is: </span><span class="si">{</span><span class="n">energy_in_ev</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+  
+        <span class="k">if</span> <span class="n">energy_in_ev</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">search_string</span><span class="si">}</span><span class="s2">&#39; not found in the file.&quot;</span><span class="p">)</span>
+    
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">energy_in_ev</span><span class="p">)</span></div>
+
+
+    
+<div class="viewcode-block" id="DFT_manager.extract_orbital_energies_and_hardness">
+<a class="viewcode-back" href="../sw_directories.html#sw_directories.DFT_manager.extract_orbital_energies_and_hardness">[docs]</a>
+    <span class="k">def</span> <span class="nf">extract_orbital_energies_and_hardness</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_filename</span><span class="p">,</span> <span class="n">homo</span><span class="p">,</span> <span class="n">lumo</span><span class="p">):</span>
+        <span class="n">search_string</span> <span class="o">=</span> <span class="s2">&quot;ORBITAL ENERGIES&quot;</span>
+        <span class="n">file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">output_filename</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
+        <span class="n">flag</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">line_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">file</span><span class="p">:</span>
+            <span class="n">index</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">search_string</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                <span class="n">flag</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="n">line_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    
+        <span class="n">file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">output_filename</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
+        <span class="n">content</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+        <span class="n">lines_to_read</span> <span class="o">=</span> <span class="n">line_list</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">line_list</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">homo_line</span> <span class="o">=</span> <span class="n">lines_to_read</span> <span class="o">+</span> <span class="n">homo</span> <span class="o">+</span> <span class="mi">3</span>
+        <span class="n">lumo_line</span> <span class="o">=</span> <span class="n">homo_line</span> <span class="o">+</span> <span class="mi">1</span>
+ 
+        <span class="n">new_line</span> <span class="o">=</span> <span class="p">(</span><span class="n">content</span><span class="p">[</span><span class="n">homo_line</span><span class="p">])</span>
+        <span class="n">new_line_2</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">new_line</span><span class="o">.</span><span class="n">split</span><span class="p">()))</span>
+        <span class="n">new_line_3</span> <span class="o">=</span> <span class="n">new_line_2</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;#&quot;</span><span class="p">)</span>
+        <span class="n">homo_energy</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">new_line_3</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="p">)[</span><span class="mi">3</span><span class="p">])</span>
+    
+        <span class="n">new_line</span> <span class="o">=</span> <span class="p">(</span><span class="n">content</span><span class="p">[</span><span class="n">lumo_line</span><span class="p">])</span>
+        <span class="n">new_line_2</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">new_line</span><span class="o">.</span><span class="n">split</span><span class="p">()))</span>
+        <span class="n">new_line_3</span> <span class="o">=</span> <span class="n">new_line_2</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;#&quot;</span><span class="p">)</span>
+        <span class="n">lumo_energy</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">new_line_3</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="p">)[</span><span class="mi">3</span><span class="p">])</span>
+    
+        <span class="n">chem_hardness</span> <span class="o">=</span> <span class="nb">format</span><span class="p">(((</span><span class="n">lumo_energy</span> <span class="o">-</span> <span class="n">homo_energy</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span> <span class="s2">&quot;.4f&quot;</span><span class="p">)</span>
+    
+        <span class="k">return</span><span class="p">(</span><span class="n">homo_energy</span><span class="p">,</span> <span class="n">lumo_energy</span><span class="p">,</span> <span class="n">chem_hardness</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DFT_manager.extract_polarizability">
+<a class="viewcode-back" href="../sw_directories.html#sw_directories.DFT_manager.extract_polarizability">[docs]</a>
+    <span class="k">def</span> <span class="nf">extract_polarizability</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_filename</span><span class="p">):</span>
+        <span class="n">search_string</span> <span class="o">=</span> <span class="s2">&quot;Isotropic polarizability&quot;</span>
+        <span class="n">file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">output_filename</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">file</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">search_string</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                <span class="n">new_line</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()))</span>
+                <span class="n">polarizability</span> <span class="o">=</span> <span class="n">new_line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">return</span><span class="p">(</span><span class="n">polarizability</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DFT_manager.extract_dipole">
+<a class="viewcode-back" href="../sw_directories.html#sw_directories.DFT_manager.extract_dipole">[docs]</a>
+    <span class="k">def</span> <span class="nf">extract_dipole</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_filename</span><span class="p">):</span>
+        <span class="n">search_string</span> <span class="o">=</span> <span class="s2">&quot;Magnitude (Debye)&quot;</span>
+        <span class="n">file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">output_filename</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">file</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">search_string</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                <span class="n">new_line</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()))</span>
+                <span class="n">dipole_moment</span> <span class="o">=</span> <span class="n">new_line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">return</span><span class="p">(</span><span class="n">dipole_moment</span><span class="p">)</span>    </div>
+</div>
+
+
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Daniel J. York.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

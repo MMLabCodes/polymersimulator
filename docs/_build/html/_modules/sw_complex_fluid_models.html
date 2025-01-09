@@ -1,0 +1,806 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>sw_complex_fluid_models &mdash; Polymer Simulator 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Polymer Simulator
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../packagecontents.html">Package Contents</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sw_openmm.html">Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sw_build_systems.html">sw_build_systems Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Polymer Simulator</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Module code</a></li>
+      <li class="breadcrumb-item active">sw_complex_fluid_models</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for sw_complex_fluid_models</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">modules.sw_orca</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">modules.sw_basic_functions</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">csv</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<div class="viewcode-block" id="complex_fluid_model">
+<a class="viewcode-back" href="../sw_complex_fluid_models.html#sw_complex_fluid_models.complex_fluid_model">[docs]</a>
+<span class="k">class</span> <span class="nc">complex_fluid_model</span><span class="p">:</span>
+    <span class="c1"># This class is the output from the functions that make models and allows for a standardised version of them</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">molecules</span><span class="p">,</span> <span class="n">group_molecules</span><span class="p">,</span> <span class="n">molecule_ratios</span><span class="p">,</span> <span class="n">model_type</span><span class="p">,</span> <span class="n">model_name</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">molecules</span> <span class="o">=</span> <span class="n">molecules</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">group_molecules</span> <span class="o">=</span> <span class="n">group_molecules</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">molecule_ratios</span> <span class="o">=</span> <span class="n">molecule_ratios</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_type</span> <span class="o">=</span> <span class="n">model_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_name</span> <span class="o">=</span> <span class="n">model_name</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_name</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>   
+            <span class="bp">self</span><span class="o">.</span><span class="n">model_name</span> <span class="o">=</span> <span class="n">model_name</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">model_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wa_mw</span> <span class="o">=</span> <span class="n">complex_fluid_models</span><span class="o">.</span><span class="n">get_weighted_average</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;mw&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wa_chemical_hardness</span> <span class="o">=</span> <span class="n">complex_fluid_models</span><span class="o">.</span><span class="n">get_weighted_average</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;chemical_hardness&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wa_polarizability</span> <span class="o">=</span> <span class="n">complex_fluid_models</span><span class="o">.</span><span class="n">get_weighted_average</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;polarizability&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wa_dipole_moment</span> <span class="o">=</span> <span class="n">complex_fluid_models</span><span class="o">.</span><span class="n">get_weighted_average</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;dipole_moment&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wa_total_energy</span> <span class="o">=</span> <span class="n">complex_fluid_models</span><span class="o">.</span><span class="n">get_weighted_average</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;total_energy&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wa_oxygen_content</span> <span class="o">=</span> <span class="n">complex_fluid_models</span><span class="o">.</span><span class="n">calculate_heteroatom_percentages</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">molecules</span><span class="p">)[</span><span class="s1">&#39;O&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wa_nitrogen_content</span> <span class="o">=</span> <span class="n">complex_fluid_models</span><span class="o">.</span><span class="n">calculate_heteroatom_percentages</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">molecules</span><span class="p">)[</span><span class="s1">&#39;N&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wa_sulfur_content</span> <span class="o">=</span> <span class="n">complex_fluid_models</span><span class="o">.</span><span class="n">calculate_heteroatom_percentages</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">molecules</span><span class="p">)[</span><span class="s1">&#39;S&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_mols_for_sim</span> <span class="o">=</span> <span class="n">complex_fluid_models</span><span class="o">.</span><span class="n">min_mols_4_simulation</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_atoms_for_sim</span> <span class="o">=</span> <span class="n">complex_fluid_models</span><span class="o">.</span><span class="n">min_atoms_4_simulation</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
+        
+<div class="viewcode-block" id="complex_fluid_models">
+<a class="viewcode-back" href="../sw_complex_fluid_models.html#sw_complex_fluid_models.complex_fluid_models">[docs]</a>
+<span class="k">class</span> <span class="nc">complex_fluid_models</span><span class="p">:</span>
+    <span class="c1"># This  class contains all the functions to generate complex_fluid_models as described in the paper</span>
+    <span class="c1"># The inputs are orca molecules</span>
+    <span class="c1"># The outputs are instances of the &#39;complex_fluid_model&#39; class - all standardised so it is easier to work with</span>
+    
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+<div class="viewcode-block" id="complex_fluid_models.get_weighted_average">
+<a class="viewcode-back" href="../sw_complex_fluid_models.html#sw_complex_fluid_models.complex_fluid_models.get_weighted_average">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_weighted_average</span><span class="p">(</span><span class="n">complex_fluid_model</span><span class="p">,</span> <span class="n">class_attribute</span><span class="p">):</span> <span class="c1"># class attribute and model type must be passed as a &quot;string&quot;</span>
+        <span class="n">peak_area</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">weighted_average</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># Not sure what this function is, there is already a function developed to calculat eheteroatom content of things    </span>
+        <span class="k">if</span> <span class="s2">&quot;Heteroatom_content&quot;</span> <span class="ow">in</span> <span class="n">class_attribute</span><span class="p">:</span>
+            <span class="c1"># Everything after the else for working with floats or integers that are attributes of the molecule class</span>
+            <span class="c1"># Below we work out the weighted average of the heteroatoms content</span>
+            <span class="k">def</span> <span class="nf">get_heteroatom_content</span><span class="p">(</span><span class="n">smiles</span><span class="p">):</span>
+                <span class="n">heteroatom_wt</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">if</span> <span class="n">class_attribute</span> <span class="o">==</span> <span class="s2">&quot;Heteroatom_content_O&quot;</span><span class="p">:</span>
+                    <span class="n">het</span> <span class="o">=</span> <span class="n">smiles</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">&quot;O&quot;</span><span class="p">)</span>
+                    <span class="n">het</span> <span class="o">=</span> <span class="n">het</span> <span class="o">+</span> <span class="n">smiles</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">&quot;o&quot;</span><span class="p">)</span>
+                    <span class="n">heteroatom_wt</span> <span class="o">=</span> <span class="n">het</span> <span class="o">*</span> <span class="mi">16</span>
+                    <span class="k">return</span><span class="p">(</span><span class="n">heteroatom_wt</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">class_attribute</span> <span class="o">==</span> <span class="s2">&quot;Heteroatom_content_N&quot;</span><span class="p">:</span>
+                    <span class="n">het</span> <span class="o">=</span> <span class="n">smiles</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">&quot;N&quot;</span><span class="p">)</span>
+                    <span class="n">het</span> <span class="o">=</span> <span class="n">het</span> <span class="o">+</span> <span class="n">smiles</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">&quot;n&quot;</span><span class="p">)</span>
+                    <span class="n">heteroatom_wt</span> <span class="o">=</span> <span class="n">het</span> <span class="o">*</span> <span class="mi">14</span>
+                    <span class="k">return</span><span class="p">(</span><span class="n">heteroatom_wt</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">class_attribute</span> <span class="o">==</span> <span class="s2">&quot;Heteroatom_content_S&quot;</span><span class="p">:</span>
+                    <span class="n">het</span> <span class="o">=</span> <span class="n">smiles</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">&quot;S&quot;</span><span class="p">)</span>
+                    <span class="n">het</span> <span class="o">=</span> <span class="n">het</span> <span class="o">+</span> <span class="n">smiles</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">&quot;s&quot;</span><span class="p">)</span>
+                    <span class="n">heteroatom_wt</span> <span class="o">=</span> <span class="n">het</span> <span class="o">*</span> <span class="mi">32</span>
+                    <span class="k">return</span><span class="p">(</span><span class="n">heteroatom_wt</span><span class="p">)</span>
+             
+                <span class="k">return</span><span class="p">(</span><span class="n">return_list</span><span class="p">)</span>
+        
+            <span class="n">weighted_het_weight</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">weighted_het_weight</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">ratio</span> <span class="o">*</span> <span class="n">get_heteroatom_content</span><span class="p">(</span><span class="n">molecule</span><span class="o">.</span><span class="n">smiles</span><span class="p">)</span> <span class="k">for</span> <span class="n">ratio</span><span class="p">,</span> <span class="n">molecule</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">complex_fluid_model</span><span class="o">.</span><span class="n">molecule_ratios</span><span class="p">,</span> <span class="n">complex_fluid_model</span><span class="o">.</span><span class="n">molecules</span><span class="p">))</span>
+            <span class="k">return</span><span class="p">(</span><span class="n">weighted_het_weight</span><span class="p">)</span>    
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">weighted_average</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">ratio</span> <span class="o">*</span> <span class="nb">float</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">molecule</span><span class="p">,</span> <span class="n">class_attribute</span><span class="p">))</span> <span class="k">for</span> <span class="n">ratio</span><span class="p">,</span> <span class="n">molecule</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">complex_fluid_model</span><span class="o">.</span><span class="n">molecule_ratios</span><span class="p">,</span> <span class="n">complex_fluid_model</span><span class="o">.</span><span class="n">molecules</span><span class="p">))</span>
+                                         
+            <span class="k">return</span><span class="p">(</span><span class="n">weighted_average</span><span class="p">)</span></div>
+
+            
+<div class="viewcode-block" id="complex_fluid_models.calculate_heteroatom_percentages_sing_mol">
+<a class="viewcode-back" href="../sw_complex_fluid_models.html#sw_complex_fluid_models.complex_fluid_models.calculate_heteroatom_percentages_sing_mol">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">calculate_heteroatom_percentages_sing_mol</span><span class="p">(</span><span class="n">molecule</span><span class="p">):</span>
+        <span class="n">smiles</span> <span class="o">=</span> <span class="n">molecule</span><span class="o">.</span><span class="n">smiles</span>
+        <span class="n">weight</span> <span class="o">=</span> <span class="n">molecule</span><span class="o">.</span><span class="n">mw</span>
+        <span class="n">atomic_weights</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;B&#39;</span><span class="p">:</span> <span class="mf">10.81</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="mf">12.01</span><span class="p">,</span> <span class="s1">&#39;N&#39;</span><span class="p">:</span> <span class="mf">14.01</span><span class="p">,</span> <span class="s1">&#39;O&#39;</span><span class="p">:</span> <span class="mf">16.00</span><span class="p">,</span> <span class="s1">&#39;P&#39;</span><span class="p">:</span> <span class="mf">30.97</span><span class="p">,</span> <span class="s1">&#39;S&#39;</span><span class="p">:</span> <span class="mf">32.07</span><span class="p">,</span> <span class="s1">&#39;F&#39;</span><span class="p">:</span> <span class="mf">18.99</span><span class="p">,</span> <span class="s1">&#39;Cl&#39;</span><span class="p">:</span> <span class="mf">35.45</span><span class="p">,</span> <span class="s1">&#39;Br&#39;</span><span class="p">:</span> <span class="mf">79.90</span><span class="p">,</span> <span class="s1">&#39;I&#39;</span><span class="p">:</span> <span class="mf">126.90</span><span class="p">}</span>
+        <span class="n">heteroatoms</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;N&#39;</span><span class="p">,</span> <span class="s1">&#39;O&#39;</span><span class="p">,</span> <span class="s1">&#39;P&#39;</span><span class="p">,</span> <span class="s1">&#39;S&#39;</span><span class="p">,</span> <span class="s1">&#39;F&#39;</span><span class="p">,</span> <span class="s1">&#39;Cl&#39;</span><span class="p">,</span> <span class="s1">&#39;Br&#39;</span><span class="p">,</span> <span class="s1">&#39;I&#39;</span><span class="p">]</span>  <span class="c1"># List of heteroatoms</span>
+    
+        <span class="n">atom_weights</span> <span class="o">=</span> <span class="p">{}</span>  
+        <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">heteroatoms</span><span class="p">:</span>
+            <span class="n">content</span> <span class="o">=</span> <span class="mf">0.0</span>    
+            <span class="n">count</span> <span class="o">=</span> <span class="n">smiles</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">atom</span><span class="p">)</span>
+            <span class="n">content</span> <span class="o">+=</span> <span class="p">(</span><span class="n">count</span> <span class="o">*</span> <span class="n">atomic_weights</span><span class="p">[</span><span class="n">atom</span><span class="p">])</span><span class="o">/</span><span class="n">weight</span>
+            <span class="n">atom_weights</span><span class="p">[</span><span class="n">atom</span><span class="p">]</span> <span class="o">=</span> <span class="n">content</span>
+        
+        <span class="n">tot_h_wt</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">mol</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">MolFromSmiles</span><span class="p">(</span><span class="n">smiles</span><span class="p">)</span>
+        <span class="n">mol_with_hydrogens</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">AddHs</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">mol_with_hydrogens</span><span class="o">.</span><span class="n">GetAtoms</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">atom</span><span class="o">.</span><span class="n">GetSymbol</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;H&#39;</span><span class="p">:</span>
+                    <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">content</span> <span class="o">=</span> <span class="p">(</span><span class="n">count</span> <span class="o">*</span> <span class="mf">1.0</span><span class="p">)</span><span class="o">/</span><span class="n">weight</span>
+        <span class="n">tot_h_wt</span> <span class="o">+=</span> <span class="n">content</span>
+        <span class="n">atom_weights</span><span class="p">[</span><span class="s1">&#39;H&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tot_h_wt</span>
+    
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">atom_weights</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">atom_weights</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
+                <span class="n">atom_weights</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">*=</span> <span class="mi">100</span>
+    
+        <span class="k">return</span> <span class="n">atom_weights</span></div>
+
+        
+<div class="viewcode-block" id="complex_fluid_models.calculate_heteroatom_percentages">
+<a class="viewcode-back" href="../sw_complex_fluid_models.html#sw_complex_fluid_models.complex_fluid_models.calculate_heteroatom_percentages">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">calculate_heteroatom_percentages</span><span class="p">(</span><span class="n">molecules</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">get_mixture</span><span class="p">(</span><span class="n">molecules</span><span class="p">):</span> <span class="c1"># model is a a list of python objects   </span>
+            <span class="n">mixture</span> <span class="o">=</span> <span class="p">{</span><span class="n">obj</span><span class="o">.</span><span class="n">smiles</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">peak_area</span><span class="p">)</span> <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">molecules</span><span class="p">}</span>
+            <span class="k">return</span><span class="p">(</span><span class="n">mixture</span><span class="p">)</span>
+            
+        <span class="n">mixture</span> <span class="o">=</span> <span class="n">get_mixture</span><span class="p">(</span><span class="n">molecules</span><span class="p">)</span> 
+        <span class="n">total_peak_area</span> <span class="o">=</span> <span class="n">complex_fluid_models</span><span class="o">.</span><span class="n">get_group_area</span><span class="p">(</span><span class="n">molecules</span><span class="p">)</span>
+    
+        <span class="n">atomic_weights</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;B&#39;</span><span class="p">:</span> <span class="mf">10.81</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="mf">12.01</span><span class="p">,</span> <span class="s1">&#39;N&#39;</span><span class="p">:</span> <span class="mf">14.01</span><span class="p">,</span> <span class="s1">&#39;O&#39;</span><span class="p">:</span> <span class="mf">16.00</span><span class="p">,</span> <span class="s1">&#39;P&#39;</span><span class="p">:</span> <span class="mf">30.97</span><span class="p">,</span> <span class="s1">&#39;S&#39;</span><span class="p">:</span> <span class="mf">32.07</span><span class="p">,</span> <span class="s1">&#39;F&#39;</span><span class="p">:</span> <span class="mf">18.99</span><span class="p">,</span> <span class="s1">&#39;Cl&#39;</span><span class="p">:</span> <span class="mf">35.45</span><span class="p">,</span> <span class="s1">&#39;Br&#39;</span><span class="p">:</span> <span class="mf">79.90</span><span class="p">,</span> <span class="s1">&#39;I&#39;</span><span class="p">:</span> <span class="mf">126.90</span><span class="p">}</span>
+        <span class="n">heteroatoms</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;N&#39;</span><span class="p">,</span> <span class="s1">&#39;O&#39;</span><span class="p">,</span> <span class="s1">&#39;P&#39;</span><span class="p">,</span> <span class="s1">&#39;S&#39;</span><span class="p">,</span> <span class="s1">&#39;F&#39;</span><span class="p">,</span> <span class="s1">&#39;Cl&#39;</span><span class="p">,</span> <span class="s1">&#39;Br&#39;</span><span class="p">,</span> <span class="s1">&#39;I&#39;</span><span class="p">]</span>  <span class="c1"># List of heteroatoms</span>
+      
+        <span class="n">atom_weights</span> <span class="o">=</span> <span class="p">{}</span>  
+        <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">heteroatoms</span><span class="p">:</span>
+            <span class="n">content</span> <span class="o">=</span> <span class="mf">0.0</span>
+            <span class="k">for</span> <span class="n">compound</span><span class="p">,</span> <span class="n">weight</span> <span class="ow">in</span> <span class="n">mixture</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">count</span> <span class="o">=</span> <span class="n">compound</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">atom</span><span class="p">)</span>
+                <span class="n">content</span> <span class="o">+=</span> <span class="p">(</span><span class="n">weight</span><span class="o">/</span><span class="n">total_peak_area</span><span class="p">)</span> <span class="o">*</span> <span class="n">count</span> <span class="o">*</span> <span class="n">atomic_weights</span><span class="p">[</span><span class="n">atom</span><span class="p">]</span>
+            <span class="n">atom_weights</span><span class="p">[</span><span class="n">atom</span><span class="p">]</span> <span class="o">=</span> <span class="n">content</span>
+         <span class="c1"># Now need to get H content</span>
+        <span class="n">tot_h_wt</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">for</span> <span class="n">compound</span><span class="p">,</span> <span class="n">weight</span> <span class="ow">in</span> <span class="n">mixture</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">hydrogen_weight</span> <span class="o">=</span> <span class="mf">0.0</span>
+            <span class="n">mol</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">MolFromSmiles</span><span class="p">(</span><span class="n">compound</span><span class="p">)</span>
+            <span class="n">mol_with_hydrogens</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">AddHs</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
+            <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">mol_with_hydrogens</span><span class="o">.</span><span class="n">GetAtoms</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="n">atom</span><span class="o">.</span><span class="n">GetSymbol</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;H&#39;</span><span class="p">:</span>
+                        <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">content</span> <span class="o">=</span> <span class="p">(</span><span class="n">weight</span><span class="o">/</span><span class="n">total_peak_area</span><span class="p">)</span> <span class="o">*</span> <span class="n">count</span> <span class="o">*</span> <span class="mf">1.0</span>
+            <span class="n">tot_h_wt</span> <span class="o">+=</span> <span class="n">content</span>
+        <span class="n">atom_weights</span><span class="p">[</span><span class="s1">&#39;H&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tot_h_wt</span>
+        <span class="n">heteroatoms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">)</span> 
+        <span class="n">total_weight</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">atom_weights</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">heteroatoms</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">total_weight</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">atom_weights</span><span class="p">[</span><span class="n">atom</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">atom_weights</span><span class="p">[</span><span class="n">atom</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">atom_weights</span><span class="p">[</span><span class="n">atom</span><span class="p">]</span><span class="o">/</span><span class="n">total_weight</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span>
+   
+        <span class="k">return</span> <span class="n">atom_weights</span> <span class="c1"># this returns the heteroatom percentage </span></div>
+
+    
+<div class="viewcode-block" id="complex_fluid_models.group_molecules">
+<a class="viewcode-back" href="../sw_complex_fluid_models.html#sw_complex_fluid_models.complex_fluid_models.group_molecules">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">group_molecules</span><span class="p">(</span><span class="n">molecule_class_list</span><span class="p">):</span>
+        <span class="n">smiles_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">molecule</span><span class="o">.</span><span class="n">smiles</span> <span class="k">for</span> <span class="n">molecule</span> <span class="ow">in</span> <span class="n">molecule_class_list</span><span class="p">]</span>
+        
+        <span class="n">mols_with_n_and_o</span> <span class="o">=</span> <span class="p">[[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]]</span>       
+        <span class="n">mols_with_n</span> <span class="o">=</span> <span class="p">[[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]]</span> <span class="c1"># 5 RING, 6 RING, OTHER RING(MAYBE COMBO CORES), NO RING</span>
+        <span class="n">mols_with_o</span> <span class="o">=</span> <span class="p">[[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]]</span>
+        <span class="n">no_hetero</span> <span class="o">=</span> <span class="p">[[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]]</span>      
+        <span class="n">N</span> <span class="o">=</span> <span class="s2">&quot;nitrogen&quot;</span>
+        <span class="n">O</span> <span class="o">=</span> <span class="s2">&quot;oxygen&quot;</span>
+        <span class="n">S</span> <span class="o">=</span> <span class="s2">&quot;sulfur&quot;</span>
+
+        <span class="n">five</span> <span class="o">=</span> <span class="s2">&quot;5-membered ring&quot;</span>
+        <span class="n">six</span> <span class="o">=</span> <span class="s2">&quot;6-membered ring&quot;</span>
+     
+        <span class="k">for</span> <span class="n">molecule</span> <span class="ow">in</span> <span class="n">molecule_class_list</span><span class="p">:</span>
+            <span class="n">mol</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">MolFromSmiles</span><span class="p">(</span><span class="n">molecule</span><span class="o">.</span><span class="n">smiles</span><span class="p">)</span>
+        
+            <span class="n">a</span> <span class="o">=</span> <span class="n">has_heteroatoms</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">N</span> <span class="ow">in</span> <span class="n">a</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">O</span> <span class="ow">in</span> <span class="n">a</span><span class="p">:</span>
+                    <span class="n">b</span> <span class="o">=</span> <span class="n">has_rings</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">five</span> <span class="ow">in</span> <span class="n">b</span> <span class="ow">and</span> <span class="n">six</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">b</span><span class="p">:</span>
+                        <span class="n">mols_with_n_and_o</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">molecule</span><span class="p">)</span> <span class="c1"># Pulls out 5 membered rings</span>
+                    <span class="k">elif</span> <span class="n">six</span> <span class="ow">in</span> <span class="n">b</span> <span class="ow">and</span> <span class="n">five</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">b</span><span class="p">:</span>
+                        <span class="n">mols_with_n_and_o</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">molecule</span><span class="p">)</span> <span class="c1"># Pulls out 6 membered rings</span>
+                    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">mols_with_n_and_o</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">molecule</span><span class="p">)</span> <span class="c1"># Pulls out any rings that aren&#39;t just 5 or 6 (ie. indoles which have both five and six rings)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">mols_with_n_and_o</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">molecule</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">O</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">a</span><span class="p">:</span>
+                    <span class="n">b</span> <span class="o">=</span> <span class="n">has_rings</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">five</span> <span class="ow">in</span> <span class="n">b</span> <span class="ow">and</span> <span class="n">six</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">b</span><span class="p">:</span>
+                        <span class="n">mols_with_n</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">molecule</span><span class="p">)</span> <span class="c1"># Pulls out 5 membered rings</span>
+                    <span class="k">elif</span> <span class="n">six</span> <span class="ow">in</span> <span class="n">b</span> <span class="ow">and</span> <span class="n">five</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">b</span><span class="p">:</span>
+                        <span class="n">mols_with_n</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">molecule</span><span class="p">)</span> <span class="c1"># Pulls out 6 membered rings</span>
+                    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">mols_with_n</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">molecule</span><span class="p">)</span> <span class="c1"># Pulls out any rings that aren&#39;t just 5 or 6 (ie. indoles which have both five and six rings)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">mols_with_n</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">molecule</span><span class="p">)</span>           
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">pass</span>
+            <span class="k">elif</span> <span class="n">O</span> <span class="ow">in</span> <span class="n">a</span><span class="p">:</span>
+                <span class="n">b</span> <span class="o">=</span> <span class="n">has_rings</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">five</span> <span class="ow">in</span> <span class="n">b</span> <span class="ow">and</span> <span class="n">six</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">b</span><span class="p">:</span>
+                    <span class="n">mols_with_o</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">molecule</span><span class="p">)</span> <span class="c1"># Pulls out 5 membered rings</span>
+                <span class="k">elif</span> <span class="n">six</span> <span class="ow">in</span> <span class="n">b</span> <span class="ow">and</span> <span class="n">five</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">b</span><span class="p">:</span>
+                    <span class="n">mols_with_o</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">molecule</span><span class="p">)</span> <span class="c1"># Pulls out 6 membered rings</span>
+                <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">mols_with_o</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">molecule</span><span class="p">)</span> <span class="c1"># Pulls out any rings that aren&#39;t just 5 or 6 (ie. indoles which have both five and six rings)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">mols_with_o</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">molecule</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">b</span> <span class="o">=</span> <span class="n">has_rings</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">five</span> <span class="ow">in</span> <span class="n">b</span> <span class="ow">and</span> <span class="n">six</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">b</span><span class="p">:</span>
+                    <span class="n">no_hetero</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">molecule</span><span class="p">)</span> <span class="c1"># Pulls out 5 membered rings</span>
+                <span class="k">elif</span> <span class="n">six</span> <span class="ow">in</span> <span class="n">b</span> <span class="ow">and</span> <span class="n">five</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">b</span><span class="p">:</span>
+                    <span class="n">no_hetero</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">molecule</span><span class="p">)</span> <span class="c1"># Pulls out 6 membered rings</span>
+                <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">no_hetero</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">molecule</span><span class="p">)</span> <span class="c1"># Pulls out any rings that aren&#39;t just 5 or 6 (ie. indoles which have both five and six rings)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">no_hetero</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">molecule</span><span class="p">)</span>
+        <span class="n">grouped_mols</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">grouped_mols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mols_with_n_and_o</span><span class="p">)</span>
+        <span class="n">grouped_mols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mols_with_n</span><span class="p">)</span>
+        <span class="n">grouped_mols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mols_with_o</span><span class="p">)</span>
+        <span class="n">grouped_mols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">no_hetero</span><span class="p">)</span>
+        <span class="k">return</span><span class="p">(</span><span class="n">grouped_mols</span><span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="complex_fluid_models.is_orca_molecule">
+<a class="viewcode-back" href="../sw_complex_fluid_models.html#sw_complex_fluid_models.complex_fluid_models.is_orca_molecule">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">is_orca_molecule</span><span class="p">(</span><span class="n">molecule</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check if the given molecule is an instance of the orca_molecule class.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        molecule : object</span>
+<span class="sd">        The object to check.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        --------</span>
+<span class="sd">        bool</span>
+<span class="sd">        True if the object is an instance of orca_molecule, False otherwise.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">molecule</span><span class="p">,</span> <span class="n">orca_molecule</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="complex_fluid_models.all_model">
+<a class="viewcode-back" href="../sw_complex_fluid_models.html#sw_complex_fluid_models.complex_fluid_models.all_model">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">all_model</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">orca_molecules</span><span class="p">):</span>
+        <span class="n">orca_mol_bool</span> <span class="o">=</span> <span class="p">[</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">molecule</span><span class="p">,</span> <span class="n">orca_molecule</span><span class="p">)</span> <span class="k">for</span> <span class="n">molecule</span> <span class="ow">in</span> <span class="n">orca_molecules</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s2">&quot;False&quot;</span> <span class="ow">in</span> <span class="n">orca_mol_bool</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Please use orca molecule class instances for each molecule in list passed to this function.&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Refer to the sw_orca module for more information on setting this up.&quot;</span><span class="p">)</span>
+            <span class="k">return</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+
+        <span class="n">ratios</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">mol</span><span class="o">.</span><span class="n">peak_area</span><span class="p">)</span><span class="o">/</span><span class="mi">100</span> <span class="k">for</span> <span class="n">mol</span> <span class="ow">in</span> <span class="n">orca_molecules</span><span class="p">]</span>
+        <span class="n">all_model</span> <span class="o">=</span> <span class="n">complex_fluid_model</span><span class="p">(</span><span class="n">orca_molecules</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">ratios</span><span class="p">,</span> <span class="s2">&quot;ALL_model&quot;</span><span class="p">,</span> <span class="n">model_name</span><span class="p">)</span>
+        
+        <span class="k">return</span><span class="p">(</span><span class="n">all_model</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="complex_fluid_models.fixed_threshold_model">
+<a class="viewcode-back" href="../sw_complex_fluid_models.html#sw_complex_fluid_models.complex_fluid_models.fixed_threshold_model">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">fixed_threshold_model</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">orca_molecules</span><span class="p">,</span> <span class="n">selection_threshold</span><span class="p">):</span>
+        <span class="n">orca_mol_bool</span> <span class="o">=</span> <span class="p">[</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">molecule</span><span class="p">,</span> <span class="n">orca_molecule</span><span class="p">)</span> <span class="k">for</span> <span class="n">molecule</span> <span class="ow">in</span> <span class="n">orca_molecules</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s2">&quot;False&quot;</span> <span class="ow">in</span> <span class="n">orca_mol_bool</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Please use orca molecule class instances for each molecule in list passed to this function.&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Refer to the sw_orca module for more information on setting this up.&quot;</span><span class="p">)</span>
+            <span class="k">return</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+
+        <span class="n">fixed_threshold_model</span> <span class="o">=</span> <span class="p">[]</span> 
+
+        <span class="k">for</span> <span class="n">molecule</span> <span class="ow">in</span> <span class="n">orca_molecules</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">float</span><span class="p">(</span><span class="n">molecule</span><span class="o">.</span><span class="n">peak_area</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">selection_threshold</span><span class="p">:</span>
+                <span class="n">fixed_threshold_model</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">molecule</span><span class="p">)</span>
+
+        <span class="n">tot_peak_area</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="nb">float</span><span class="p">(</span><span class="n">mol</span><span class="o">.</span><span class="n">peak_area</span><span class="p">)</span> <span class="k">for</span> <span class="n">mol</span> <span class="ow">in</span> <span class="n">fixed_threshold_model</span><span class="p">])</span>
+        <span class="n">ratios</span> <span class="o">=</span> <span class="p">[(</span><span class="nb">float</span><span class="p">(</span><span class="n">mol</span><span class="o">.</span><span class="n">peak_area</span><span class="p">)</span><span class="o">/</span><span class="n">tot_peak_area</span><span class="p">)</span> <span class="k">for</span> <span class="n">mol</span> <span class="ow">in</span> <span class="n">fixed_threshold_model</span><span class="p">]</span>
+        
+        <span class="n">fixed_threshold_model</span> <span class="o">=</span> <span class="n">complex_fluid_model</span><span class="p">(</span><span class="n">fixed_threshold_model</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">ratios</span><span class="p">,</span> <span class="s2">&quot;FT_model&quot;</span><span class="p">,</span> <span class="n">model_name</span><span class="p">)</span>
+        
+        <span class="k">return</span><span class="p">(</span><span class="n">fixed_threshold_model</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="complex_fluid_models.proportional_threshold_model">
+<a class="viewcode-back" href="../sw_complex_fluid_models.html#sw_complex_fluid_models.complex_fluid_models.proportional_threshold_model">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">proportional_threshold_model</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">orca_molecules</span><span class="p">):</span>
+        <span class="n">orca_mol_bool</span> <span class="o">=</span> <span class="p">[</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">molecule</span><span class="p">,</span> <span class="n">orca_molecule</span><span class="p">)</span> <span class="k">for</span> <span class="n">molecule</span> <span class="ow">in</span> <span class="n">orca_molecules</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s2">&quot;False&quot;</span> <span class="ow">in</span> <span class="n">orca_mol_bool</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Please use orca molecule class instances for each molecule in list passed to this function.&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Refer to the sw_orca module for more information on setting this up.&quot;</span><span class="p">)</span>
+            <span class="k">return</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">calculate_normalised_total</span><span class="p">(</span><span class="n">all_info</span><span class="p">):</span>
+            <span class="n">normalised_values</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_info</span><span class="p">)):</span>
+                <span class="n">normalised_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">all_info</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">3</span><span class="p">])</span>
+            <span class="k">return</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">normalised_values</span><span class="p">))</span>
+        
+        <span class="n">all_info</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">peak_areas</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># Used for initial normalising calculation</span>
+
+        <span class="k">for</span> <span class="n">molecule</span> <span class="ow">in</span> <span class="n">orca_molecules</span><span class="p">:</span>
+            <span class="n">peak_areas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">molecule</span><span class="o">.</span><span class="n">peak_area</span><span class="p">))</span>
+
+        <span class="n">max_mols</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">orca_molecules</span><span class="p">)</span> <span class="c1"># The number of molecules to select for the model</span>
+        
+        <span class="k">for</span> <span class="n">molecule</span> <span class="ow">in</span> <span class="n">orca_molecules</span><span class="p">:</span>
+            <span class="n">info</span> <span class="o">=</span> <span class="p">[</span><span class="n">molecule</span><span class="p">,</span> <span class="n">molecule</span><span class="o">.</span><span class="n">smiles</span><span class="p">,</span> <span class="n">molecule</span><span class="o">.</span><span class="n">peak_area</span><span class="p">,</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">molecule</span><span class="o">.</span><span class="n">peak_area</span><span class="p">)</span><span class="o">/</span><span class="nb">min</span><span class="p">(</span><span class="n">peak_areas</span><span class="p">))]</span>
+            <span class="n">all_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">info</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">orca_molecules</span><span class="p">)):</span>
+            <span class="n">normalised_total</span> <span class="o">=</span> <span class="n">calculate_normalised_total</span><span class="p">(</span><span class="n">all_info</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">normalised_total</span> <span class="o">&gt;</span> <span class="n">max_mols</span><span class="p">:</span>
+                <span class="n">min_peak_area</span> <span class="o">=</span> <span class="n">peak_areas</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">peak_areas</span><span class="p">))</span>
+                <span class="n">peak_areas</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">min_peak_area</span><span class="p">)</span>
+                <span class="n">all_info</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">min_peak_area</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_info</span><span class="p">)):</span>
+                <span class="n">all_info</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">all_info</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">2</span><span class="p">])</span><span class="o">/</span><span class="nb">min</span><span class="p">(</span><span class="n">peak_areas</span><span class="p">)</span>
+
+    
+        
+        <span class="n">selected_mols</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_info</span><span class="p">)):</span>
+            <span class="n">selected_mols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">all_info</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="n">tot_peak_area</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="nb">float</span><span class="p">(</span><span class="n">mol</span><span class="o">.</span><span class="n">peak_area</span><span class="p">)</span> <span class="k">for</span> <span class="n">mol</span> <span class="ow">in</span> <span class="n">selected_mols</span><span class="p">])</span>
+        <span class="n">ratios</span> <span class="o">=</span> <span class="p">[(</span><span class="nb">float</span><span class="p">(</span><span class="n">mol</span><span class="o">.</span><span class="n">peak_area</span><span class="p">)</span><span class="o">/</span><span class="n">tot_peak_area</span><span class="p">)</span> <span class="k">for</span> <span class="n">mol</span> <span class="ow">in</span> <span class="n">selected_mols</span><span class="p">]</span>
+
+        <span class="n">proportional_threshold_model</span> <span class="o">=</span> <span class="n">complex_fluid_model</span><span class="p">(</span><span class="n">selected_mols</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">ratios</span><span class="p">,</span> <span class="s2">&quot;PT_model&quot;</span><span class="p">,</span> <span class="n">model_name</span><span class="p">)</span>
+
+        <span class="k">return</span><span class="p">(</span><span class="n">proportional_threshold_model</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="complex_fluid_models.get_group_area">
+<a class="viewcode-back" href="../sw_complex_fluid_models.html#sw_complex_fluid_models.complex_fluid_models.get_group_area">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_group_area</span><span class="p">(</span><span class="n">orca_molecules</span><span class="p">):</span>
+        <span class="c1"># used in both AG and SG models</span>
+        <span class="n">tot_peak_area</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">molecule</span> <span class="ow">in</span> <span class="n">orca_molecules</span><span class="p">:</span>
+            <span class="n">tot_peak_area</span> <span class="o">=</span> <span class="n">tot_peak_area</span> <span class="o">+</span> <span class="nb">float</span><span class="p">(</span><span class="n">molecule</span><span class="o">.</span><span class="n">peak_area</span><span class="p">)</span>
+        <span class="k">return</span><span class="p">(</span><span class="n">tot_peak_area</span><span class="p">)</span></div>
+
+        
+<div class="viewcode-block" id="complex_fluid_models.abundancy_grouped_model">
+<a class="viewcode-back" href="../sw_complex_fluid_models.html#sw_complex_fluid_models.complex_fluid_models.abundancy_grouped_model">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">abundancy_grouped_model</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">orca_molecules</span><span class="p">):</span>
+        <span class="n">orca_mol_bool</span> <span class="o">=</span> <span class="p">[</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">molecule</span><span class="p">,</span> <span class="n">orca_molecule</span><span class="p">)</span> <span class="k">for</span> <span class="n">molecule</span> <span class="ow">in</span> <span class="n">orca_molecules</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s2">&quot;False&quot;</span> <span class="ow">in</span> <span class="n">orca_mol_bool</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Please use orca molecule class instances for each molecule in list passed to this function.&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Refer to the sw_orca module for more information on setting this up.&quot;</span><span class="p">)</span>
+            <span class="k">return</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+
+        <span class="n">grouped_molecules</span> <span class="o">=</span> <span class="n">complex_fluid_models</span><span class="o">.</span><span class="n">group_molecules</span><span class="p">(</span><span class="n">orca_molecules</span><span class="p">)</span>
+
+        <span class="n">abundancy_grouped_model</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">all_mols_in_group</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">groups_in_model</span> <span class="o">=</span> <span class="mi">0</span> 
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">grouped_molecules</span><span class="p">)):</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">grouped_molecules</span><span class="p">[</span><span class="n">j</span><span class="p">])):</span>
+                <span class="n">group</span> <span class="o">=</span> <span class="n">grouped_molecules</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">]</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">group</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">pass</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">all_mols_in_group</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
+                    <span class="n">groups_in_model</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">molecule_to_model</span> <span class="o">=</span> <span class="n">group</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">group</span><span class="p">)):</span>
+                        <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="k">pass</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="nb">float</span><span class="p">(</span><span class="n">group</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">peak_area</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">float</span><span class="p">(</span><span class="n">molecule_to_model</span><span class="o">.</span><span class="n">peak_area</span><span class="p">):</span>
+                                <span class="n">molecule_to_model</span> <span class="o">=</span> <span class="n">group</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="k">pass</span>
+                    <span class="n">abundancy_grouped_model</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">molecule_to_model</span><span class="p">)</span>
+
+        <span class="n">group_peaks</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">mw</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">grouped_molecules</span><span class="p">)):</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">grouped_molecules</span><span class="p">[</span><span class="n">j</span><span class="p">])):</span>
+                <span class="n">group</span> <span class="o">=</span> <span class="n">grouped_molecules</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">]</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">group</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">pass</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">group_area</span> <span class="o">=</span> <span class="n">complex_fluid_models</span><span class="o">.</span><span class="n">get_group_area</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
+                    <span class="n">group_peaks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">group_area</span><span class="p">)</span>
+
+        <span class="n">summ</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">group_peaks</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">group_peaks</span><span class="p">)):</span>
+            <span class="n">group_peaks</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">group_peaks</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">/</span><span class="n">summ</span>
+
+        <span class="n">abundancy_grouped_model</span> <span class="o">=</span> <span class="n">complex_fluid_model</span><span class="p">(</span><span class="n">abundancy_grouped_model</span><span class="p">,</span> <span class="n">all_mols_in_group</span><span class="p">,</span> <span class="n">group_peaks</span><span class="p">,</span> <span class="s2">&quot;AG_model&quot;</span><span class="p">,</span> <span class="n">model_name</span><span class="p">)</span>
+
+        <span class="k">return</span><span class="p">(</span><span class="n">abundancy_grouped_model</span><span class="p">)</span></div>
+
+        
+<div class="viewcode-block" id="complex_fluid_models.scored_grouped_model">
+<a class="viewcode-back" href="../sw_complex_fluid_models.html#sw_complex_fluid_models.complex_fluid_models.scored_grouped_model">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">scored_grouped_model</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">orca_molecules</span><span class="p">):</span>
+        <span class="n">all_model</span> <span class="o">=</span> <span class="n">complex_fluid_models</span><span class="o">.</span><span class="n">all_model</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">orca_molecules</span><span class="p">)</span>
+        <span class="c1"># this is a variant of the ag_model</span>
+        <span class="n">ag_model</span> <span class="o">=</span> <span class="n">complex_fluid_models</span><span class="o">.</span><span class="n">abundancy_grouped_model</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">orca_molecules</span><span class="p">)</span>
+
+        <span class="n">ag_model</span> <span class="o">=</span> <span class="n">ag_model</span><span class="o">.</span><span class="n">molecules</span><span class="p">,</span> <span class="n">ag_model</span><span class="o">.</span><span class="n">group_molecules</span><span class="p">,</span> <span class="n">ag_model</span><span class="o">.</span><span class="n">molecule_ratios</span> 
+
+        <span class="n">selected_molecules</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">all_groups</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">group_peaks</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ag_model</span><span class="p">[</span><span class="mi">1</span><span class="p">])):</span>
+            <span class="n">scored_molecules</span> <span class="o">=</span> <span class="p">[[],</span> <span class="p">[]]</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">complex_fluid_models</span><span class="o">.</span><span class="n">all_model</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">ag_model</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">i</span><span class="p">])</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+            <span class="n">all_groups</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+            <span class="n">group_peak</span> <span class="o">=</span> <span class="n">complex_fluid_models</span><span class="o">.</span><span class="n">get_group_area</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">molecules</span><span class="p">)</span>
+            <span class="n">group_peaks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">group_peak</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">molecules</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">scored_molecules</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">scored_molecules</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
+                <span class="n">selected_molecules</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="k">continue</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+            <span class="c1"># These don&#39;t need to be calculated here - can be called from the instance</span>
+            <span class="n">oxygen_content</span> <span class="o">=</span> <span class="n">complex_fluid_models</span><span class="o">.</span><span class="n">calculate_heteroatom_percentages</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">molecules</span><span class="p">)[</span><span class="s1">&#39;O&#39;</span><span class="p">]</span>
+            <span class="n">wa_mw</span> <span class="o">=</span> <span class="n">complex_fluid_models</span><span class="o">.</span><span class="n">get_weighted_average</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s2">&quot;mw&quot;</span><span class="p">)</span>
+            <span class="n">wa_tot_en</span> <span class="o">=</span> <span class="n">complex_fluid_models</span><span class="o">.</span><span class="n">get_weighted_average</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s2">&quot;total_energy&quot;</span><span class="p">)</span>
+            <span class="n">wa_polar</span> <span class="o">=</span> <span class="n">complex_fluid_models</span><span class="o">.</span><span class="n">get_weighted_average</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s2">&quot;polarizability&quot;</span><span class="p">)</span>
+            <span class="n">wa_dipole</span> <span class="o">=</span> <span class="n">complex_fluid_models</span><span class="o">.</span><span class="n">get_weighted_average</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s2">&quot;dipole_moment&quot;</span><span class="p">)</span>
+            <span class="n">wa_chem_hard</span> <span class="o">=</span> <span class="n">complex_fluid_models</span><span class="o">.</span><span class="n">get_weighted_average</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s2">&quot;chemical_hardness&quot;</span><span class="p">)</span>
+
+            <span class="n">mws</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">mol</span><span class="o">.</span><span class="n">mw</span><span class="p">)</span> <span class="k">for</span> <span class="n">mol</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">molecules</span><span class="p">]</span>
+            <span class="n">min_mw</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">mws</span><span class="p">)</span>
+            <span class="n">max_mw</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">mws</span><span class="p">)</span>
+
+            <span class="n">normalized_mws</span> <span class="o">=</span> <span class="p">[(</span><span class="n">mw</span> <span class="o">-</span> <span class="n">min_mw</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">max_mw</span> <span class="o">-</span> <span class="n">min_mw</span><span class="p">)</span> <span class="k">for</span> <span class="n">mw</span> <span class="ow">in</span> <span class="n">mws</span><span class="p">]</span>
+            <span class="n">avg_norm_mw</span> <span class="o">=</span> <span class="p">(</span><span class="n">wa_mw</span> <span class="o">-</span> <span class="n">min_mw</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">max_mw</span> <span class="o">-</span> <span class="n">min_mw</span><span class="p">)</span>
+        
+            <span class="n">tot_ens</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">mol</span><span class="o">.</span><span class="n">total_energy</span><span class="p">)</span> <span class="k">for</span> <span class="n">mol</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">molecules</span><span class="p">]</span>
+            <span class="n">min_tot_en</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">tot_ens</span><span class="p">)</span>
+            <span class="n">max_tot_en</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">tot_ens</span><span class="p">)</span>
+            <span class="n">normalized_tot_ens</span> <span class="o">=</span> <span class="p">[(</span><span class="n">tot_en</span> <span class="o">-</span> <span class="n">min_tot_en</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">max_tot_en</span> <span class="o">-</span> <span class="n">min_tot_en</span><span class="p">)</span> <span class="k">for</span> <span class="n">tot_en</span> <span class="ow">in</span> <span class="n">tot_ens</span><span class="p">]</span>
+            <span class="n">avg_norm_tot_en</span> <span class="o">=</span> <span class="p">(</span><span class="n">wa_tot_en</span> <span class="o">-</span> <span class="n">min_tot_en</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">max_tot_en</span> <span class="o">-</span> <span class="n">min_tot_en</span><span class="p">)</span>
+        
+            <span class="n">polars</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">mol</span><span class="o">.</span><span class="n">polarizability</span><span class="p">)</span> <span class="k">for</span> <span class="n">mol</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">molecules</span><span class="p">]</span>
+            <span class="n">min_polar</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">polars</span><span class="p">)</span>
+            <span class="n">max_polar</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">polars</span><span class="p">)</span>
+            <span class="n">normalized_polars</span> <span class="o">=</span> <span class="p">[(</span><span class="n">polar</span> <span class="o">-</span> <span class="n">min_polar</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">max_polar</span> <span class="o">-</span> <span class="n">min_polar</span><span class="p">)</span> <span class="k">for</span> <span class="n">polar</span> <span class="ow">in</span> <span class="n">polars</span><span class="p">]</span>
+            <span class="n">avg_norm_polar</span> <span class="o">=</span> <span class="p">(</span><span class="n">wa_polar</span> <span class="o">-</span> <span class="n">min_polar</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">max_polar</span> <span class="o">-</span> <span class="n">min_polar</span><span class="p">)</span>        
+                                            
+            <span class="n">dipoles</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">mol</span><span class="o">.</span><span class="n">dipole_moment</span><span class="p">)</span> <span class="k">for</span> <span class="n">mol</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">molecules</span><span class="p">]</span>
+            <span class="n">min_dipole</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">dipoles</span><span class="p">)</span>
+            <span class="n">max_dipole</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">dipoles</span><span class="p">)</span>
+            <span class="n">normalized_dipoles</span> <span class="o">=</span> <span class="p">[(</span><span class="n">dipole</span> <span class="o">-</span> <span class="n">min_dipole</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">max_dipole</span> <span class="o">-</span> <span class="n">min_dipole</span><span class="p">)</span> <span class="k">for</span> <span class="n">dipole</span> <span class="ow">in</span> <span class="n">dipoles</span><span class="p">]</span>
+            <span class="n">avg_norm_dipole</span> <span class="o">=</span> <span class="p">(</span><span class="n">wa_dipole</span> <span class="o">-</span> <span class="n">min_dipole</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">max_dipole</span> <span class="o">-</span> <span class="n">min_dipole</span><span class="p">)</span>
+                                            
+            <span class="n">chem_hards</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">mol</span><span class="o">.</span><span class="n">chemical_hardness</span><span class="p">)</span> <span class="k">for</span> <span class="n">mol</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">molecules</span><span class="p">]</span>
+            <span class="n">min_chem_hard</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">chem_hards</span><span class="p">)</span>
+            <span class="n">max_chem_hard</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">chem_hards</span><span class="p">)</span>
+            <span class="n">normalized_chem_hards</span> <span class="o">=</span> <span class="p">[(</span><span class="n">chem_hard</span> <span class="o">-</span> <span class="n">min_chem_hard</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">max_chem_hard</span> <span class="o">-</span> <span class="n">min_chem_hard</span><span class="p">)</span> <span class="k">for</span> <span class="n">chem_hard</span> <span class="ow">in</span> <span class="n">chem_hards</span><span class="p">]</span>
+            <span class="n">avg_norm_chem_hard</span> <span class="o">=</span> <span class="p">(</span><span class="n">wa_chem_hard</span> <span class="o">-</span> <span class="n">min_chem_hard</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">max_chem_hard</span> <span class="o">-</span> <span class="n">min_chem_hard</span><span class="p">)</span>
+        
+            <span class="n">oxys</span> <span class="o">=</span> <span class="p">[</span><span class="n">complex_fluid_models</span><span class="o">.</span><span class="n">calculate_heteroatom_percentages_sing_mol</span><span class="p">(</span><span class="n">mol</span><span class="p">)[</span><span class="s1">&#39;O&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">mol</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">molecules</span><span class="p">]</span>
+            <span class="n">min_oxy</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">oxys</span><span class="p">)</span>
+            <span class="n">max_oxy</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">oxys</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">min_oxy</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">max_oxy</span> <span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+                    <span class="n">key</span><span class="o">=</span><span class="s2">&quot;no_oxy&quot;</span>           
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">key</span><span class="o">=</span><span class="s2">&quot;oxy_present&quot;</span>
+                <span class="n">normalized_oxys</span> <span class="o">=</span> <span class="p">[(</span><span class="n">oxy</span> <span class="o">-</span> <span class="n">min_oxy</span> <span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">max_oxy</span>  <span class="o">-</span> <span class="n">min_oxy</span> <span class="p">)</span> <span class="k">for</span> <span class="n">oxy</span>  <span class="ow">in</span> <span class="n">oxys</span><span class="p">]</span>
+                <span class="n">avg_norm_oxy</span> <span class="o">=</span> <span class="p">(</span><span class="n">oxygen_content</span> <span class="o">-</span> <span class="n">min_oxy</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">max_oxy</span> <span class="o">-</span> <span class="n">min_oxy</span><span class="p">)</span>
+        
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">molecules</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;oxy_present&quot;</span><span class="p">:</span>
+                    <span class="n">score_value</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">normalized_mws</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">-</span><span class="nb">float</span><span class="p">(</span><span class="n">avg_norm_mw</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">normalized_tot_ens</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">-</span><span class="nb">float</span><span class="p">(</span><span class="n">avg_norm_tot_en</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span><span class="p">(</span><span class="n">normalized_polars</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">-</span><span class="nb">float</span><span class="p">(</span><span class="n">avg_norm_polar</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">normalized_dipoles</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">-</span><span class="nb">float</span><span class="p">(</span><span class="n">avg_norm_dipole</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span><span class="p">(</span><span class="n">normalized_chem_hards</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">-</span><span class="nb">float</span><span class="p">(</span><span class="n">avg_norm_chem_hard</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span><span class="p">(</span><span class="n">normalized_oxys</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">-</span><span class="nb">float</span><span class="p">(</span><span class="n">avg_norm_oxy</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span><span class="p">)))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">score_value</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">normalized_mws</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">-</span><span class="nb">float</span><span class="p">(</span><span class="n">avg_norm_mw</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">normalized_tot_ens</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">-</span><span class="nb">float</span><span class="p">(</span><span class="n">avg_norm_tot_en</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span><span class="p">(</span><span class="n">normalized_polars</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">-</span><span class="nb">float</span><span class="p">(</span><span class="n">avg_norm_polar</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">normalized_dipoles</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">-</span><span class="nb">float</span><span class="p">(</span><span class="n">avg_norm_dipole</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span><span class="p">(</span><span class="n">normalized_chem_hards</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">-</span><span class="nb">float</span><span class="p">(</span><span class="n">avg_norm_chem_hard</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span><span class="p">)))</span>
+            
+                <span class="n">scored_molecules</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">molecules</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+                <span class="n">scored_molecules</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">score_value</span><span class="p">)</span>
+        
+            <span class="n">best_score</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">scored_molecules</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">best_score_index</span> <span class="o">=</span> <span class="n">scored_molecules</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">best_score</span><span class="p">)</span>
+
+            <span class="n">selected_molecules</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">scored_molecules</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">best_score_index</span><span class="p">])</span>  
+        <span class="n">group_peaks</span> <span class="o">=</span> <span class="p">[</span><span class="n">peak</span><span class="o">/</span><span class="mi">100</span> <span class="k">for</span> <span class="n">peak</span> <span class="ow">in</span> <span class="n">group_peaks</span><span class="p">]</span>
+        <span class="n">scored_grouped_model</span> <span class="o">=</span> <span class="n">complex_fluid_model</span><span class="p">(</span><span class="n">selected_molecules</span><span class="p">,</span> <span class="n">all_groups</span><span class="p">,</span> <span class="n">group_peaks</span><span class="p">,</span> <span class="s2">&quot;SG_model&quot;</span><span class="p">,</span> <span class="n">model_name</span><span class="p">)</span>
+        
+        <span class="k">return</span><span class="p">(</span><span class="n">scored_grouped_model</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="complex_fluid_models.generate_model_df">
+<a class="viewcode-back" href="../sw_complex_fluid_models.html#sw_complex_fluid_models.complex_fluid_models.generate_model_df">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">generate_model_df</span><span class="p">(</span><span class="n">models</span><span class="p">):</span> <span class="c1"># molecules is all set, models are subsets of molecules</span>
+        <span class="n">mws</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">chem_hards</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">polars</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">dipoles</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">tot_ens</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">oxygen_content</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">model_types</span> <span class="o">=</span> <span class="p">[]</span>
+    
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">models</span><span class="p">)):</span>
+            <span class="n">mws</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">complex_fluid_models</span><span class="o">.</span><span class="n">get_weighted_average</span><span class="p">(</span><span class="n">models</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="s2">&quot;mw&quot;</span><span class="p">))</span>
+            <span class="n">chem_hards</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">complex_fluid_models</span><span class="o">.</span><span class="n">get_weighted_average</span><span class="p">(</span><span class="n">models</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="s2">&quot;chemical_hardness&quot;</span><span class="p">))</span>
+            <span class="n">polars</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">complex_fluid_models</span><span class="o">.</span><span class="n">get_weighted_average</span><span class="p">(</span><span class="n">models</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="s2">&quot;polarizability&quot;</span><span class="p">))</span>
+            <span class="n">dipoles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">complex_fluid_models</span><span class="o">.</span><span class="n">get_weighted_average</span><span class="p">(</span><span class="n">models</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="s2">&quot;dipole_moment&quot;</span><span class="p">))</span>
+            <span class="n">tot_ens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">complex_fluid_models</span><span class="o">.</span><span class="n">get_weighted_average</span><span class="p">(</span><span class="n">models</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="s2">&quot;total_energy&quot;</span><span class="p">))</span>
+            <span class="n">model_types</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">models</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">model_type</span><span class="p">)</span>
+
+            <span class="n">oxy</span> <span class="o">=</span> <span class="n">complex_fluid_models</span><span class="o">.</span><span class="n">calculate_heteroatom_percentages</span><span class="p">(</span><span class="n">models</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">molecules</span><span class="p">)[</span><span class="s2">&quot;O&quot;</span><span class="p">]</span>
+            <span class="n">oxygen_content</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">oxy</span><span class="p">)</span>
+    
+        <span class="c1"># Create a DataFrame with model properties</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+            <span class="s2">&quot;Model Type&quot;</span><span class="p">:</span> <span class="n">model_types</span><span class="p">,</span>
+            <span class="s2">&quot;Mw&quot;</span><span class="p">:</span> <span class="n">mws</span><span class="p">,</span>
+            <span class="s2">&quot;Chem_hard&quot;</span><span class="p">:</span> <span class="n">chem_hards</span><span class="p">,</span>
+            <span class="s2">&quot;polarizability&quot;</span><span class="p">:</span> <span class="n">polars</span><span class="p">,</span>
+            <span class="s2">&quot;Dipole&quot;</span><span class="p">:</span> <span class="n">dipoles</span><span class="p">,</span>
+            <span class="s2">&quot;total_energy&quot;</span><span class="p">:</span> <span class="n">tot_ens</span><span class="p">,</span>
+            <span class="s2">&quot;oxygen_content&quot;</span><span class="p">:</span> <span class="n">oxygen_content</span>
+        <span class="p">})</span>
+    
+        <span class="k">return</span> <span class="n">df</span></div>
+
+
+<div class="viewcode-block" id="complex_fluid_models.rank_models">
+<a class="viewcode-back" href="../sw_complex_fluid_models.html#sw_complex_fluid_models.complex_fluid_models.rank_models">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">rank_models</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+        <span class="c1"># Ensure the column names are correct and in proper case</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    
+        <span class="n">properties</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Mw&quot;</span><span class="p">,</span> <span class="s2">&quot;Chem_hard&quot;</span><span class="p">,</span> <span class="s2">&quot;polarizability&quot;</span><span class="p">,</span> <span class="s2">&quot;Dipole&quot;</span><span class="p">,</span> <span class="s2">&quot;total_energy&quot;</span><span class="p">,</span> <span class="s2">&quot;oxygen_content&quot;</span><span class="p">]</span>
+
+        <span class="c1"># Create a new dataframe to store the calculated differences and ranks</span>
+        <span class="n">differences_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+        <span class="n">ranks_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+    
+        <span class="c1"># Copy the &quot;Model Type&quot; column from the input dataframe to the output dataframes</span>
+        <span class="n">differences_df</span><span class="p">[</span><span class="s2">&quot;Model Type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;Model Type&quot;</span><span class="p">]</span>
+        <span class="n">ranks_df</span><span class="p">[</span><span class="s2">&quot;Model Type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;Model Type&quot;</span><span class="p">]</span>
+
+        <span class="c1"># Check if &#39;ALL_model&#39; is in the &quot;Model Type&quot; column</span>
+        <span class="k">if</span> <span class="s2">&quot;ALL_model&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;Model Type&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;ALL_model not found in &#39;Model Type&#39; column&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Calculate absolute differences for each property against the &quot;all_model&quot; row</span>
+        <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">:</span>
+            <span class="n">all_model_value</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;Model Type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;ALL_model&quot;</span><span class="p">,</span> <span class="n">prop</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">differences_df</span><span class="p">[</span><span class="n">prop</span> <span class="o">+</span> <span class="s2">&quot;_Difference&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">prop</span><span class="p">]</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">all_model_value</span><span class="p">)</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span>
+
+            <span class="c1"># Calculate ranks for each descriptor against the &quot;all_model&quot; benchmark</span>
+            <span class="n">ranks_df</span><span class="p">[</span><span class="n">prop</span> <span class="o">+</span> <span class="s2">&quot;_Rank&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">differences_df</span><span class="p">[</span><span class="n">prop</span> <span class="o">+</span> <span class="s2">&quot;_Difference&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">rank</span><span class="p">()</span>
+
+        <span class="c1"># Calculate cumulative difference for each model based on the property differences</span>
+        <span class="n">differences_df</span><span class="p">[</span><span class="s2">&quot;Cumulative_Difference&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">differences_df</span><span class="p">[[</span><span class="n">prop</span> <span class="o">+</span> <span class="s2">&quot;_Difference&quot;</span> <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">]]</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># Calculate final score for each model</span>
+        <span class="n">min_diff</span> <span class="o">=</span> <span class="n">differences_df</span><span class="p">[</span><span class="s2">&quot;Cumulative_Difference&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+        <span class="n">differences_df</span><span class="p">[</span><span class="s2">&quot;Final_Score&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">differences_df</span><span class="p">[</span><span class="s2">&quot;Cumulative_Difference&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">diff</span><span class="p">:</span> <span class="p">(</span><span class="n">min_diff</span> <span class="o">-</span> <span class="n">diff</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># Calculate the sum of ranks for each model</span>
+        <span class="n">ranks_df</span><span class="p">[</span><span class="s2">&quot;Final_Rank&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ranks_df</span><span class="p">[[</span><span class="n">prop</span> <span class="o">+</span> <span class="s2">&quot;_Rank&quot;</span> <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">]]</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">ranks_df</span></div>
+
+        
+<div class="viewcode-block" id="complex_fluid_models.min_mols_4_simulation">
+<a class="viewcode-back" href="../sw_complex_fluid_models.html#sw_complex_fluid_models.complex_fluid_models.min_mols_4_simulation">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">min_mols_4_simulation</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+        <span class="n">num_compounds</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">molecules</span><span class="p">)</span>
+        <span class="n">min_peak</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">molecule_ratios</span><span class="p">)</span>
+        <span class="n">min_mols</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_compounds</span><span class="p">):</span>
+            <span class="n">min_mols</span> <span class="o">+=</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">molecule_ratios</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">min_peak</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">molecules</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">min_mols</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="complex_fluid_models.min_atoms_4_simulation">
+<a class="viewcode-back" href="../sw_complex_fluid_models.html#sw_complex_fluid_models.complex_fluid_models.min_atoms_4_simulation">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">min_atoms_4_simulation</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+        <span class="n">min_peak</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">molecule_ratios</span><span class="p">)</span>
+        <span class="n">num_atoms</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">molecules</span><span class="p">)):</span>
+            <span class="n">mol</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">MolFromSmiles</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">molecules</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">smiles</span><span class="p">)</span>
+            <span class="n">mol</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">AddHs</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
+            <span class="n">num_atoms</span> <span class="o">=</span> <span class="n">num_atoms</span> <span class="o">+</span> <span class="p">(</span><span class="n">mol</span><span class="o">.</span><span class="n">GetNumAtoms</span><span class="p">()</span><span class="o">*</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">molecule_ratios</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">min_peak</span><span class="p">))</span><span class="o">*</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">molecules</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+            
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">num_atoms</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="complex_fluid_models.model_output_block">
+<a class="viewcode-back" href="../sw_complex_fluid_models.html#sw_complex_fluid_models.complex_fluid_models.model_output_block">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">model_output_block</span><span class="p">(</span><span class="n">all_model</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">ranked_data</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">all_model</span><span class="o">.</span><span class="n">model_type</span> <span class="o">!=</span> <span class="s2">&quot;ALL_model&quot;</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Please provide the ALL_model to serve as a benchmark&quot;</span><span class="p">)</span>
+            <span class="k">return</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+        <span class="n">supported_models</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;FT_model&quot;</span><span class="p">,</span> <span class="s2">&quot;ALL_model&quot;</span><span class="p">,</span> <span class="s2">&quot;AG_model&quot;</span><span class="p">,</span> <span class="s2">&quot;PT_model&quot;</span><span class="p">,</span> <span class="s2">&quot;SG_model&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">model_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">supported_models</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;This function currently does not support: &quot;</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">model_type</span><span class="p">)</span>
+            <span class="k">return</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+        <span class="c1"># Set up a dictionary for the benchmark so I can score each model versus the benchmark</span>
+        <span class="n">benchmark_values</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Mw&quot;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Chem_hard&quot;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;polarizability&quot;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Dipole&quot;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;total_energy&quot;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;oxygen_content&quot;</span><span class="p">:</span><span class="mi">0</span><span class="p">}</span>
+        <span class="n">benchmark_values</span><span class="p">[</span><span class="s2">&quot;Mw&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">all_model</span><span class="o">.</span><span class="n">wa_mw</span>
+        <span class="n">benchmark_values</span><span class="p">[</span><span class="s2">&quot;Chem_hard&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">all_model</span><span class="o">.</span><span class="n">wa_chemical_hardness</span>
+        <span class="n">benchmark_values</span><span class="p">[</span><span class="s2">&quot;polarizability&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">all_model</span><span class="o">.</span><span class="n">wa_polarizability</span>
+        <span class="n">benchmark_values</span><span class="p">[</span><span class="s2">&quot;Dipole&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">all_model</span><span class="o">.</span><span class="n">wa_dipole_moment</span>
+        <span class="n">benchmark_values</span><span class="p">[</span><span class="s2">&quot;total_energy&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">all_model</span><span class="o">.</span><span class="n">wa_total_energy</span>
+        <span class="n">benchmark_values</span><span class="p">[</span><span class="s2">&quot;oxygen_content&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">all_model</span><span class="o">.</span><span class="n">wa_oxygen_content</span>
+    
+        <span class="c1"># Creation of a dictionary for the model_values</span>
+        <span class="n">model_values</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Mw&quot;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Chem_hard&quot;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;polarizability&quot;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Dipole&quot;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;total_energy&quot;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;oxygen_content&quot;</span><span class="p">:</span><span class="mi">0</span><span class="p">}</span> 
+    
+        <span class="n">num_mols</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">molecules</span><span class="p">)</span>
+          
+        <span class="n">spacer</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">molecule_header</span> <span class="o">=</span> <span class="s2">&quot;The molecules in this model are:&quot;</span>
+        <span class="n">smiles_header</span> <span class="o">=</span> <span class="s2">&quot;The smiles for these molecules are:&quot;</span>
+        <span class="n">model_lines</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">recorded_peak_area</span> <span class="o">=</span> <span class="mi">0</span>
+    
+        <span class="c1"># This loop gets total peak area of the entire dataset passed to it</span>
+        <span class="n">dataset_peak_area</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">molecule</span><span class="o">.</span><span class="n">peak_area</span><span class="p">)</span> <span class="k">for</span> <span class="n">molecule</span> <span class="ow">in</span> <span class="n">all_model</span><span class="o">.</span><span class="n">molecules</span><span class="p">)</span>
+        <span class="c1"># This gets the peak area of the compounds in the model (or subset)</span>
+        <span class="n">model_area</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">molecule</span><span class="o">.</span><span class="n">peak_area</span><span class="p">)</span> <span class="k">for</span> <span class="n">molecule</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">molecules</span><span class="p">)</span>
+    
+        <span class="n">model_line</span> <span class="o">=</span> <span class="s2">&quot;Model: &quot;</span> <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">model_type</span>
+             
+        <span class="c1"># Representation of model in a string to write to file</span>
+        <span class="n">representation_line</span> <span class="o">=</span> <span class="s2">&quot;This model represents &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">((</span><span class="n">model_area</span><span class="o">/</span><span class="n">dataset_peak_area</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="si">% o</span><span class="s2">f the charecterised biocrude&quot;</span>
+        <span class="c1"># Other properties of model to write to line</span>
+        <span class="n">weighted_line</span> <span class="o">=</span> <span class="s2">&quot;Weighted values for molecular weight, chemical hardness, polarizability, chemical hardness and dipole moment are listed below:&quot;</span>
+        <span class="n">mw</span> <span class="o">=</span> <span class="s2">&quot;Molecular weight  = &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">wa_mw</span><span class="p">)</span>
+        <span class="n">chem_hard</span> <span class="o">=</span> <span class="s2">&quot;Chemical hardness = &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">wa_chemical_hardness</span><span class="p">)</span>
+        <span class="n">polar</span> <span class="o">=</span> <span class="s2">&quot;Polarizability    = &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">wa_polarizability</span><span class="p">)</span>
+        <span class="n">dipole</span> <span class="o">=</span> <span class="s2">&quot;Dipole moment     = &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">wa_dipole_moment</span><span class="p">)</span>
+        <span class="n">tot_energy</span> <span class="o">=</span> <span class="s2">&quot;Total energy      = &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">wa_total_energy</span><span class="p">)</span>
+    
+        <span class="n">model_values</span><span class="p">[</span><span class="s2">&quot;oxygen_content&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">wa_oxygen_content</span>            
+        <span class="n">model_values</span><span class="p">[</span><span class="s2">&quot;Mw&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">wa_mw</span>
+        <span class="n">model_values</span><span class="p">[</span><span class="s2">&quot;Chem_hard&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">wa_chemical_hardness</span>
+        <span class="n">model_values</span><span class="p">[</span><span class="s2">&quot;polarizability&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">wa_polarizability</span>
+        <span class="n">model_values</span><span class="p">[</span><span class="s2">&quot;Dipole&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">wa_dipole_moment</span>
+        <span class="n">model_values</span><span class="p">[</span><span class="s2">&quot;total_energy&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">wa_total_energy</span>
+    
+        <span class="c1"># Functions to calculate how good a model is versus the benchmark  </span>
+        <span class="n">model_score</span> <span class="o">=</span> <span class="n">ranked_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">ranked_data</span><span class="p">[</span><span class="s2">&quot;Model Type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">model</span><span class="o">.</span><span class="n">model_type</span><span class="p">,</span> <span class="s2">&quot;Final_Rank&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">score_line</span> <span class="o">=</span> <span class="s2">&quot;This model has a score of: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">model_score</span><span class="o">/</span><span class="mi">6</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; versus the benchmark&quot;</span>
+        <span class="n">hetero_content_line</span> <span class="o">=</span> <span class="s2">&quot;The heteroatom content of this model is:&quot;</span>
+        <span class="n">model_lines</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">model_line</span><span class="p">,</span> <span class="n">representation_line</span><span class="p">,</span> <span class="n">score_line</span><span class="p">,</span> <span class="n">spacer</span><span class="p">,</span> <span class="n">weighted_line</span><span class="p">,</span> <span class="n">mw</span><span class="p">,</span> <span class="n">chem_hard</span><span class="p">,</span> <span class="n">polar</span><span class="p">,</span> <span class="n">dipole</span><span class="p">,</span> <span class="n">tot_energy</span><span class="p">,</span> <span class="n">spacer</span><span class="p">,</span> <span class="n">hetero_content_line</span><span class="p">])</span>
+     
+        <span class="c1"># Now we write heteroatoms content to file</span>
+        <span class="n">heteroatom_content</span> <span class="o">=</span> <span class="n">complex_fluid_models</span><span class="o">.</span><span class="n">calculate_heteroatom_percentages</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">molecules</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">atom</span><span class="p">,</span> <span class="n">weight</span> <span class="ow">in</span> <span class="n">heteroatom_content</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">atom_content</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">atom</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">weight</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">model_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">atom_content</span><span class="p">)</span>
+        
+        <span class="n">atoms_line</span> <span class="o">=</span> <span class="s2">&quot;This model will require the following minimum number of atoms for unbiased simulation:&quot;</span>
+        <span class="n">mol_line</span> <span class="o">=</span> <span class="s2">&quot;This model will require the following minimum number of molecules for unbiased simulation:&quot;</span>
+        <span class="n">model_lines</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">spacer</span><span class="p">,</span> <span class="n">atoms_line</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">min_atoms_for_sim</span><span class="p">),</span> <span class="n">spacer</span><span class="p">,</span> <span class="n">mol_line</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">min_mols_for_sim</span><span class="p">),</span> <span class="n">spacer</span><span class="p">,</span> <span class="n">molecule_header</span><span class="p">])</span>
+                           
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_mols</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">model_type</span> <span class="o">==</span> <span class="s2">&quot;AG_model&quot;</span> <span class="ow">or</span> <span class="n">model</span><span class="o">.</span><span class="n">model_type</span> <span class="o">==</span> <span class="s2">&quot;SG_model&quot;</span><span class="p">:</span>
+                <span class="n">group_area</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">molecule_ratios</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">line</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">molecules</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot; and this group accounts for: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">group_area</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; </span><span class="si">% o</span><span class="s2">f the biocrude&quot;</span>
+    
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">model_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">molecules</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+           
+        <span class="n">model_lines</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">spacer</span><span class="p">,</span> <span class="n">smiles_header</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_mols</span><span class="p">):</span>
+            <span class="n">model_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">molecules</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">smiles</span><span class="p">)</span>
+       
+        <span class="k">return</span><span class="p">(</span><span class="n">model_lines</span><span class="p">)</span> </div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Daniel J. York.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

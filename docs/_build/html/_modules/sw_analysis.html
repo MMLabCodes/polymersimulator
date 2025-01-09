@@ -1,0 +1,875 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>sw_analysis &mdash; Polymer Simulator 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Polymer Simulator
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../packagecontents.html">Package Contents</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sw_openmm.html">Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sw_build_systems.html">sw_build_systems Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Polymer Simulator</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Module code</a></li>
+      <li class="breadcrumb-item active">sw_analysis</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for sw_analysis</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Created on Tue Jun  4 11:13:57 2024</span>
+
+<span class="sd">@author: danie</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">modules.sw_basic_functions</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="c1">#from modules.sw_custom_decorators import *</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+<span class="kn">import</span> <span class="nn">os</span> <span class="k">as</span> <span class="nn">os</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">matplotlib.cm</span> <span class="k">as</span> <span class="nn">cm</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">r2_score</span>
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">nglview</span> <span class="k">as</span> <span class="nn">nv</span>
+<span class="kn">import</span> <span class="nn">MDAnalysis</span> <span class="k">as</span> <span class="nn">mda</span>
+<span class="kn">from</span> <span class="nn">MDAnalysis.lib</span> <span class="kn">import</span> <span class="n">distances</span> 
+<span class="kn">from</span> <span class="nn">MDAnalysis.analysis</span> <span class="kn">import</span> <span class="n">rdf</span>
+<span class="kn">import</span> <span class="nn">MDAnalysisData</span> <span class="k">as</span> <span class="nn">data</span>
+<span class="kn">from</span> <span class="nn">MDAnalysis.analysis.polymer</span> <span class="kn">import</span> <span class="n">PersistenceLength</span>
+<span class="kn">from</span> <span class="nn">MDAnalysis.analysis</span> <span class="kn">import</span> <span class="n">polymer</span>
+
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="s2">&quot;DCDReader currently makes independent timesteps&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="initialise_analysis">
+<a class="viewcode-back" href="../sw_analysis.html#sw_analysis.initialise_analysis">[docs]</a>
+<span class="k">def</span> <span class="nf">initialise_analysis</span><span class="p">(</span><span class="n">manager</span><span class="p">,</span> <span class="n">system_name</span><span class="p">,</span> <span class="n">base_molecule_name</span><span class="p">,</span> <span class="n">poly_len</span><span class="p">,</span> <span class="n">sim_index</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    This function will require an update as it only parses one type of simulation stage at the minute</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">sim_avail</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="n">simulations_avail</span><span class="p">(</span><span class="n">system_name</span><span class="p">)</span>
+    <span class="n">masterclass</span> <span class="o">=</span> <span class="n">master_anal</span><span class="p">(</span><span class="n">manager</span><span class="p">,</span> <span class="n">system_name</span><span class="p">,</span> <span class="n">base_molecule_name</span><span class="p">,</span> <span class="n">sim_avail</span><span class="p">[</span><span class="n">sim_index</span><span class="p">],</span> <span class="n">poly_len</span><span class="p">)</span>
+    <span class="n">universe</span> <span class="o">=</span> <span class="n">Universe</span><span class="p">(</span><span class="n">masterclass</span><span class="p">,</span> <span class="s1">&#39;temp_ramp_cool&#39;</span><span class="p">,</span> <span class="s1">&#39;.dcd&#39;</span><span class="p">)</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">universe</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="master_anal">
+<a class="viewcode-back" href="../sw_analysis.html#sw_analysis.master_anal">[docs]</a>
+<span class="k">class</span> <span class="nc">master_anal</span><span class="p">():</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">manager</span><span class="p">,</span> <span class="n">system_name</span><span class="p">,</span> <span class="n">base_molecule_name</span><span class="p">,</span> <span class="n">simulation_directory</span><span class="p">,</span> <span class="n">poly_length</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">manager</span> <span class="o">=</span> <span class="n">manager</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">polymer_code</span> <span class="o">=</span> <span class="n">base_molecule_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">system_name</span> <span class="o">=</span> <span class="n">system_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">base_molecule_name</span> <span class="o">=</span> <span class="n">base_molecule_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">topology_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">manager</span><span class="o">.</span><span class="n">load_amber_filepaths</span><span class="p">(</span><span class="n">system_name</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulation_directory</span> <span class="o">=</span> <span class="n">simulation_directory</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">extracted_poly_coords_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simulation_directory</span><span class="p">,</span> <span class="s2">&quot;extracted_poly_coords&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">extracted_poly_coords_dir</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">extracted_poly_coords_dir</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">poly_dft_input_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simulation_directory</span><span class="p">,</span> <span class="s2">&quot;poly_DFT_inputs&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">poly_dft_input_dir</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">poly_dft_input_dir</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">poly_dft_output_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simulation_directory</span><span class="p">,</span> <span class="s2">&quot;poly_DFT_outputs&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">poly_dft_output_dir</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">poly_dft_output_dir</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulation_files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">group_files</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_filepath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simulation_directory</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulation_files</span><span class="p">[</span><span class="s2">&quot;min&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">base_pdb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">manager</span><span class="o">.</span><span class="n">load_pdb_filepath</span><span class="p">(</span><span class="n">base_molecule_name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">base_poly_vol</span> <span class="o">=</span> <span class="n">estimated_volume</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_pdb</span><span class="p">)</span>
+        <span class="c1"># It is important to note that passing a polymer length is only appropriate where the system contains polymers of the same length</span>
+        <span class="k">if</span> <span class="n">poly_length</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">poly_length</span> <span class="o">=</span> <span class="n">poly_length</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">residue_codes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_polymers_and_assign_residue_codes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">min_filepath</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">poly_length</span><span class="p">)[</span><span class="mi">2</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">poly_sel_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_polymers_and_assign_residue_codes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">min_filepath</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">poly_length</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">number_of_polymers</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">poly_sel_dict</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">system_vol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_poly_vol</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">number_of_polymers</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">poly_length</span> <span class="o">=</span> <span class="kc">None</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">residue_codes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extract_rescodes_and_resnums</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">min_filepath</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">system_vol</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulation_stages</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simulation_files</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        
+
+        
+<div class="viewcode-block" id="master_anal.group_files">
+<a class="viewcode-back" href="../sw_analysis.html#sw_analysis.master_anal.group_files">[docs]</a>
+    <span class="k">def</span> <span class="nf">group_files</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">grouped_files</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+
+        <span class="n">sim_step_strings</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;1_atm&quot;</span><span class="p">,</span> <span class="s2">&quot;temp_ramp_heat&quot;</span><span class="p">,</span> <span class="s2">&quot;temp_ramp_cool&quot;</span><span class="p">,</span> <span class="s2">&quot;min&quot;</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simulation_directory</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">((</span><span class="s1">&#39;.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;.dcd&#39;</span><span class="p">,</span> <span class="s1">&#39;.pdb&#39;</span><span class="p">)):</span>
+                <span class="n">base_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">file</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">string</span> <span class="ow">in</span> <span class="n">sim_step_strings</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">string</span> <span class="ow">in</span> <span class="n">base_name</span><span class="p">:</span>
+                        <span class="n">grouped_files</span><span class="p">[</span><span class="n">string</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+
+        <span class="k">return</span><span class="p">(</span><span class="n">grouped_files</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="master_anal.extract_rescodes_and_resnums">
+<a class="viewcode-back" href="../sw_analysis.html#sw_analysis.master_anal.extract_rescodes_and_resnums">[docs]</a>
+    <span class="k">def</span> <span class="nf">extract_rescodes_and_resnums</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pdb_file_path</span><span class="p">):</span>
+        <span class="n">largest_residue_number</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Variable to track the largest residue number</span>
+        <span class="n">unique_residue_codes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>    <span class="c1"># Set to hold unique residue codes</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">pdb_file_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">pdb_file</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">pdb_file</span><span class="p">:</span>
+                <span class="c1"># Parse only lines that start with &quot;ATOM&quot; or &quot;HETATM&quot;</span>
+                <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;ATOM&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;HETATM&quot;</span><span class="p">):</span>
+                    <span class="c1"># Extract the residue number (position 22-26)</span>
+                    <span class="n">residue_number</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">22</span><span class="p">:</span><span class="mi">26</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+                    <span class="c1"># Extract the residue code (position 17-20)</span>
+                    <span class="n">residue_code</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">17</span><span class="p">:</span><span class="mi">20</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+                    <span class="c1"># Update the largest residue number if this one is larger</span>
+                    <span class="k">if</span> <span class="n">largest_residue_number</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">residue_number</span> <span class="o">&gt;</span> <span class="n">largest_residue_number</span><span class="p">:</span>
+                        <span class="n">largest_residue_number</span> <span class="o">=</span> <span class="n">residue_number</span>
+                
+                    <span class="c1"># Add the residue code to the set for unique codes</span>
+                    <span class="n">unique_residue_codes</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">residue_code</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">largest_residue_number</span><span class="p">,</span> <span class="n">unique_residue_codes</span></div>
+
+
+<div class="viewcode-block" id="master_anal.calculate_polymers_and_assign_residue_codes">
+<a class="viewcode-back" href="../sw_analysis.html#sw_analysis.master_anal.calculate_polymers_and_assign_residue_codes">[docs]</a>
+    <span class="k">def</span> <span class="nf">calculate_polymers_and_assign_residue_codes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pdb_file_path</span><span class="p">,</span> <span class="n">poly_length</span><span class="p">):</span>
+        <span class="c1"># Find the largest residue number and unique residue codes</span>
+        <span class="n">largest_residue_number</span><span class="p">,</span> <span class="n">unique_residue_codes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extract_rescodes_and_resnums</span><span class="p">(</span><span class="n">pdb_file_path</span><span class="p">)</span>
+
+        <span class="c1"># Calculate the number of polymers</span>
+        <span class="n">num_polymers</span> <span class="o">=</span> <span class="n">largest_residue_number</span> <span class="o">//</span> <span class="n">poly_length</span>
+
+        <span class="c1"># Create a dictionary to hold the polymer residue codes</span>
+        <span class="n">polymers_dict</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># Assign residue codes based on the number of residues per polymer</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_polymers</span><span class="p">):</span>
+            <span class="c1"># Calculate the start and end residue codes for this polymer</span>
+            <span class="n">start_code</span> <span class="o">=</span> <span class="n">i</span> <span class="o">*</span> <span class="n">poly_length</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">end_code</span> <span class="o">=</span> <span class="n">start_code</span> <span class="o">+</span> <span class="n">poly_length</span> <span class="o">-</span> <span class="mi">1</span>
+            <span class="n">polymers_dict</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;Polymer_</span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">start_code</span><span class="p">,</span> <span class="n">end_code</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">num_polymers</span><span class="p">,</span> <span class="n">polymers_dict</span><span class="p">,</span> <span class="n">unique_residue_codes</span>   </div>
+</div>
+
+
+<div class="viewcode-block" id="Universe">
+<a class="viewcode-back" href="../sw_analysis.html#sw_analysis.Universe">[docs]</a>
+<span class="k">class</span> <span class="nc">Universe</span><span class="p">():</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">master_anal</span><span class="p">,</span> <span class="n">sim_stage</span><span class="p">,</span> <span class="n">traj_format</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">traj_format</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">traj_format</span> <span class="o">=</span> <span class="s2">&quot;.pdb&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">traj_format</span> <span class="o">!=</span> <span class="s2">&quot;.pdb&quot;</span> <span class="ow">and</span> <span class="n">traj_format</span> <span class="o">!=</span> <span class="s2">&quot;.dcd&quot;</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">traj_format</span><span class="si">}</span><span class="s2"> is not supported&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;please enter &#39;.pdb&#39; or &#39;.dcd&#39; format.&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">traj_format</span> <span class="o">=</span> <span class="n">traj_format</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sim_stage</span> <span class="o">=</span> <span class="n">sim_stage</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">masterclass</span> <span class="o">=</span> <span class="n">master_anal</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">topology</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">masterclass</span><span class="o">.</span><span class="n">topology_file</span>
+        <span class="c1"># True tells &#39;select_file&#39; we are searching for the traj</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trajectory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">masterclass</span><span class="o">.</span><span class="n">simulation_directory</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">select_file</span><span class="p">(</span><span class="kc">True</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">universe</span> <span class="o">=</span> <span class="n">mda</span><span class="o">.</span><span class="n">Universe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">topology</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">trajectory</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">masterclass</span><span class="o">.</span><span class="n">simulation_directory</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">masterclass</span><span class="o">.</span><span class="n">system_name</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">sim_stage</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="c1"># False tells &#39;select_file&#39; we are searching for the data file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">masterclass</span><span class="o">.</span><span class="n">simulation_directory</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">select_file</span><span class="p">(</span><span class="kc">False</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_file</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Universe.select_file">
+<a class="viewcode-back" href="../sw_analysis.html#sw_analysis.Universe.select_file">[docs]</a>
+    <span class="k">def</span> <span class="nf">select_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">traj</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sim_stage</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">masterclass</span><span class="o">.</span><span class="n">simulation_files</span><span class="p">:</span>
+            <span class="c1"># Filter the files based on the specified extension</span>
+            <span class="k">if</span> <span class="n">traj</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="n">matching_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">filename</span> <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">masterclass</span><span class="o">.</span><span class="n">simulation_files</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">sim_stage</span><span class="p">]</span> <span class="k">if</span> <span class="n">filename</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">traj_format</span><span class="p">)]</span>
+            <span class="k">if</span> <span class="n">traj</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+                <span class="n">matching_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">filename</span> <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">masterclass</span><span class="o">.</span><span class="n">simulation_files</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">sim_stage</span><span class="p">]</span> <span class="k">if</span> <span class="n">filename</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.txt&quot;</span><span class="p">)]</span>            
+            
+            <span class="k">if</span> <span class="n">matching_files</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">matching_files</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># Return the first matching file</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;No files with extension &#39;</span><span class="si">{</span><span class="n">extension</span><span class="si">}</span><span class="s2">&#39; found for key &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">sim_key</span><span class="si">}</span><span class="s2">&#39;.&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Key &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">sim_stage</span><span class="si">}</span><span class="s2">&#39; not found in the dictionary.&quot;</span></div>
+
+
+<div class="viewcode-block" id="Universe.select_polymer">
+<a class="viewcode-back" href="../sw_analysis.html#sw_analysis.Universe.select_polymer">[docs]</a>
+    <span class="k">def</span> <span class="nf">select_polymer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">polymer_name</span><span class="p">,</span> <span class="n">select_rest</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="c1"># Select the first polymer (Polymer_1)</span>
+        <span class="n">first_polymer_indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">masterclass</span><span class="o">.</span><span class="n">poly_sel_dict</span><span class="p">[</span><span class="n">polymer_name</span><span class="p">]</span>
+
+        <span class="c1"># Convert the list of indices into a selection string</span>
+        <span class="k">if</span> <span class="n">select_rest</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="n">selection_string</span> <span class="o">=</span> <span class="s2">&quot;resid &quot;</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">first_polymer_indices</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">select_rest</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">selection_string</span> <span class="o">=</span> <span class="s2">&quot;not resid &quot;</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">first_polymer_indices</span><span class="p">))</span>          
+        <span class="n">selected_atoms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">universe</span><span class="o">.</span><span class="n">select_atoms</span><span class="p">(</span><span class="n">selection_string</span><span class="p">)</span>
+
+        <span class="k">return</span><span class="p">(</span><span class="n">selected_atoms</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Universe.select_backbone">
+<a class="viewcode-back" href="../sw_analysis.html#sw_analysis.Universe.select_backbone">[docs]</a>
+    <span class="k">def</span> <span class="nf">select_backbone</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">polymer_name</span><span class="p">):</span>
+        <span class="n">backbone_smarts</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;[O][C][C][O]&quot;</span><span class="p">,</span> <span class="s2">&quot;[O][C][C][C][O]&quot;</span><span class="p">,</span> <span class="s2">&quot;[O][C][C][C][C][O]&quot;</span><span class="p">,</span> <span class="s2">&quot;[O][C][C][C][C][C][O]&quot;</span><span class="p">,</span> <span class="s2">&quot;[O][C][C][C][C][C][C][O]&quot;</span><span class="p">,</span>  <span class="s2">&quot;[O][C][C][C][C][C][C][C][O]&quot;</span><span class="p">]</span>
+        
+        <span class="c1"># Select the first polymer (Polymer_1)</span>
+        <span class="n">first_polymer_indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">masterclass</span><span class="o">.</span><span class="n">poly_sel_dict</span><span class="p">[</span><span class="n">polymer_name</span><span class="p">]</span>
+        <span class="n">selection_string</span> <span class="o">=</span> <span class="s2">&quot;resid &quot;</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">first_polymer_indices</span><span class="p">))</span>
+        <span class="n">selected_atoms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">universe</span><span class="o">.</span><span class="n">select_atoms</span><span class="p">(</span><span class="n">selection_string</span><span class="p">)</span>
+
+        <span class="n">backbone_results</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">smarts</span> <span class="ow">in</span> <span class="n">backbone_smarts</span><span class="p">:</span>
+            <span class="n">backbone</span> <span class="o">=</span> <span class="n">selected_atoms</span><span class="o">.</span><span class="n">select_atoms</span><span class="p">(</span><span class="s2">&quot;smarts </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">smarts</span><span class="p">))</span>
+            <span class="n">backbone_results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">backbone</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">backbone_results</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">n_atoms</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No backbone identified, consider adding a backbone pattern to this functions source code&quot;</span><span class="p">)</span>
+        <span class="k">return</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span></div>
+</div>
+
+
+        
+        
+        
+
+<div class="viewcode-block" id="select_not_polymer">
+<a class="viewcode-back" href="../sw_analysis.html#sw_analysis.select_not_polymer">[docs]</a>
+<span class="k">def</span> <span class="nf">select_not_polymer</span><span class="p">(</span><span class="n">polymer_name</span><span class="p">):</span>
+    <span class="c1"># Get the indices of the specified polymer from the masterclass</span>
+    <span class="n">polymer_indices</span> <span class="o">=</span> <span class="n">universe</span><span class="o">.</span><span class="n">masterclass</span><span class="o">.</span><span class="n">poly_sel_dict</span><span class="p">[</span><span class="n">polymer_name</span><span class="p">]</span>
+
+    <span class="c1"># Convert the list of indices into a selection string</span>
+    <span class="c1"># Using `not` to exclude the specified residues</span>
+    <span class="n">selection_string</span> <span class="o">=</span> <span class="s2">&quot;not resid &quot;</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">polymer_indices</span><span class="p">))</span>
+
+    <span class="c1"># Use the selection string in MDAnalysis</span>
+    <span class="n">selected_atoms</span> <span class="o">=</span> <span class="n">universe</span><span class="o">.</span><span class="n">universe</span><span class="o">.</span><span class="n">select_atoms</span><span class="p">(</span><span class="n">selection_string</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">selected_atoms</span></div>
+
+
+<div class="viewcode-block" id="Analysis">
+<a class="viewcode-back" href="../sw_analysis.html#sw_analysis.Analysis">[docs]</a>
+<span class="k">class</span> <span class="nc">Analysis</span><span class="p">:</span>
+
+<div class="viewcode-block" id="Analysis.calc_free_volume">
+<a class="viewcode-back" href="../sw_analysis.html#sw_analysis.Analysis.calc_free_volume">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">calc_free_volume</span><span class="p">(</span><span class="n">universe</span><span class="p">,</span> <span class="n">plot</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">from_multiple</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="n">u</span> <span class="o">=</span> <span class="n">universe</span><span class="o">.</span><span class="n">universe</span>
+        <span class="n">n_frames</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">trajectory</span><span class="p">)</span>
+        <span class="n">free_volumes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">temperatures</span> <span class="o">=</span> <span class="n">universe</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;Temperature (K)&quot;</span><span class="p">]</span>  <span class="c1"># Assuming temperature data is available</span>
+
+        <span class="k">for</span> <span class="n">ts</span> <span class="ow">in</span> <span class="n">u</span><span class="o">.</span><span class="n">trajectory</span><span class="p">:</span>
+            <span class="n">box_vectors</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">dimensions</span>
+            <span class="n">volume</span> <span class="o">=</span> <span class="n">box_vectors</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">box_vectors</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">box_vectors</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+            <span class="n">free_volume</span> <span class="o">=</span> <span class="n">volume</span> <span class="o">-</span> <span class="n">universe</span><span class="o">.</span><span class="n">masterclass</span><span class="o">.</span><span class="n">system_vol</span>
+            <span class="n">free_volumes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">free_volume</span><span class="p">)</span>
+
+        <span class="n">avg_free_volume</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">free_volumes</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">free_volumes</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">plot</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">plot</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The returned value is an average volume across this whole simulation stage. Do not report this value if a thermal ramping was used as values will not be representative of the system at any point.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">avg_free_volume</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Binning the data using np.histogram for both free volumes and temperatures</span>
+            <span class="n">bin_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">digitize</span><span class="p">(</span><span class="n">temperatures</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="mi">700</span><span class="p">,</span> <span class="n">bins</span><span class="p">))</span>
+            <span class="n">binned_volumes</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">binned_temperatures</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">bins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">bin_volumes</span> <span class="o">=</span> <span class="p">[</span><span class="n">free_volumes</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">bin_indices</span><span class="p">))</span> <span class="k">if</span> <span class="n">bin_indices</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">==</span> <span class="n">i</span><span class="p">]</span>
+                <span class="n">bin_temps</span> <span class="o">=</span> <span class="p">[</span><span class="n">temperatures</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">bin_indices</span><span class="p">))</span> <span class="k">if</span> <span class="n">bin_indices</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">==</span> <span class="n">i</span><span class="p">]</span>
+
+                <span class="k">if</span> <span class="n">bin_volumes</span><span class="p">:</span>
+                    <span class="n">binned_volumes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">bin_volumes</span><span class="p">))</span>
+                    <span class="n">binned_temperatures</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">bin_temps</span><span class="p">))</span>
+
+            <span class="c1"># Return binned data if specified</span>
+            <span class="k">if</span> <span class="n">plot</span> <span class="o">==</span> <span class="s2">&quot;multiple&quot;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">binned_temperatures</span><span class="p">,</span> <span class="n">binned_volumes</span>
+
+            <span class="c1"># Plot the binned data as a scatter plot</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">binned_temperatures</span><span class="p">,</span> <span class="n">binned_volumes</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Data Points&quot;</span><span class="p">)</span>
+
+            <span class="c1"># Fit and plot the best-fit line</span>
+            <span class="n">best_degree</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">best_r2</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+            <span class="n">best_fit_line</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="c1"># Test polynomial fits of degree 1 (linear) to 3</span>
+            <span class="k">for</span> <span class="n">degree</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">):</span>
+                <span class="n">coeffs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">polyfit</span><span class="p">(</span><span class="n">binned_temperatures</span><span class="p">,</span> <span class="n">binned_volumes</span><span class="p">,</span> <span class="n">degree</span><span class="p">)</span>
+                <span class="n">poly</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">poly1d</span><span class="p">(</span><span class="n">coeffs</span><span class="p">)</span>
+                <span class="n">fit_line</span> <span class="o">=</span> <span class="n">poly</span><span class="p">(</span><span class="n">binned_temperatures</span><span class="p">)</span>
+
+                <span class="c1"># Calculate R² score to evaluate the fit</span>
+                <span class="n">r2</span> <span class="o">=</span> <span class="n">r2_score</span><span class="p">(</span><span class="n">binned_volumes</span><span class="p">,</span> <span class="n">fit_line</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">r2</span> <span class="o">&gt;</span> <span class="n">best_r2</span><span class="p">:</span>
+                    <span class="n">best_r2</span> <span class="o">=</span> <span class="n">r2</span>
+                    <span class="n">best_degree</span> <span class="o">=</span> <span class="n">degree</span>
+                    <span class="n">best_fit_line</span> <span class="o">=</span> <span class="n">fit_line</span>
+
+            <span class="c1"># Plot the best-fit line</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">binned_temperatures</span><span class="p">,</span> <span class="n">best_fit_line</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">universe</span><span class="o">.</span><span class="n">masterclass</span><span class="o">.</span><span class="n">system_name</span><span class="si">}</span><span class="s2"> Best Fit (Degree </span><span class="si">{</span><span class="n">best_degree</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">)</span>
+
+            <span class="c1"># Label the axes</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Temperature (K)&#39;</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Free Volume (Å³)&#39;</span><span class="p">)</span>
+
+            <span class="c1"># Add a title</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Binned Free Volume vs Temperature with Best Fits&#39;</span><span class="p">)</span>
+
+            <span class="c1"># Add a legend</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+
+            <span class="c1"># Save the graph</span>
+            <span class="n">savepath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">universe</span><span class="o">.</span><span class="n">masterclass</span><span class="o">.</span><span class="n">simulation_directory</span><span class="p">,</span> <span class="s2">&quot;Binned_Free_Vol_vs_Temp_BestFit.png&quot;</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">savepath</span><span class="p">)</span>
+
+            <span class="c1"># Show the plot</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+            <span class="k">return</span> <span class="n">binned_temperatures</span><span class="p">,</span> <span class="n">binned_volumes</span></div>
+
+
+<div class="viewcode-block" id="Analysis.calc_free_volume_multiple">
+<a class="viewcode-back" href="../sw_analysis.html#sw_analysis.Analysis.calc_free_volume_multiple">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">calc_free_volume_multiple</span><span class="p">(</span><span class="n">universe_list</span><span class="p">,</span> <span class="n">graph_title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">plot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">25</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function takes a list of universes, calls the calc_free_volume function for each, </span>
+<span class="sd">        and plots the results on the same graph.</span>
+
+<span class="sd">        :param universe_list: List of universes</span>
+<span class="sd">        :param plot: Boolean to indicate if you want to plot or just return the values</span>
+<span class="sd">        :param bins: Number of bins for data binning</span>
+<span class="sd">        :return: A list of (temperatures, volumes) for each universe</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">all_binned_temperatures</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">all_binned_volumes</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="c1"># Generate colors from a colormap based on the number of universes</span>
+        <span class="n">colormap</span> <span class="o">=</span> <span class="n">cm</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="s1">&#39;viridis&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">universe_list</span><span class="p">))</span>  <span class="c1"># Choose a colormap like &#39;viridis&#39;</span>
+
+        <span class="c1"># Loop over each universe</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">universe_list</span><span class="p">)):</span>
+            <span class="c1"># Call the existing calc_free_volume function</span>
+            <span class="n">binned_temperatures</span><span class="p">,</span> <span class="n">binned_volumes</span> <span class="o">=</span> <span class="n">Analysis</span><span class="o">.</span><span class="n">calc_free_volume</span><span class="p">(</span><span class="n">universe_list</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">plot</span><span class="o">=</span><span class="s2">&quot;multiple&quot;</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="n">bins</span><span class="p">)</span>
+            <span class="n">all_binned_temperatures</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">binned_temperatures</span><span class="p">)</span>
+            <span class="n">all_binned_volumes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">binned_volumes</span><span class="p">)</span>
+
+            <span class="c1"># Assign a unique color from the colormap</span>
+            <span class="n">color</span> <span class="o">=</span> <span class="n">colormap</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+            <span class="c1"># Plot the volumes for this universe using crosses as markers</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+                <span class="n">binned_temperatures</span><span class="p">,</span> <span class="n">binned_volumes</span><span class="p">,</span> 
+                <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">universe_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">masterclass</span><span class="o">.</span><span class="n">system_name</span><span class="p">,</span> 
+                <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;x&#39;</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Fit and plot the best-fit line for this universe</span>
+            <span class="n">best_degree</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">best_r2</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+            <span class="n">best_fit_line</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="c1"># Test polynomial fits of degree 1 (linear) to 3</span>
+            <span class="k">for</span> <span class="n">degree</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">):</span>
+                <span class="n">coeffs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">polyfit</span><span class="p">(</span><span class="n">binned_temperatures</span><span class="p">,</span> <span class="n">binned_volumes</span><span class="p">,</span> <span class="n">degree</span><span class="p">)</span>
+                <span class="n">poly</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">poly1d</span><span class="p">(</span><span class="n">coeffs</span><span class="p">)</span>
+                <span class="n">fit_line</span> <span class="o">=</span> <span class="n">poly</span><span class="p">(</span><span class="n">binned_temperatures</span><span class="p">)</span>
+
+                <span class="c1"># Calculate R² score to evaluate the fit</span>
+                <span class="n">r2</span> <span class="o">=</span> <span class="n">r2_score</span><span class="p">(</span><span class="n">binned_volumes</span><span class="p">,</span> <span class="n">fit_line</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">r2</span> <span class="o">&gt;</span> <span class="n">best_r2</span><span class="p">:</span>
+                    <span class="n">best_r2</span> <span class="o">=</span> <span class="n">r2</span>
+                    <span class="n">best_degree</span> <span class="o">=</span> <span class="n">degree</span>
+                    <span class="n">best_fit_line</span> <span class="o">=</span> <span class="n">fit_line</span>
+
+            <span class="c1"># Plot the best-fit line</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">binned_temperatures</span><span class="p">,</span> <span class="n">best_fit_line</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">)</span>
+
+        <span class="c1"># Label the axes</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Temperature (K)&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Free Volume (Å³)&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Add a title</span>
+        <span class="k">if</span> <span class="n">graph_title</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">graph_title</span> <span class="o">=</span> <span class="s2">&quot;Free Volume vs Temperature&quot;</span>
+            <span class="n">graph_filename</span> <span class="o">=</span> <span class="s2">&quot;Free_volume_vs_temperature&quot;</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">graph_title</span><span class="p">)</span>
+
+        <span class="c1"># Add a legend to the right side of the plot</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;center left&#39;</span><span class="p">,</span> <span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">))</span>
+
+        <span class="c1"># Adjust layout to ensure the legend doesn&#39;t overlap with the plot</span>
+       <span class="c1"># plt.tight_layout(rect=[0, 0, 0.85, 1])</span>
+
+        <span class="c1"># Save the graph</span>
+        <span class="k">if</span> <span class="n">graph_title</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">graph_filename</span> <span class="o">=</span> <span class="n">graph_title</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span>
+        <span class="n">savepath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">universe_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">masterclass</span><span class="o">.</span><span class="n">simulation_directory</span><span class="p">,</span> <span class="n">graph_filename</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">savepath</span><span class="p">)</span>
+
+        <span class="c1"># Show plot if requested</span>
+        <span class="k">if</span> <span class="n">plot</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+        <span class="c1"># Return all data for potential further analysis</span>
+        <span class="k">return</span> <span class="n">all_binned_temperatures</span><span class="p">,</span> <span class="n">all_binned_volumes</span></div>
+
+
+<div class="viewcode-block" id="Analysis.plot_ROG">
+<a class="viewcode-back" href="../sw_analysis.html#sw_analysis.Analysis.plot_ROG">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">plot_ROG</span><span class="p">(</span><span class="n">universe_object</span><span class="p">,</span> <span class="n">atom_group</span><span class="p">,</span> <span class="n">graph_filename</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">graph_title</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">graph_filename</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">graph_filename</span> <span class="o">=</span> <span class="s2">&quot;_ROG_graph&quot;</span>
+        <span class="k">if</span> <span class="n">graph_title</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">graph_title</span> <span class="o">=</span> <span class="s2">&quot;ROG_graph&quot;</span>
+        
+        <span class="c1"># universe = mdanalysis univers</span>
+        <span class="c1"># atom_group = mdanalysis atom group</span>
+        <span class="c1"># atom_group_name = str of atom_group_identifier (i.e. &quot;_polymer&quot;, &quot;_polymer_backbone&quot;, ect..)</span>
+
+        <span class="n">rog</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">ts</span> <span class="ow">in</span> <span class="n">universe_object</span><span class="o">.</span><span class="n">universe</span><span class="o">.</span><span class="n">trajectory</span><span class="p">:</span>
+            <span class="n">rog</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">atom_group</span><span class="o">.</span><span class="n">radius_of_gyration</span><span class="p">())</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">rog</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Time (fs)&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;R$_</span><span class="si">{g}</span><span class="s2">$ ($\AA$)&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="n">bottom</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="n">top</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">graph_title</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">universe_object</span><span class="p">,</span> <span class="s2">&quot;output_filename&quot;</span><span class="p">):</span>
+            <span class="c1"># Default path is just used generally and not part of another analysis</span>
+            <span class="n">graph_filepath</span> <span class="o">=</span> <span class="n">universe_object</span><span class="o">.</span><span class="n">output_filename</span> <span class="o">+</span> <span class="n">graph_filename</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Default path is just used generally and not part of another analysis</span>
+            <span class="n">graph_filepath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span> <span class="s2">&quot;ROG_graph&quot;</span><span class="p">)</span>
+        
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">graph_filepath</span><span class="p">)</span>
+        <span class="n">avg_rog</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">rog</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">rog</span><span class="p">)</span>
+        <span class="k">return</span><span class="p">(</span><span class="n">avg_rog</span><span class="p">,</span> <span class="n">rog</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Analysis.plot_ROG_5_5_array">
+<a class="viewcode-back" href="../sw_analysis.html#sw_analysis.Analysis.plot_ROG_5_5_array">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">plot_ROG_5_5_array</span><span class="p">(</span><span class="n">universe_object</span><span class="p">):</span>
+        <span class="n">graph_title</span> <span class="o">=</span> <span class="n">universe_object</span><span class="o">.</span><span class="n">masterclass</span><span class="o">.</span><span class="n">system_name</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">universe_object</span><span class="o">.</span><span class="n">sim_stage</span>
+        <span class="n">avg_rogs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">25</span><span class="p">):</span>
+            <span class="n">selected_atoms</span> <span class="o">=</span> <span class="n">universe_object</span><span class="o">.</span><span class="n">select_polymer</span><span class="p">(</span><span class="s2">&quot;Polymer_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+            <span class="n">rog_anal</span> <span class="o">=</span> <span class="n">Analysis</span><span class="o">.</span><span class="n">plot_ROG</span><span class="p">(</span><span class="n">universe_object</span><span class="p">,</span> <span class="n">selected_atoms</span><span class="p">,</span> <span class="s2">&quot;_5_5_array_ROG&quot;</span><span class="p">,</span> <span class="n">graph_title</span><span class="p">)</span>
+            <span class="n">avg_rogs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rog_anal</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="k">return</span><span class="p">(</span><span class="n">avg_rogs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Analysis.calc_end_to_end_dist">
+<a class="viewcode-back" href="../sw_analysis.html#sw_analysis.Analysis.calc_end_to_end_dist">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">calc_end_to_end_dist</span><span class="p">(</span><span class="n">atom_group</span><span class="p">):</span>
+        <span class="n">start_pos</span> <span class="o">=</span> <span class="n">atom_group</span><span class="o">.</span><span class="n">positions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">end_pos</span> <span class="o">=</span> <span class="n">atom_group</span><span class="o">.</span><span class="n">positions</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">dist</span> <span class="o">=</span> <span class="n">distances</span><span class="o">.</span><span class="n">distance_array</span><span class="p">(</span><span class="n">start_pos</span><span class="p">,</span> <span class="n">end_pos</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span><span class="p">(</span><span class="n">dist</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Analysis.plot_end_to_end_dists_5_5_array">
+<a class="viewcode-back" href="../sw_analysis.html#sw_analysis.Analysis.plot_end_to_end_dists_5_5_array">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">plot_end_to_end_dists_5_5_array</span><span class="p">(</span><span class="n">universe_object</span><span class="p">,</span> <span class="n">plot</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="n">dists</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">universe_object</span><span class="o">.</span><span class="n">masterclass</span><span class="o">.</span><span class="n">poly_sel_dict</span><span class="p">)):</span>
+            <span class="n">poly</span> <span class="o">=</span> <span class="n">universe_object</span><span class="o">.</span><span class="n">select_polymer</span><span class="p">(</span><span class="s2">&quot;Polymer_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+            <span class="n">dist</span> <span class="o">=</span> <span class="n">Analysis</span><span class="o">.</span><span class="n">calc_end_to_end_dist</span><span class="p">(</span><span class="n">poly</span><span class="p">)</span>
+            <span class="n">dists</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dist</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">plot</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="k">return</span><span class="p">(</span><span class="n">dists</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">dists</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">dists</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;End-to-end Distance&#39;</span><span class="p">)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Polymer Index&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;End-to-End Distance (Å)&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">universe_object</span><span class="o">.</span><span class="n">masterclass</span><span class="o">.</span><span class="n">system_name</span> <span class="o">+</span> <span class="s2">&quot;_end_to_end_dists&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">graph_filepath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">universe_object</span><span class="o">.</span><span class="n">masterclass</span><span class="o">.</span><span class="n">simulation_directory</span><span class="p">,</span> <span class="p">(</span><span class="n">universe_object</span><span class="o">.</span><span class="n">masterclass</span><span class="o">.</span><span class="n">system_name</span> <span class="o">+</span> <span class="s2">&quot;_5_5_array_end_to_end&quot;</span><span class="p">))</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">graph_filepath</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="k">return</span><span class="p">(</span><span class="n">dists</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Analysis.plot_end_to_end_dists_5_5_array_statistics">
+<a class="viewcode-back" href="../sw_analysis.html#sw_analysis.Analysis.plot_end_to_end_dists_5_5_array_statistics">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">plot_end_to_end_dists_5_5_array_statistics</span><span class="p">(</span><span class="n">list_of_universe_objects</span><span class="p">,</span> <span class="n">graph_filename</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">graph_title</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">graph_title</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">graph_title</span> <span class="o">=</span> <span class="s2">&quot;End-to-End Distances with Mean and Standard Deviation for Each System&quot;</span>
+            <span class="n">graph_filepath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span> <span class="s2">&quot;End-to-End_graph&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">graph_filepath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">list_of_universe_objects</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">masterclass</span><span class="o">.</span><span class="n">manager</span><span class="o">.</span><span class="n">systems_dir</span><span class="p">,</span> <span class="n">graph_filename</span><span class="p">)</span>
+
+        <span class="n">system_distances</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># Build the system_distances dictionary with distances as a list</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">list_of_universe_objects</span><span class="p">)):</span>
+            <span class="n">dists</span> <span class="o">=</span> <span class="n">Analysis</span><span class="o">.</span><span class="n">plot_end_to_end_dists_5_5_array</span><span class="p">(</span><span class="n">list_of_universe_objects</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">system_name</span> <span class="o">=</span> <span class="n">list_of_universe_objects</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">masterclass</span><span class="o">.</span><span class="n">system_name</span>
+            <span class="n">system_distances</span><span class="p">[</span><span class="n">system_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;distances&quot;</span><span class="p">:</span> <span class="n">dists</span>  <span class="c1"># Store distances as part of a dictionary</span>
+        <span class="p">}</span>
+    
+        <span class="n">polymer_codes</span> <span class="o">=</span> <span class="p">[</span><span class="n">universe</span><span class="o">.</span><span class="n">masterclass</span><span class="o">.</span><span class="n">polymer_code</span> <span class="k">for</span> <span class="n">universe</span> <span class="ow">in</span> <span class="n">list_of_universe_objects</span><span class="p">]</span>
+
+        <span class="c1"># Prepare data for plotting</span>
+        <span class="n">system_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">system_distances</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>  <span class="c1"># List of system names for the x-axis</span>
+        <span class="n">distance_values</span> <span class="o">=</span> <span class="p">[</span><span class="n">system_distances</span><span class="p">[</span><span class="n">sys</span><span class="p">][</span><span class="s2">&quot;distances&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">sys</span> <span class="ow">in</span> <span class="n">system_names</span><span class="p">]</span>  <span class="c1"># Extract distances</span>
+
+        <span class="c1"># Calculate mean and standard deviation for each system</span>
+        <span class="n">means</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">dists</span><span class="p">)</span> <span class="k">for</span> <span class="n">dists</span> <span class="ow">in</span> <span class="n">distance_values</span><span class="p">]</span>
+        <span class="n">std_devs</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">dists</span><span class="p">)</span> <span class="k">for</span> <span class="n">dists</span> <span class="ow">in</span> <span class="n">distance_values</span><span class="p">]</span>
+
+        <span class="c1"># Add mean and standard deviation to the dictionary</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">system_name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">system_names</span><span class="p">):</span>
+            <span class="n">system_distances</span><span class="p">[</span><span class="n">system_name</span><span class="p">][</span><span class="s2">&quot;mean&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">means</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">system_distances</span><span class="p">[</span><span class="n">system_name</span><span class="p">][</span><span class="s2">&quot;std_dev&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">std_devs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+        <span class="c1"># Set up the plot</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+
+        <span class="c1"># Scatter plot of individual distances for each system, without adding to the legend</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">distances</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">distance_values</span><span class="p">):</span>
+            <span class="n">x_vals</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">distances</span><span class="p">)</span>  <span class="c1"># 1-based indexing for x values</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x_vals</span><span class="p">,</span> <span class="n">distances</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;_nolegend_&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Plot the means with standard deviation error bars and include in legend</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">errorbar</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">system_names</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">means</span><span class="p">,</span> <span class="n">yerr</span><span class="o">=</span><span class="n">std_devs</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">,</span> 
+                 <span class="n">capsize</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Mean ± Std Dev&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Customize the plot</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">system_names</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">polymer_codes</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="mi">90</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Polymer&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;End-to-End Distance (Å)&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">graph_title</span><span class="p">)</span>
+
+        <span class="c1"># Place the legend inside the plot</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;best&#39;</span><span class="p">,</span> <span class="n">borderaxespad</span><span class="o">=</span><span class="mf">0.</span><span class="p">)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>  <span class="c1"># Adjust layout to prevent clipping of tick labels</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">graph_filepath</span><span class="p">)</span>
+
+        <span class="c1"># Display the plot</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+        <span class="c1"># Convert the system_distances dictionary to a DataFrame</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;System&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;Polymer_Code&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;Mean_Distance&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;Std_Dev_Distance&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;All_Distances&quot;</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="p">}</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">system_name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">system_names</span><span class="p">):</span>
+            <span class="n">data</span><span class="p">[</span><span class="s2">&quot;System&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">system_name</span><span class="p">)</span>
+            <span class="n">data</span><span class="p">[</span><span class="s2">&quot;Polymer_Code&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">polymer_codes</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">data</span><span class="p">[</span><span class="s2">&quot;Mean_Distance&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">system_distances</span><span class="p">[</span><span class="n">system_name</span><span class="p">][</span><span class="s2">&quot;mean&quot;</span><span class="p">])</span>
+            <span class="n">data</span><span class="p">[</span><span class="s2">&quot;Std_Dev_Distance&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">system_distances</span><span class="p">[</span><span class="n">system_name</span><span class="p">][</span><span class="s2">&quot;std_dev&quot;</span><span class="p">])</span>
+            <span class="n">data</span><span class="p">[</span><span class="s2">&quot;All_Distances&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">system_distances</span><span class="p">[</span><span class="n">system_name</span><span class="p">][</span><span class="s2">&quot;distances&quot;</span><span class="p">])</span>
+
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">df</span></div>
+
+        
+<div class="viewcode-block" id="Analysis.plot_PL">
+<a class="viewcode-back" href="../sw_analysis.html#sw_analysis.Analysis.plot_PL">[docs]</a>
+    <span class="nd">@staticmethod</span>   
+    <span class="k">def</span> <span class="nf">plot_PL</span><span class="p">(</span><span class="n">universe_object</span><span class="p">,</span> <span class="n">atom_group</span><span class="p">,</span> <span class="n">graph_filename</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">graph_title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">plot</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">graph_filename</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">graph_filename</span> <span class="o">=</span> <span class="s2">&quot;_PL_graph&quot;</span>
+        <span class="k">if</span> <span class="n">graph_title</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">graph_title</span> <span class="o">=</span> <span class="s2">&quot;PL_graph&quot;</span>
+            
+        <span class="n">pl</span> <span class="o">=</span> <span class="n">polymer</span><span class="o">.</span><span class="n">PersistenceLength</span><span class="p">([</span><span class="n">atom_group</span><span class="p">])</span>
+        <span class="n">pl</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">plot</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">pl</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">graph_title</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">universe_object</span><span class="p">,</span> <span class="s2">&quot;output_filename&quot;</span><span class="p">):</span>
+                <span class="c1"># Default path is just used generally and not part of another analysis</span>
+                <span class="n">graph_filepath</span> <span class="o">=</span> <span class="n">universe_object</span><span class="o">.</span><span class="n">output_filename</span> <span class="o">+</span> <span class="n">graph_filename</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Default path is just used generally and not part of another analysis</span>
+                <span class="n">graph_filepath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span> <span class="s2">&quot;pl_graph&quot;</span><span class="p">)</span>
+        
+            <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">graph_filepath</span><span class="p">)</span>
+        
+        <span class="k">return</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">lp</span><span class="p">,</span> <span class="n">pl</span><span class="o">.</span><span class="n">lb</span><span class="p">)</span> </div>
+
+
+<div class="viewcode-block" id="Analysis.calculate_PL_5_5_array">
+<a class="viewcode-back" href="../sw_analysis.html#sw_analysis.Analysis.calculate_PL_5_5_array">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">calculate_PL_5_5_array</span><span class="p">(</span><span class="n">universe_object</span><span class="p">):</span>
+        <span class="n">pls</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">pbs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">universe_object</span><span class="o">.</span><span class="n">masterclass</span><span class="o">.</span><span class="n">poly_sel_dict</span><span class="p">)):</span>
+            <span class="n">backbone</span> <span class="o">=</span> <span class="n">universe_object</span><span class="o">.</span><span class="n">select_backbone</span><span class="p">(</span><span class="s2">&quot;Polymer_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+            <span class="n">lp</span><span class="p">,</span> <span class="n">lb</span> <span class="o">=</span> <span class="n">Analysis</span><span class="o">.</span><span class="n">plot_PL</span><span class="p">(</span><span class="n">universe_object</span><span class="p">,</span> <span class="n">backbone</span><span class="p">)</span>
+            <span class="n">pls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lp</span><span class="p">)</span>
+            <span class="n">pbs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lb</span><span class="p">)</span>
+    
+        <span class="k">return</span><span class="p">(</span><span class="n">pls</span><span class="p">,</span> <span class="n">pbs</span><span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="Analysis.plot_PL_5_5_array">
+<a class="viewcode-back" href="../sw_analysis.html#sw_analysis.Analysis.plot_PL_5_5_array">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">plot_PL_5_5_array</span><span class="p">(</span><span class="n">universe_object</span><span class="p">,</span> <span class="n">plot</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="n">pls</span><span class="p">,</span> <span class="n">pbs</span> <span class="o">=</span> <span class="n">Analysis</span><span class="o">.</span><span class="n">calculate_PL_5_5_array</span><span class="p">(</span><span class="n">universe_object</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">plot</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">pls</span><span class="p">,</span> <span class="n">pbs</span>
+    
+        <span class="c1"># Plot for persistence lengths (PLs)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">pls</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">pls</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;End-to-End Distance&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Polymer Index&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Persistence Length (Å)&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">universe_object</span><span class="o">.</span><span class="n">masterclass</span><span class="o">.</span><span class="n">system_name</span> <span class="o">+</span> <span class="s2">&quot;_persistence_lengths&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">graph_filepath_pls</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="n">universe_object</span><span class="o">.</span><span class="n">masterclass</span><span class="o">.</span><span class="n">simulation_directory</span><span class="p">,</span>
+            <span class="n">universe_object</span><span class="o">.</span><span class="n">masterclass</span><span class="o">.</span><span class="n">system_name</span> <span class="o">+</span> <span class="s2">&quot;_5_5_array_persistence_lengths.png&quot;</span>
+        <span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">graph_filepath_pls</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    
+        <span class="c1"># Plot for bond lengths (PBs)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">pbs</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">pbs</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;g&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Bond Lengths&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Polymer Index&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Bond Length (Å)&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">universe_object</span><span class="o">.</span><span class="n">masterclass</span><span class="o">.</span><span class="n">system_name</span> <span class="o">+</span> <span class="s2">&quot;_bond_lengths&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">graph_filepath_pbs</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="n">universe_object</span><span class="o">.</span><span class="n">masterclass</span><span class="o">.</span><span class="n">simulation_directory</span><span class="p">,</span>
+            <span class="n">universe_object</span><span class="o">.</span><span class="n">masterclass</span><span class="o">.</span><span class="n">system_name</span> <span class="o">+</span> <span class="s2">&quot;_5_5_array_bond_lengths.png&quot;</span>
+        <span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">graph_filepath_pbs</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    
+        <span class="k">return</span> <span class="n">pls</span><span class="p">,</span> <span class="n">pbs</span></div>
+</div>
+
+        
+<div class="viewcode-block" id="universe_coord_extraction">
+<a class="viewcode-back" href="../sw_analysis.html#sw_analysis.universe_coord_extraction">[docs]</a>
+<span class="k">class</span> <span class="nc">universe_coord_extraction</span><span class="p">():</span>
+    <span class="c1"># This class can extract coordinates and atom types of from mdanalysis universes and can write them to xyz files</span>
+    <span class="c1"># Optional ability to make orca input files too</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+ 
+
+<div class="viewcode-block" id="universe_coord_extraction.mdanalysis_info_2_xyz">
+<a class="viewcode-back" href="../sw_analysis.html#sw_analysis.universe_coord_extraction.mdanalysis_info_2_xyz">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">mdanalysis_info_2_xyz</span><span class="p">(</span><span class="n">atom_types</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">,</span> <span class="n">filepath</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Converts atom types and coordinates into an XYZ file format and saves it.</span>
+<span class="sd">    </span>
+<span class="sd">        Parameters:</span>
+<span class="sd">            atom_types (list of str): List of atom type strings (e.g., &#39;h&#39;, &#39;c&#39;, &#39;o&#39;).</span>
+<span class="sd">            coordinates (list of lists): List of coordinates, where each coordinate is [x, y, z].</span>
+<span class="sd">            filepath (str): Path to save the XYZ file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
+    
+        <span class="c1"># Number of atoms</span>
+        <span class="n">no_atoms</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">atom_types</span><span class="p">)</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">no_atoms</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># First line: Number of atoms</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># Second line: Blank comment line</span>
+    
+        <span class="c1"># Map lowercase atom types to proper case</span>
+        <span class="n">atom_map</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;h&quot;</span><span class="p">:</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="s2">&quot;o&quot;</span><span class="p">:</span> <span class="s2">&quot;O&quot;</span><span class="p">}</span>
+    
+        <span class="c1"># Generate the lines for each atom</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">atom_types</span><span class="p">)):</span>
+            <span class="n">atom_type</span> <span class="o">=</span> <span class="n">atom_types</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>  <span class="c1"># Convert to lowercase for mapping</span>
+            <span class="n">atom_name</span> <span class="o">=</span> <span class="n">atom_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">atom_type</span><span class="p">,</span> <span class="n">atom_type</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>  <span class="c1"># Fallback to uppercase if not in map</span>
+            <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">coordinates</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>  <span class="c1"># Unpack coordinates</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">atom_name</span><span class="si">:</span><span class="s2">&lt;2</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">x</span><span class="si">:</span><span class="s2">12.6f</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">y</span><span class="si">:</span><span class="s2">12.6f</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">z</span><span class="si">:</span><span class="s2">12.6f</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>  <span class="c1"># Format the line</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+    
+        <span class="c1"># Write to the file</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+            <span class="n">file</span><span class="o">.</span><span class="n">writelines</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+
+        <span class="c1">#print(f&quot;XYZ file written to {filepath}&quot;)</span>
+        <span class="k">return</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="universe_coord_extraction.save_polymers_xyz">
+<a class="viewcode-back" href="../sw_analysis.html#sw_analysis.universe_coord_extraction.save_polymers_xyz">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">save_polymers_xyz</span><span class="p">(</span><span class="n">universe_object</span><span class="p">,</span> <span class="n">gen_orca_input</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">universe_object</span><span class="o">.</span><span class="n">masterclass</span><span class="o">.</span><span class="n">poly_sel_dict</span><span class="p">)):</span>
+            <span class="n">polymer_name</span> <span class="o">=</span> <span class="s2">&quot;Polymer_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">poly</span> <span class="o">=</span> <span class="n">universe_object</span><span class="o">.</span><span class="n">select_polymer</span><span class="p">(</span><span class="n">polymer_name</span><span class="p">)</span>
+            <span class="n">coords</span><span class="p">,</span> <span class="n">atom_types</span> <span class="o">=</span> <span class="n">poly</span><span class="o">.</span><span class="n">positions</span><span class="p">,</span> <span class="n">poly</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">types</span>
+
+            <span class="n">xyz_filepath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">universe_object</span><span class="o">.</span><span class="n">masterclass</span><span class="o">.</span><span class="n">poly_dft_input_dir</span><span class="p">,</span> <span class="n">universe_object</span><span class="o">.</span><span class="n">masterclass</span><span class="o">.</span><span class="n">base_molecule_name</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span>  <span class="s2">&quot;.xyz&quot;</span><span class="p">)</span>
+            <span class="n">universe_coord_extraction</span><span class="o">.</span><span class="n">mdanalysis_info_2_xyz</span><span class="p">(</span><span class="n">atom_types</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">xyz_filepath</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">gen_orca_input</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="kn">from</span> <span class="nn">modules.sw_file_formatter</span> <span class="kn">import</span> <span class="n">DFT_input_generator</span>
+                <span class="n">input_filepath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">universe_object</span><span class="o">.</span><span class="n">masterclass</span><span class="o">.</span><span class="n">poly_dft_input_dir</span><span class="p">,</span> <span class="n">universe_object</span><span class="o">.</span><span class="n">masterclass</span><span class="o">.</span><span class="n">base_molecule_name</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;.inp&quot;</span><span class="p">)</span>
+                <span class="n">DFT_input_generator</span><span class="o">.</span><span class="n">generate_input</span><span class="p">(</span><span class="n">xyz_filepath</span><span class="p">,</span> <span class="n">input_filepath</span><span class="p">,</span> <span class="n">universe_object</span><span class="o">.</span><span class="n">masterclass</span><span class="o">.</span><span class="n">base_molecule_name</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+               <span class="c1"># print(f&quot;Orca input file written to {input_filepath}&quot;)</span>
+        <span class="k">return</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span></div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Daniel J. York.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

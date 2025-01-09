@@ -1,17 +1,22 @@
-.. Polymer Simulator documentation master file, created by
-   sphinx-quickstart on Mon Jan  6 14:07:23 2025.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+Welcome to the **Polymer Simulator** Documentation
+==================================================
 
-Polymer Simulator documentation
-===============================
+This is the main entry point for the documentation.
 
-Add your content using ``reStructuredText`` syntax. See the
-`reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html>`_
-documentation for details.
-
+Contents
+--------
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Table of Contents
 
+   introduction
+   installation
+   packagecontents
+   sw_openmm
+   sw_build_systems
+   usage
+   api
+   contributing
+   faq
+   license
