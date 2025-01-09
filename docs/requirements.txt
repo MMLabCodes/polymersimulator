@@ -4,7 +4,6 @@ parmed
 numpy
 pandas>=2.0.0
 
-itertools
 matplotlib
 shutil
 datetime
