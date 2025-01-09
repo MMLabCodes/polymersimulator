@@ -6,7 +6,7 @@ This section includes the documentation for the **sw_openmm** module.
 sw_openmm
 ---------
 
-.. autoclass:: ../modules/sw_openmm.BuildSimulation
+.. automodule:: sw_openmm
     :members:
     :undoc-members:
     :show-inheritance:

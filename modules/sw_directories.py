@@ -452,18 +452,36 @@ class BioOilDirs(SnippetSimManage):
             os.makedirs(self.bio_oil_models_dir)
 
     def GC_data_avail(self):
+        import pandas as pd
         # Walk through the directory tree recursively
         for root, dirs, files in os.walk(self.bio_oil_GC_data):
+            # Exclude 'depreceated' directories
             dirs[:] = [d for d in dirs if d != 'depreceated']
+        
             # Check each file in the current directory
             for file in files:
-                # Check if the file has a .pdb extension
+                # Check if the file has a .csv extension
                 if file.endswith(".csv"):
                     # Construct the full path to the .csv file
                     csv_file_path = os.path.join(root, file)
                     # Extract filename
-                    csv_file = csv_file_path.split("/")[-1]
-                    print(csv_file)
+                    csv_file = os.path.basename(csv_file_path)
+
+                    try:
+                        # Read the CSV file
+                        df = pd.read_csv(csv_file_path)
+
+                        # Drop any columns without headers (unnamed columns)
+                        df = df.loc[:, ~df.columns.str.startswith('Unnamed')]
+
+                        # Check for null values in the remaining columns
+                        if df.isnull().any().any():  # Check for any NaN in valid columns
+                            print(f"{csv_file} - Incomplete")
+                        else:
+                            print(csv_file)
+                    except Exception as e:
+                        print(f"Error reading {csv_file}: {e}")
+
 
 class DFT_manager(SnippetSimManage):
     max_jobs = 8
@@ -524,18 +542,14 @@ class DFT_manager(SnippetSimManage):
                         self.move_to_submitted_jobs(inp_dir, out_dir, job_name, job_number)
                         self.write_job_queue(job_queue)
 
-                elif:
-                    job_queue = self.read_job_queue()
-                    if len(job_queue) == 0:
-                        self.check_submitted_jobs()
-                        print("No jobs in queue. Processing...")
-                    else:
-                        time.sleep(60)
-                                 
-                else:
+                if len(job_queue) == 0:
                     self.check_submitted_jobs()
-                    print("Job queue full. Processing...")
                     time.sleep(60)
+
+            else:
+                self.check_submitted_jobs()
+                print("Job queue full. Processing...")
+                time.sleep(60)
 
     def get_running_jobs_count(self):
         try:
@@ -618,6 +632,8 @@ class DFT_manager(SnippetSimManage):
             try:
                 # Parse job and output directories
                 job_path, out_path = line.split(" ", 1)
+                print(f"Job path is: {job_path}")
+                print(f"Out path is: {out_path}")
 
                 # Check if job directory exists
                 if not os.path.isdir(job_path):
@@ -635,6 +651,7 @@ class DFT_manager(SnippetSimManage):
                 # Process `.out` files
                 for out_file in out_files:
                     out_file_path = os.path.join(job_path, out_file)
+                    print(f"Output filepath {out_file_path}")
                     try:
                         with open(out_file_path, "r") as f:
                             content = f.read()
@@ -662,18 +679,17 @@ class DFT_manager(SnippetSimManage):
 
     def _update_jobs_files(self, running_jobs, finished_jobs, error_jobs):
         with open(self.job_paths_file, "w") as file:
-            file.writelines(running_jobs)
+            file.writelines(f"{job}\n" for job in running_jobs)
         with open(self.error_jobs_file, "a") as file:
-            file.writelines(error_jobs)
+            file.writelines(f"{job}\n" for job in error_jobs)
         with open(self.processed_jobs_file, "a") as file:
-            file.writelines(finished_jobs)
+            file.writelines(f"{job}\n" for job in finished_jobs)
 
     def process_result(self, molecule_name, job_path, out_path):
 
         output_filename = os.path.join(job_path, f"{molecule_name}.out")
-        xyz_filename = os.path.join(job_path, f"{molecule_name}.xyz")
-        
-        fukui_filename = f"{molecule_name}_fukui.cube"
+        xyz_filename = os.path.join(job_path, f"{molecule_name}.xyz")    
+        fukui_filename = f"{molecule_name}.fukui.cube"
 
         # Prepare destination directories
         fukui_destination = os.path.join(out_path, "final_fukuis")
@@ -681,6 +697,7 @@ class DFT_manager(SnippetSimManage):
         output_destination = os.path.join(out_path, "output_files")
         os.makedirs(output_destination, exist_ok=True)
         results_file = os.path.join(output_destination, "DFT_results.csv")
+        
         if not os.path.exists(results_file):
             with open(results_file, "w", newline='') as file:
                 writer = csv.DictWriter(file, fieldnames=[
@@ -699,13 +716,15 @@ class DFT_manager(SnippetSimManage):
                 homo_path = os.path.join(job_path, file)
             if file.endswith(".lumo.cube"):
                 lumo_path = os.path.join(job_path, file)
-                
-        os.chdir(job_path)
         
         # Extract data from orca output
         scf_energy = self.extract_SCF_energy(output_filename)
-        homo, lumo = get_homo_lumo_from_xyz(xyz_filename)
-        homo_energy, lumo_energy, chem_hardness = self.extract_orbital_energies_hardness(output_filename, homo, lumo)
+        homo, lumo = None, None
+        try:
+            homo, lumo = get_homo_lumo_from_xyz(xyz_filename)
+        except Exception as e:
+            print(f"Error in homo lumo: {homo} {lumo}")
+        homo_energy, lumo_energy, chem_hardness = self.extract_orbital_energies_and_hardness(output_filename, homo, lumo)
         polar = self.extract_polarizability(output_filename)
         dipole_moment = self.extract_dipole(output_filename)
         
@@ -723,8 +742,6 @@ class DFT_manager(SnippetSimManage):
             writer = csv.DictWriter(file, fieldnames=final_dat_dict.keys())
             writer.writerow(final_dat_dict)
             
-        # Move output file
-        shutil.move(output_filename, output_destination)
 
         # Now we do the fukui
         subprocess.run(["python3", self.orbital_editor, homo_path], check=True)
@@ -734,32 +751,32 @@ class DFT_manager(SnippetSimManage):
         subprocess.run(["bash", self.fukui_path, homo_path, lumo_path, molecule_name], check=True)
 
         # Move the Fukui file
-        fukui_path = os.path.join(job_path, fukui_filename)
+        fukui_path = os.path.join(fukui_filename)
         shutil.move(fukui_path, fukui_destination)
-  
-        # Restore the original working directory
-        os.chdir(self.main_dir)
+
+        shutil.move(output_filename, output_destination)
 
     def extract_SCF_energy(self, output_filename):
         search_string = "TOTAL SCF ENERGY"
-        file = open(output_filename, "r")
-        flag = 0
-        index = 0
-        line_list = []
-        for line in file:
-            index += 1
-            if search_string in line:
-                line_list.append(index)
-        file.close()
+        energy_in_ev = None
+
+        scf_lines = []
+        with open(output_filename, "r") as file:
+            lines = file.readlines()
+
+            for i in range(len(lines)):  # Correctly indented the loop
+                if "TOTAL SCF ENERGY" in lines[i]:
+                    print(lines[i + 3])  # Assuming energy is 3 lines below
+                    scf_lines.append(lines[i + 3])
+            print(f"SCF lines: {scf_lines}")
+            energy_in_ev = (scf_lines[-1].split("eV")[0]).split()[-1]
+            print(f"Final energy is: {energy_in_ev}")
+  
+        if energy_in_ev is None:
+            raise ValueError(f"'{search_string}' not found in the file.")
     
-        file = open(output_filename, "r")
-        content = file.readlines()
-        lines_to_read = line_list[len(line_list)-1]
-        i = lines_to_read
-        str_dict = repr(content[i+2])
-        cut1 = str_dict.split("Eh")[1]
-        cut2 = str_dict.split("eV")[0]
-        return(cut2)
+        return float(energy_in_ev)
+
     
     def extract_orbital_energies_and_hardness(self, output_filename, homo, lumo):
         search_string = "ORBITAL ENERGIES"
@@ -785,12 +802,12 @@ class DFT_manager(SnippetSimManage):
         new_line_3 = new_line_2.replace(" ", "#")
         homo_energy = float(new_line_3.split("#")[3])
     
-        new_line = (content[lumo_energy_line])
+        new_line = (content[lumo_line])
         new_line_2 = (' '.join(new_line.split()))
         new_line_3 = new_line_2.replace(" ", "#")
         lumo_energy = float(new_line_3.split("#")[3])
     
-        chem_hardness = format((lumo_energy - homo_energy)/2), ".4f")
+        chem_hardness = format(((lumo_energy - homo_energy)/2), ".4f")
     
         return(homo_energy, lumo_energy, chem_hardness)
 
@@ -805,7 +822,7 @@ class DFT_manager(SnippetSimManage):
 
     def extract_dipole(self, output_filename):
         search_string = "Magnitude (Debye)"
-        file = open(output_filepath, "r")
+        file = open(output_filename, "r")
         for line in file:
             if search_string in line:
                 new_line = (' '.join(line.split()))
