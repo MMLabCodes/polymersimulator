@@ -2,8 +2,8 @@ sphinx
 sphinx-rtd-theme
 parmed
 numpy
-pandas
-csv
+pandas>=2.0.0
+
 itertools
 matplotlib
 shutil
