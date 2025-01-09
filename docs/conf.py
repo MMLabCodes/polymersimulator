@@ -1,7 +1,8 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath('../'))  # Adjusting to root project directory
-sys.path.insert(0, os.path.abspath('../modules/sw_openmm.py')) 
+sys.path.insert(0, os.path.abspath('../modules/'))  # Correcting to the directory of the modules
+
 # Project information
 project = 'Polymer Simulator'
 copyright = '2025, Daniel J. York'
@@ -25,4 +26,9 @@ html_static_path = ['_static']
 
 master_doc = 'index'
 
-autodic_default_options = {'members':True, 'undoc-members':True, 'show-inheritance':True}
+# Autodoc default options (you can modify this as needed)
+autodoc_default_options = {
+    'members': True,            # Include members (functions, classes, etc.)
+    'undoc-members': True,      # Include members without docstrings
+    'show-inheritance': True,   # Show inheritance in class documentation
+}
