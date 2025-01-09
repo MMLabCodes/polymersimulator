@@ -17,19 +17,14 @@ from rdkit.Chem.rdmolfiles import MolFromPDBFile
 
 class BuildSystems():
     """
-    This class provides methods for building and simulating molecular systems, including:
-    - Converting SMILES strings to PDB files
-    - Generating residue codes
-    - Running Packmol simulations
-    - Calculating XYZ distances
-    - Aligning molecular structures
+    A class for building and simulating molecular systems.
 
-    It also interfaces with a CSV file to manage residue codes and allows various helper
-    functions for molecular manipulation and simulation setup.
+    Provides methods for converting SMILES strings to PDB files, running simulations,
+    generating residue codes, calculating distances, and aligning molecules.
 
     Attributes:
         packmol_path (str): Path to the Packmol executable.
-        manager (object): Manager object for interacting with the directories and files.
+        manager (object): Manager object to handle file paths and directories.
     """
     packmol_path = "/home/dan/packmol-20.14.4-docs1/packmol-20.14.4-docs1/packmol"
     
@@ -38,8 +33,8 @@ class BuildSystems():
         Initializes the BuildSystems class with the specified manager object.
 
         Args:
-            manager (object): Manager object to handle file paths and directories.
-        """        
+            manager (object): The manager object for interacting with directories and files.
+        """      
         self.manager = manager
     
     def SmilesToPDB(self, smiles_string, output_file):
@@ -51,12 +46,7 @@ class BuildSystems():
             output_file (str): The name of the output PDB file.
 
         Returns:
-            None. Writes the 3D structure of the molecule to a PDB file.
-            
-        Note: 
-            This function is utilised by the SmilesToPDB_GenerateRescode function and carries out
-            the same functionality but additionally generates a residue code for the pdb file generated.
-            These generated residue codes are stored in a database.
+            None: Writes the 3D structure of the molecule to a PDB file.
         """
         # Create a molecule from the SMILES string
         molecule = pybel.readstring("smi", smiles_string)
@@ -73,31 +63,14 @@ class BuildSystems():
 
     def SmilesToPDB_GenResCode(self, smiles, name):
         """
-        Converts a molecule specified by its SMILES representation to a PDB file.
+        Converts a SMILES string to a PDB file and generates a residue code if not found.
 
-        Parameters:
-        - smiles (str): SMILES representation of the molecule.
-        - name (str): Name of the molecule.
-        - directory (str): Directory where the PDB file will be saved.
-        - residue_code_csv (str): Path to the CSV file containing existing residue codes.
+        Args:
+            smiles (str): The SMILES string of the molecule.
+            name (str): The name of the molecule.
 
         Returns:
-        None
-
-        The function performs the following steps:
-        1. Loads existing residue codes from the provided CSV file.
-        2. Checks if the molecule name or SMILES is already in the database.
-        3. If the entry exists, uses the existing residue code; otherwise, generates a unique 3-letter
-           residue code excluding forbidden codes (which contains some examples "AAA", "BBB", "CCC" and amino acid residue codes.
-        4. Updates the CSV file with the new entry if a new residue code is generated (If a new code isn't generated, the database already has info for that molecule).
-        5. Converts the SMILES representation to a molecule object, adds hydrogens, and canonicalizes
-           conformers.
-        6. Replaces default "UNL" codes in the PDB content with the generated or existing residue code (if the molecule has already been assigned a residue code).
-        7. Writes the PDB content to a file in the specified directory using the molecule's name.
-
-        Note: The function utilizes various helper functions such as load_residue_codes,
-        find_existing_entry, generate_unique_residue_code, update_residue_codes_csv, EmbedMolecule,
-        and rdMolTransforms. These functions are defined and are available in this python file.
+            None: Writes the PDB file and updates the residue code CSV.
         """
         forbidden_codes = ["AAA", "BBB", "CCC", "UNL", "ALA", "ARG", "ASN", "ASP", "ASX", "CYS", "GLU", "GLN", "GLX", "HIS", "ILE", "LEU", "LYS", "MET", "PHE", "PRO", "SER", "THR", "SEC", "TRP", "TYR", "VAL"]
         # Load existing residue codes from the CSV file
@@ -125,30 +98,13 @@ class BuildSystems():
 
     def load_residue_codes(self, residue_code_csv):
         """
-        Loads existing residue codes from a CSV file. Used by SmilesToPDB_GenerateRescode function.
+        Loads existing residue codes from a CSV file.
 
-        Parameters:
-        - residue_code_csv (str): Path to the CSV file containing residue codes.
+        Args:
+            residue_code_csv (str): The path to the residue code CSV file.
 
         Returns:
-        list: A list of lists representing rows from the CSV file, where each row contains
-              residue code information.
-
-        The CSV file is expected to have rows containing residue code information.
-        Each row may include data such as molecule name, SMILES representation, and
-        the corresponding residue code. The function reads the CSV file and returns
-        a list of lists, where each inner list represents a row from the CSV file.
-
-        Example CSV structure:
-        ```
-        MoleculeName, SMILES, ResidueCode
-        Example1, CCO, AAA
-        Example2, CCN, BBB
-        ...
-        ```
-
-        Note: Ensure that the CSV file has appropriate headers, and the function
-        assumes that the first row contains column headers.
+            list: List of residue codes from the CSV file.
         """
         # Load existing residue codes from the CSV file
         residue_codes = []	
@@ -159,28 +115,15 @@ class BuildSystems():
 
     def generate_unique_residue_code(self, residue_codes, forbidden_codes=None):
         """
-        Generates a unique 3-letter residue code not present in the database and not in the forbidden codes list.
-        Used by SmilesToPDB_GenerateRescode function.
+        Generates a unique 3-letter residue code not in the forbidden or existing codes.
 
-        Parameters:
-        - residue_codes (list): A list of lists representing existing residue code information.
-                              Each inner list is expected to contain data such as molecule name,
-                              SMILES representation, and the corresponding residue code.
-        - forbidden_codes (list, optional): A list of 3-letter residue codes that are not allowed
-                                          to be used. Defaults to None if no forbidden codes are specified..
+        Args:
+            residue_codes (list): List of existing residue codes.
+            forbidden_codes (list, optional): List of forbidden residue codes.
 
         Returns:
-        str: A unique 3-letter residue code.
-
-        The function utilizes the existing residue codes and an optional list of forbidden codes
-        to generate a new 3-letter residue code. It ensures that the generated code is not already
-        present in the database and is not in the list of forbidden codes.
-
-        If a unique code cannot be generated, a ValueError is raised.
-
-        Note: The function assumes that the residue code is the third element in each inner list
-        of the residue_codes parameter.
-        """  
+            str: A unique 3-letter residue code.
+        """
         # Generate a unique 3-letter residue code not already in the database and not in the forbidden codes list
         existing_codes = set(entry[2] for entry in residue_codes)  # Assuming code is the third column
         forbidden_codes = set(forbidden_codes) if forbidden_codes else set()
@@ -198,13 +141,13 @@ class BuildSystems():
 
     def GenRescode_4_PolyUnits(self, name):
         """
-        Generates residue codes for polymeric units (e.g., trimers) and updates the residue codes database.
+        Generates residue codes for polymeric units (e.g., trimers) and updates the CSV.
 
         Args:
-            name (str): Name of the trimer molecule.
+            name (str): The name of the trimer molecule.
 
         Returns:
-            None. Updates the residue code database and prints assigned residue codes.
+            None: Updates the residue code CSV.
         """
         if "trimer" not in name:
             print("Polymeric unit generation requires trimers. Please consult the build systems guide for information on how to do this")
@@ -249,23 +192,16 @@ class BuildSystems():
     
     def update_residue_codes_csv(self, name, smiles, residue_code, residue_code_csv):
         """
-        Updates a CSV file with a new entry if the entry does not already exist.
-        Used by SmilesToPDB_GenerateRescode function.
+        Updates the CSV file with a new residue code entry.
 
-        Parameters:
-        - name (str): Name of the molecule.
-        - smiles (str): SMILES representation of the molecule.
-        - residue_code (str): Residue code associated with the molecule.
-        - residue_code_csv (str): Path to the CSV file containing existing residue codes.
+        Args:
+            name (str): The name of the molecule.
+            smiles (str): The SMILES representation of the molecule.
+            residue_code (str): The residue code to be added.
+            residue_code_csv (str): Path to the CSV file for residue codes.
 
         Returns:
-        None
-
-        The function checks if an entry with the provided name and smiles already exists
-        in the CSV file. If not, it appends a new entry with the given information to the CSV file.
-
-        Note: The function relies on helper functions such as load_residue_codes and find_existing_entry.
-        Ensure these functions are defined and available in this python file.
+            None: Appends the new residue code to the CSV file.
         """
         # Update the CSV file with the new entry if it doesn't exist
         residue_codes = self.load_residue_codes(residue_code_csv)
@@ -280,23 +216,15 @@ class BuildSystems():
 
     def find_existing_entry(self, residue_codes, name, smiles=None):
         """
-        Finds an existing entry in a list of residue codes based on molecule name or SMILES representation.
-        Used by SmilesToPDB_GenerateRescode function.
+        Finds an existing residue code entry by molecule name or SMILES string.
 
-        Parameters:
-        - residue_codes (list): A list of lists representing existing residue code information.
-                              Each inner list is expected to contain data such as molecule name,
-                              SMILES representation, and the corresponding residue code.
-        - name (str): Name of the molecule to search for.
-        - smiles (str): SMILES representation of the molecule to search for.
+        Args:
+            residue_codes (list): The list of existing residue codes.
+            name (str): The name of the molecule.
+            smiles (str, optional): The SMILES string of the molecule.
 
         Returns:
-        list or None: If an entry with the provided name or smiles is found, returns the corresponding
-                     entry (a list). Otherwise, returns None.
-
-        The function iterates through the list of residue codes and checks if any entry has a matching
-        molecule name or SMILES representation. If a match is found, the corresponding entry is returned.
-        If no match is found, None is returned.
+            list or None: The matching entry if found, otherwise None.
         """
         if smiles == None:
             for entry in residue_codes:
@@ -311,23 +239,13 @@ class BuildSystems():
 
     def run_packmol(self, input_file_name):
         """
-        Run Packmol with the specified input file and directories.
+        Runs the Packmol simulation with the specified input file.
 
         Args:
-            directories: An object with methods to load Packmol file paths and access system directories.
-            input_file_name: The name of the Packmol input file.
+            input_file_name (str): The name of the Packmol input file.
 
-        The 'directories' object should have the following methods:
-            - load_pckml_filepath(input_file_name): Returns the full path to the Packmol input file.
-            - systems_dir: A directory where the Packmol output will be stored.
-
-        Example:
-            from modules.sw_directories import *
-            directories = PolymerSimulatorDirs("path/to/project/directory")
-
-            from modules.sw_build_systems import *
-            build = BuildSystems()
-            build.run_packmol(directories, 'input_file_name')
+        Returns:
+            None: Executes Packmol simulation using the provided input file.
         """
         if os.path.exists(self.packmol_path):
             print(f"Packmol executable exists at '{self.packmol_path}'.")
@@ -352,15 +270,13 @@ class BuildSystems():
     @classmethod
     def update_packmol_path(cls, new_packmol_path):
         """
-        Update the path to the Packmol executable.
+        Updates the path to the Packmol executable.
 
         Args:
-            new_packmol_path: The new path to the Packmol executable.
+            new_packmol_path (str): The new path to the Packmol executable.
 
-        Example:
-            from modules.sw_build_systems import *
-            build = BuildSystems()
-            build.update_packmol_path('/new/path/to/packmol/ececutable')
+        Returns:
+            None: Updates the class-level variable for the Packmol path.
         """
         if os.path.exists(new_packmol_path):
             self.packmol_path = new_packmol_path
@@ -371,19 +287,13 @@ class BuildSystems():
     @staticmethod
     def get_xyz_dists(input_file=None):
         """
-        Calculates the maximum distance between the largest and smallest xyz coordinates.
+        Calculates the maximum distance between the largest and smallest XYZ coordinates in a file.
 
-        Parameters:
-            - input_file: Currently supported formats are '.pdb' and '.xyz' files.
+        Args:
+            input_file (str): Path to a '.pdb' or '.xyz' file.
 
         Returns:
-            - tuple: Maximum distances along x, y, and z axes between 2 atoms.
-
-        Example:
-            from modules.sw_build_systems import *
-            build = BuildSystems()
-            pdb_file = path/to/your/pdb/file
-            x, y, z = build.get_xyz_dists(pdb_file)
+            tuple: Maximum distances along the x, y, and z axes.
         """
         if input_file == None:
             print("Please provide a valid input file.")
@@ -427,7 +337,12 @@ class BuildSystems():
 
     @classmethod
     def get_xyz_dists_help(cls):
-        """Display help information for the get_xyz_dists method."""
+        """
+        Displays help information for the `get_xyz_dists` method.
+
+        Returns:
+            None: Prints out the docstring of `get_xyz_dists` method.
+        """
         print(cls.get_xyz_dists.__doc__)
         print("This method calculates the maximum distance between the largest and smallest xyz coordinates")
         print("from a PDB or XYZ file.")
@@ -435,14 +350,14 @@ class BuildSystems():
     @staticmethod
     def align_molecule(input_pdb, axis_to_align=None):
         """
-        Aligns the molecule structure to a given axis (X, Y, or Z).
+        Aligns the molecule structure to a specified axis (X, Y, or Z).
 
         Args:
             input_file (str): Path to a PDB file containing the molecule.
-            axis (str): The axis ("X", "Y", or "Z") to align the molecule to.
+            axis (str): The axis to align the molecule to ('X', 'Y', or 'Z').
 
         Returns:
-            None. The structure is aligned and saved.
+            None: The aligned structure is saved with a new file name.
         """
         import MDAnalysis as mda
         import numpy as np
