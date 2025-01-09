@@ -1,6 +1,7 @@
 sphinx
 sphinx-rtd-theme
-openbabel
+unittest
+mock
 parmed
 numpy
 pandas>=2.0.0

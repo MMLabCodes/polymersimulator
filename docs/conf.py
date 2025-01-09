@@ -3,6 +3,13 @@ import sys
 sys.path.insert(0, os.path.abspath('../'))  # Adjusting to root project directory
 sys.path.insert(0, os.path.abspath('../modules/'))  # Correcting to the directory of the modules
 
+from unittest import mock
+
+# Mock openbabel to avoid build issues
+sys.modules['openbabel'] = mock.MagicMock()
+sys.modules['pybel'] = mock.MagicMock()
+
+
 #from sw_openmm import *
 #from sw_build_systems import *
 #from sw_analysis import *
