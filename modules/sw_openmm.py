@@ -1104,7 +1104,7 @@ class BuildSimulation():
     
     @classmethod
     def display_start_time(cls):
-            """
+        """
         Display the simulation start time.
 
         This class method prints the timestamp indicating when the simulation was initiated.
