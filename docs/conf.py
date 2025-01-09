@@ -1,7 +1,7 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath('../'))  # Adjusting to root project directory
-sys.path.insert(0, os.path.abspath('../modules/')) 
+sys.path.insert(0, os.path.abspath('../modules/sw_openmm.py')) 
 # Project information
 project = 'Polymer Simulator'
 copyright = '2025, Daniel J. York'
