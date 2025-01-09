@@ -5,7 +5,7 @@ numpy
 pandas>=2.0.0
 matplotlib
 rdkit
-sklearn
+scikit-learn
 seaborn
 nglview
 MDAnalysis
