@@ -5,7 +5,6 @@ numpy
 pandas>=2.0.0
 matplotlib
 rdkit
-os
 subprocess
 sklearn
 seaborn
