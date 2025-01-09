@@ -1,7 +1,5 @@
 sphinx
 sphinx-rtd-theme
-unittest
-mock
 parmed
 numpy
 pandas>=2.0.0
