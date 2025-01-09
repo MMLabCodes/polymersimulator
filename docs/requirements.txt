@@ -1,5 +1,6 @@
 sphinx
 sphinx-rtd-theme
+openbabel
 parmed
 numpy
 pandas>=2.0.0
