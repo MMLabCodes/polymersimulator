@@ -3,6 +3,8 @@ import sys
 sys.path.insert(0, os.path.abspath('../'))  # Adjusting to root project directory
 sys.path.insert(0, os.path.abspath('../modules/'))  # Correcting to the directory of the modules
 
+from sw_build_systems import *
+
 # Project information
 project = 'Polymer Simulator'
 copyright = '2025, Daniel J. York'
