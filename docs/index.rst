@@ -13,6 +13,7 @@ Contents
    introduction
    installation
    packagecontents
+   sw_openmm
    usage
    api
    contributing
