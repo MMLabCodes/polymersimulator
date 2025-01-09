@@ -1,4 +1,4 @@
-sw\_analysis module
+sw_analysis module
 ===================
 
 .. automodule:: sw_analysis
