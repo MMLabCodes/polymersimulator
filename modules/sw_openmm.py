@@ -188,10 +188,20 @@ class TopologyML(Topology):
         return self.pdb
         
     def get_pm_num_atoms(self):
-        self._n = 1
-        for self._x in self.pdb:
-            i = i + 1
-        return i
+        """
+        Calculate and return the number of atoms in the `pdb` attribute.
+
+        The function iterates through the `pdb` attribute (assumed to be an iterable 
+        containing atomic data) and counts the number of elements (atoms).
+
+        Returns:
+            int: The number of atoms in the `pdb` attribute.
+        """
+        count = 0
+        for _ in self.pdb:
+            count += 1
+        return count
+
     
     def create_topo(self):
         '''This method creates an OpenMM Topology object. The pdb file is parsed
@@ -265,14 +275,65 @@ class PositionsML():
         self.c = [0, 0, self.pbc_coord[2]]
         return [self.a, self.b , self.c]
 
-class DcdWriter():
-    def __init__(self, prefix, freq):
-        self.dcdReporter = app.DCDReporter(f'{prefix}.dcd', freq, enforcePeriodicBox = True)
+class DcdWriter:
+    """
+    A class to handle writing DCD (Dynamics Coordinate Data) files for molecular simulations.
 
-class DataWriter():
+    Attributes:
+        dcdReporter (app.DCDReporter): An instance of DCDReporter to write the DCD file with specified parameters.
+
+    Methods:
+        __init__(prefix: str, freq: int):
+            Initializes the DcdWriter with the given prefix and frequency for writing frames.
+    """
+
+    def __init__(self, prefix, freq):
+        """
+        Initialize a DcdWriter instance.
+
+        Args:
+            prefix (str): The prefix for the output DCD file name.
+            freq (int): The frequency (in steps) at which frames are written to the DCD file.
+
+        The output file will be named `{prefix}.dcd`. The DCDReporter enforces the periodic box
+        constraints for the simulation.
+        """
+        self.dcdReporter = app.DCDReporter(f'{prefix}.dcd', freq, enforcePeriodicBox=True)
+
+
+class DataWriter:
+    """
+    A class to handle writing simulation state data to a text file.
+
+    Attributes:
+        stateDataReporter (app.StateDataReporter): An instance of StateDataReporter to log simulation data.
+
+    Methods:
+        __init__(prefix: str, freq: int, steps: int):
+            Initializes the DataWriter with the given prefix, frequency, and total number of steps.
+    """
+
     def __init__(self, prefix, freq, steps):
-        self.stateDataReporter = app.StateDataReporter(f'{prefix}.txt', freq, totalSteps=steps,
-step=True, time=True, speed=True, progress=True, elapsedTime=True,  totalEnergy=True, kineticEnergy=True, potentialEnergy=True, temperature=True, volume=True, density=True, separator=',')
+        """
+        Initialize a DataWriter instance.
+
+        Args:
+            prefix (str): The prefix for the output text file name.
+            freq (int): The frequency (in steps) at which data is written to the text file.
+            steps (int): The total number of simulation steps.
+
+        The output file will be named `{prefix}.txt`. The StateDataReporter logs various
+        simulation parameters, including step count, time, speed, progress, elapsed time, 
+        total energy, kinetic energy, potential energy, temperature, volume, and density.
+        The data is separated by commas.
+        """
+        self.stateDataReporter = app.StateDataReporter(
+            f'{prefix}.txt', freq, totalSteps=steps,
+            step=True, time=True, speed=True, progress=True, elapsedTime=True,
+            totalEnergy=True, kineticEnergy=True, potentialEnergy=True,
+            temperature=True, volume=True, density=True, separator=','
+        )
+
 
 
 class BuildSimulation():
@@ -356,9 +417,9 @@ class BuildSimulation():
         if not os.path.exists(self.output_dir):
             os.makedirs(self.output_dir)
         self.log_info = {'Minimization': {'Temperature':None,'Time taken': None},
-                            'Annealing': {'Time taken': None, 'Simulation time': None, 'Start temp': None, 'Target temp': None, 'Cycles': None, 'Steps at plateaus': None, 'Steps at incremental temps': None, 'Timestep': None},
-                            'Equilibration': {'Time taken': None, 'Simulation time': None, 'Temperature': None, 'Pressure': None, 'Timestep': None},
-                            'Production': {'Time taken': None, 'Simulation time': None, 'Temperature': None, 'Timestep': None},
+                            'Annealing_NPT': {'Time taken': None, 'Simulation time': None, 'Start temp': None, 'Target temp': None, 'Cycles': None, 'Steps at plateaus': None, 'Steps at incremental temps': None, 'Timestep': None},
+                            'basic_NPT': {'Time taken': None, 'Simulation time': None, 'Temperature': None, 'Pressure': None, 'Timestep': None},
+                            'basic_NVT': {'Time taken': None, 'Simulation time': None, 'Temperature': None, 'Timestep': None},
                         'Thermal Ramp' : {'Time taken':None, 'Simulation time':None, 'Start temp':None, 'Target temp':None, 'Quench Rate':None, 'Steps at incremental temps':None, 'Timestep':None, 'Ensemble':None, 'Method':None}}
         self.log_csv = os.path.join(self.output_dir, (self.filename + "_" + self.timestamp + "_log.csv"))
                              
@@ -430,7 +491,7 @@ class BuildSimulation():
         """Display help information for the minimize_energy method."""
         print(cls.minimize_energy.__doc__)    
      
-    def anneal(self, simulation, start_temp=None, max_temp=None, cycles=None, holding_steps=None, steps_at_temp=None):
+    def anneal_NVT(self, simulation, start_temp=None, max_temp=None, cycles=None, holding_steps=None, steps_at_temp=None):
         """
         Function to perform simulated annealing on the provided simulation system.
         
@@ -569,8 +630,7 @@ class BuildSimulation():
     def anneal_help(cls):
         """Display help information for the anneal method."""
         print(cls.anneal.__doc__)    
-    
-    def equilibrate(self, simulation, total_steps=None, temp=None, pressure=None):
+    def basic_NPT(self, simulation, total_steps=None, temp=None, pressure=None):
         """
         Function to equilibrate the provided simulation to reach a specified temperature and pressure.
         
@@ -670,11 +730,11 @@ class BuildSimulation():
         equili_end_time = time.time()  
         time_taken = equili_end_time - equili_start_time
 
-        self.log_info['Equilibration']['Time taken'] = time_taken
-        self.log_info['Equilibration']['Simulation time'] = total_steps * self.timestep
-        self.log_info['Equilibration']['Temperature'] = temp
-        self.log_info['Equilibration']['Pressure'] = pressure
-        self.log_info['Equilibration']['Timestep'] = self.timestep
+        self.log_info['Basic_NPT']['Time taken'] = time_taken
+        self.log_info['Basic_NPT']['Simulation time'] = total_steps * self.timestep
+        self.log_info['Basic_NPT']['Temperature'] = temp
+        self.log_info['Basic_NPT']['Pressure'] = pressure
+        self.log_info['Basic_NPT']['Timestep'] = self.timestep
 
         # Write the final structure to pdb
         self.final_pdbname = os.path.join(self.output_dir, ("final_" + self.filename + "_" + str(pressure) + "_atm.pdb"))
@@ -688,7 +748,7 @@ class BuildSimulation():
         """Display help information for the equilibrate method."""
         print(cls.equilibrate.__doc__) 
         
-    def production_run(self, simulation, total_steps=None, temp=None):
+    def basic_NVT(self, simulation, total_steps=None, temp=None):
         """
         Function to perform a production run simulation with the provided parameters.
         
@@ -772,10 +832,10 @@ class BuildSimulation():
 
         prod_end_time = time.time()
         time_taken = prod_end_time - prod_start_time
-        self.log_info['Production']['Time taken'] = time_taken
-        self.log_info['Production']['Simulation time'] = total_steps * self.timestep
-        self.log_info['Production']['Temperature'] = temp
-        self.log_info['Production']['Timestep'] = self.timestep
+        self.log_info['basic_NVT']['Time taken'] = time_taken
+        self.log_info['basic_NVT']['Simulation time'] = total_steps * self.timestep
+        self.log_info['basic_NVT']['Temperature'] = temp
+        self.log_info['basic_NVT']['Timestep'] = self.timestep
 
         # Write the final structure to pdb
         self.final_pdbname = os.path.join(self.output_dir, ("final_prod_" + self.filename + ".pdb"))
@@ -784,9 +844,40 @@ class BuildSimulation():
         return(simulation, (output_dataname + ".txt"))
         
     def thermal_ramp(self, simulation, heating, quench_rate, ensemble, start_temp=None, max_temp=None, total_steps=None, pressure=None):
-        # Heating is a boolean - true for heating, false for cooling
-        # quench rate is an integer. i.e. 10 or 20 K (or smth else) and is the temperature steps the system is heated/cooled in
-        # Ensemble is "NVT" or "NPT"
+        """
+        Perform a thermal ramp (heating or cooling) on the simulation system.
+
+        This method adjusts the system's temperature incrementally, either heating or cooling it over
+        a range of temperatures in defined steps. It supports both NVT and NPT ensembles, and allows
+        for detailed reporting of the simulation process.
+
+        Args:
+            simulation (app.Simulation): The simulation object on which the thermal ramp is performed.
+            heating (bool): If True, the system is heated; if False, the system is cooled.
+            quench_rate (int): The temperature increment (in Kelvin) between successive steps of the ramp.
+            ensemble (str): The ensemble used for the ramp, either "NVT" (constant volume) or "NPT" (constant pressure).
+            start_temp (float, optional): The starting temperature for the ramp. Defaults to the first value in `self.anneal_parameters`.
+            max_temp (float, optional): The maximum temperature for the ramp. Defaults to the second value in `self.anneal_parameters`.
+            total_steps (int, optional): The total number of steps for the ramp. Defaults to `self.total_steps`.
+            pressure (float, optional): The pressure to use in NPT ensemble. Defaults to `self.pressure`.
+
+        Returns:
+            tuple: The updated simulation object and the path to the output data file.
+
+        Raises:
+            ValueError: If an invalid ensemble is specified.
+
+        Notes:
+            - This method uses a Langevin integrator with the specified starting temperature.
+            - The simulation system can be either AMBER (AMB) or ANI type.
+            - Various simulation data and trajectories are saved, including DCD and PDB files.
+            - The function updates internal logs with details of the thermal ramp.
+
+        Example:
+            simulation = app.Simulation(topology, system, integrator)
+            ramp = self.thermal_ramp(simulation, heating=True, quench_rate=10, ensemble="NVT", start_temp=300, max_temp=500)
+        """
+
         if ensemble == "NVT" or ensemble == "NPT":
             pass
         else:
@@ -988,22 +1079,71 @@ class BuildSimulation():
         print(cls.production_run.__doc__)
         
     def __repr__(self):
+        """
+        Return a string representation of the simulation parameters for debugging and logging purposes.
+
+        This method prints and returns a formatted string that includes key simulation parameters:
+        pressure, temperature, timestep, friction coefficient, total steps, and reporter frequency.
+
+        Returns:
+            str: A formatted string representing the simulation parameters.
+        """
         print("Simulation parameters: ('{}', '{}', '{}, {}, {}, {}')".format(self.pressure, self.temp, self.timestep, self.friction_coeff, self.total_steps, self.reporter_freq))
         return("Simulation parameters given in the following format: ('{}', '{}', '{}, {}, {}, {}')".format("pressure", "temperature", "timestep", "friction coefficient", "total steps", "reporter freqeuncy"))
     
     def __str__(self):
+        """
+        Return a user-friendly string representation of the simulation object.
+
+        This method provides a concise description of the simulation, including its associated filename.
+
+        Returns:
+            str: A string describing the simulation object.
+        """
         return 'Simulation object of - {}'.format( self.filename)
     
-    # All class methods here change a variable in the following way
-    # AmberSimulation.set_temperature(400)
-    # AmberSimulation.temp
-
     @classmethod
     def display_start_time(cls):
+            """
+        Display the simulation start time.
+
+        This class method prints the timestamp indicating when the simulation was initiated.
+
+        Args:
+            cls (type): The class on which the method is called.
+
+        Returns:
+            None
+        """
         print("Simulation initiated at: ", cls.timestamp)
 
     @classmethod
     def savepdb_trajectories(cls, boolean):
+        """
+        Set whether to save simulation trajectories in PDB format.
+
+        This method allows the user to toggle the saving of simulation trajectories
+        in both PDB and DCD formats. If enabled, trajectories are saved in both formats;
+        otherwise, only DCD format is used.
+
+        Args:
+            boolean (bool): A flag indicating whether to save PDB trajectories.
+                        - `True` to save both PDB and DCD formats.
+                        - `False` to save only DCD format.
+
+        Raises:
+            ValueError: If the provided argument is not a boolean.
+
+        Returns:
+            None
+
+        Example:
+            # Enable PDB trajectory saving
+            Simulation.savepdb_trajectories(True)
+
+            # Disable PDB trajectory saving
+            Simulation.savepdb_trajectories(False)
+        """
         if not isinstance(boolean, bool):
             print("Please pass True or False to this function.")
             return
@@ -1123,6 +1263,25 @@ class BuildSimulation():
 
     @classmethod
     def set_nonbondedcutoff(cls, nonbondedcutoff):
+        """
+        Set the non-bonded cutoff distance for the simulation.
+
+        This method allows the user to update the non-bonded cutoff distance, which
+        determines how far the simulation considers interactions between non-bonded
+        particles.
+
+        Args:
+            nonbondedcutoff (float): The new cutoff distance in nanometers.
+
+        Raises:
+            ValueError: If the provided argument is not a float.
+
+        Returns:
+            None
+
+        Example:
+            Simulation.set_nonbondedcutoff(5.0)
+        """
         if nonbondedcutoff is not type(float):
             print("Please pass a float to this method to set a new nonbondedcutoff")
             print("Example: simulation.set_nonbondedcutoff(5.0)")
@@ -1261,35 +1420,53 @@ class BuildSimulation():
             writer.writeheader()
             for section, info in self.log_info.items():
                 writer.writerow({'Section': section, **info})
-        
 class AmberSimulation(BuildSimulation):
     """
     A class representing an AMBER molecular dynamics simulation.
 
+    This class is designed to initialize and manage an AMBER simulation using specified 
+    topology and coordinates files. It inherits from the BuildSimulation class.
+
     Attributes:
-        directories (str): A directories obejct generated with sw_directories which manages filepaths during simulations.
-        topology_file (str): A string representing the path to the topology file.
-        coordinates_file (str): A string representing the path to the coordinates file.
+        manager (str): A manager object that handles directories and file paths for simulations.
+        filename (str): The base name of the topology file without the extension.
+        amb_coordinates (app.AmberInpcrdFile): An object representing the AMBER coordinates file.
+        amb_topology (app.AmberPrmtopFile): An object representing the AMBER topology file, 
+                                            which also includes periodic box vectors.
 
     Methods:
-        __init__(directories, topology_file, coordinates_file): 
-            Initializes an AmberSimulation object with specified directories, topology file, and coordinates file.
-        __str__():
-            Returns a string representation of the AmberSimulation object.
+        __new__(cls, *args, **kwargs):
+            Creates a new instance of AmberSimulation. Ensures the correct number of arguments 
+            are provided before creating an instance.
+        __init__(self, manager, topology_file, coordinates_file):
+            Initializes an AmberSimulation object with the specified manager, topology file, 
+            and coordinates file.
+        __str__(self):
+            Returns a user-friendly string representation of the AmberSimulation object.
+
+    Raises:
+        TypeError: If an incorrect number of arguments are provided to the __new__ method.
+
+    Example:
+        # Create a new AmberSimulation object
+        sim = AmberSimulation(manager, 'path/to/topology.prmtop', 'path/to/coordinates.inpcrd')
+
+        # Print the string representation
+        print(sim)
     """
     def __new__(cls, *args, **kwargs):
-        # Check number of arguments provided #
-        # The __new__ method essentially creates a dummy instance before actually creating the real instance # 
+        # Check number of arguments provided
+        # The __new__ method essentially creates a dummy instance before actually creating the real instance 
         if len(args) != 3:
             raise TypeError(
                 f"AmberSimulation expected 3 arguments, but {len(args)} were given. "
                 "Usage: 'sim = AmberSimulation(manager, topology_file, coordinates_file)'"
             )
         # Call __new__ to continue object creation if the argument count is correct
-        return super().__new__(cls)   
+        return super().__new__(cls)
         
     def __init__(self, manager, topology_file, coordinates_file): 
-        self.manger = manager
+        self.manager = manager
         self.filename = os.path.basename(topology_file).split('.')[0]
         
         # Inherit attributes defined in the parent class and pass directories to the BuildSimulation constructor
@@ -1297,11 +1474,6 @@ class AmberSimulation(BuildSimulation):
         
         self.amb_coordinates = app.AmberInpcrdFile(coordinates_file)
         self.amb_topology = app.AmberPrmtopFile(topology_file, periodicBoxVectors=self.amb_coordinates.boxVectors)
-        
-        # Set pbc into topology
-        #self.positionsML = PositionsML(pdb_file)
-        #self.pbc = self.positionsML.get_pbc()
-        #self.amb_topology.topology.setPeriodicBoxVectors(self.pbc)
 
     def __str__(self):
         return 'Amber simulation object of - {}'.format(self.filename)
@@ -1343,11 +1515,26 @@ class ANISimulation(BuildSimulation):
     
     @classmethod
     def set_potential(cls, potential):
-        # No need for this yet, but can be used to swap to ANI 1 potential
+        """
+        Set the potential function for the simulation.
+
+        This method allows the user to change the potential function used in the simulation. 
+        It can be used to swap between different potential models, such as switching to 
+        an ANI (Artificial Neural Network) potential.
+
+        Args:
+            potential (object): The new potential function or object to be used in the simulation.
+
+        Returns:
+            None
+
+        Example:
+            # Set a new potential function
+            AmberSimulation.set_potential(new_potential)
+
+        Note:
+            This method currently serves as a placeholder for switching to ANI 1 potential, 
+            but it can be extended for other potential models as needed.
+        """
         cls.potential = potential
         print("Potential set to: ", str(potential))
-
-
-'''
-['number', 'name', 'type', 'atomic_number', 'charge', 'mass', 'nb_idx', 'solvent_radius', 'screen', 'occupancy', 'bfactor', 'altloc', 'tree', 'join', 'irotat', 'rmin', 'epsilon', 'rmin_14', 'epsilon_14', 'resname', 'resid', 'resnum', 'chain', 'segid', 'xx', 'xy', 'xz']
-'''
