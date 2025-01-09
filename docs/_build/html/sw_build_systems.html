@@ -1,0 +1,711 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>sw_build_systems Documentation &mdash; Polymer Simulator 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=01f34227"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Module Documentation" href="sw_openmm.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Polymer Simulator
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="packagecontents.html">Package Contents</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sw_openmm.html">Module Documentation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">sw_build_systems Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-sw_build_systems">sw_build_systems</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#sw_build_systems.BuildAmberSystems"><code class="docutils literal notranslate"><span class="pre">BuildAmberSystems</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#sw_build_systems.BuildAmberSystems.add_ter_to_pckml_result"><code class="docutils literal notranslate"><span class="pre">BuildAmberSystems.add_ter_to_pckml_result()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_build_systems.BuildAmberSystems.build_2_10_polymer_array"><code class="docutils literal notranslate"><span class="pre">BuildAmberSystems.build_2_10_polymer_array()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_build_systems.BuildAmberSystems.build_2_10_polymer_array_infinite"><code class="docutils literal notranslate"><span class="pre">BuildAmberSystems.build_2_10_polymer_array_infinite()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_build_systems.BuildAmberSystems.error_param"><code class="docutils literal notranslate"><span class="pre">BuildAmberSystems.error_param</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_build_systems.BuildAmberSystems.extract_coordinates_from_pdb"><code class="docutils literal notranslate"><span class="pre">BuildAmberSystems.extract_coordinates_from_pdb()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_build_systems.BuildAmberSystems.gen_ac_file"><code class="docutils literal notranslate"><span class="pre">BuildAmberSystems.gen_ac_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_build_systems.BuildAmberSystems.gen_amber_params_4_pckml_array"><code class="docutils literal notranslate"><span class="pre">BuildAmberSystems.gen_amber_params_4_pckml_array()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_build_systems.BuildAmberSystems.gen_polymer_pdb"><code class="docutils literal notranslate"><span class="pre">BuildAmberSystems.gen_polymer_pdb()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_build_systems.BuildAmberSystems.gen_prepin_file_sing_mol"><code class="docutils literal notranslate"><span class="pre">BuildAmberSystems.gen_prepin_file_sing_mol()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_build_systems.BuildAmberSystems.gen_prepin_files"><code class="docutils literal notranslate"><span class="pre">BuildAmberSystems.gen_prepin_files()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_build_systems.BuildAmberSystems.generate_3_3_polymer_array_crystal"><code class="docutils literal notranslate"><span class="pre">BuildAmberSystems.generate_3_3_polymer_array_crystal()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_build_systems.BuildAmberSystems.generate_3_3_polymer_array_random"><code class="docutils literal notranslate"><span class="pre">BuildAmberSystems.generate_3_3_polymer_array_random()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_build_systems.BuildAmberSystems.generate_5_5_polymer_array_crystal"><code class="docutils literal notranslate"><span class="pre">BuildAmberSystems.generate_5_5_polymer_array_crystal()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_build_systems.BuildAmberSystems.generate_5_5_polymer_array_random"><code class="docutils literal notranslate"><span class="pre">BuildAmberSystems.generate_5_5_polymer_array_random()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_build_systems.BuildAmberSystems.generate_polymer_3_3_array"><code class="docutils literal notranslate"><span class="pre">BuildAmberSystems.generate_polymer_3_3_array()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_build_systems.BuildAmberSystems.generate_polymer_5_5_array"><code class="docutils literal notranslate"><span class="pre">BuildAmberSystems.generate_polymer_5_5_array()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_build_systems.BuildAmberSystems.is_mol_parametrized"><code class="docutils literal notranslate"><span class="pre">BuildAmberSystems.is_mol_parametrized()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_build_systems.BuildAmberSystems.is_poly_prepped"><code class="docutils literal notranslate"><span class="pre">BuildAmberSystems.is_poly_prepped()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_build_systems.BuildAmberSystems.mod_pdb_file"><code class="docutils literal notranslate"><span class="pre">BuildAmberSystems.mod_pdb_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_build_systems.BuildAmberSystems.parameterize_mol"><code class="docutils literal notranslate"><span class="pre">BuildAmberSystems.parameterize_mol()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_build_systems.BuildAmberSystems.pdb_2_mol2"><code class="docutils literal notranslate"><span class="pre">BuildAmberSystems.pdb_2_mol2()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_build_systems.BuildAmberSystems.relax_molecule"><code class="docutils literal notranslate"><span class="pre">BuildAmberSystems.relax_molecule()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_build_systems.BuildAmberSystems.replace_coordinates_in_pdb"><code class="docutils literal notranslate"><span class="pre">BuildAmberSystems.replace_coordinates_in_pdb()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_build_systems.BuildAmberSystems.solvate_frame_from_sim"><code class="docutils literal notranslate"><span class="pre">BuildAmberSystems.solvate_frame_from_sim()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_build_systems.BuildAmberSystems.solvate_molecule"><code class="docutils literal notranslate"><span class="pre">BuildAmberSystems.solvate_molecule()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#sw_build_systems.BuildSystems"><code class="docutils literal notranslate"><span class="pre">BuildSystems</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#sw_build_systems.BuildSystems.packmol_path"><code class="docutils literal notranslate"><span class="pre">BuildSystems.packmol_path</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_build_systems.BuildSystems.manager"><code class="docutils literal notranslate"><span class="pre">BuildSystems.manager</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_build_systems.BuildSystems.GenRescode_4_PolyUnits"><code class="docutils literal notranslate"><span class="pre">BuildSystems.GenRescode_4_PolyUnits()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_build_systems.BuildSystems.SmilesToPDB"><code class="docutils literal notranslate"><span class="pre">BuildSystems.SmilesToPDB()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_build_systems.BuildSystems.SmilesToPDB_GenResCode"><code class="docutils literal notranslate"><span class="pre">BuildSystems.SmilesToPDB_GenResCode()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_build_systems.BuildSystems.align_molecule"><code class="docutils literal notranslate"><span class="pre">BuildSystems.align_molecule()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_build_systems.BuildSystems.find_existing_entry"><code class="docutils literal notranslate"><span class="pre">BuildSystems.find_existing_entry()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_build_systems.BuildSystems.generate_unique_residue_code"><code class="docutils literal notranslate"><span class="pre">BuildSystems.generate_unique_residue_code()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_build_systems.BuildSystems.get_xyz_dists"><code class="docutils literal notranslate"><span class="pre">BuildSystems.get_xyz_dists()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_build_systems.BuildSystems.get_xyz_dists_help"><code class="docutils literal notranslate"><span class="pre">BuildSystems.get_xyz_dists_help()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_build_systems.BuildSystems.load_residue_codes"><code class="docutils literal notranslate"><span class="pre">BuildSystems.load_residue_codes()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id0"><code class="docutils literal notranslate"><span class="pre">BuildSystems.packmol_path</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_build_systems.BuildSystems.run_packmol"><code class="docutils literal notranslate"><span class="pre">BuildSystems.run_packmol()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_build_systems.BuildSystems.update_packmol_path"><code class="docutils literal notranslate"><span class="pre">BuildSystems.update_packmol_path()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_build_systems.BuildSystems.update_residue_codes_csv"><code class="docutils literal notranslate"><span class="pre">BuildSystems.update_residue_codes_csv()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Polymer Simulator</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">sw_build_systems Documentation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/sw_build_systems.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="sw-build-systems-documentation">
+<h1>sw_build_systems Documentation<a class="headerlink" href="#sw-build-systems-documentation" title="Link to this heading"></a></h1>
+<p>This section includes the documentation for the <strong>sw_build_systems</strong> module.</p>
+<section id="module-sw_build_systems">
+<span id="sw-build-systems"></span><h2>sw_build_systems<a class="headerlink" href="#module-sw_build_systems" title="Link to this heading"></a></h2>
+<p>Created on Tue Mar 19 10:00:30 2024</p>
+<p>&#64;author: danie</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="sw_build_systems.BuildAmberSystems">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sw_build_systems.</span></span><span class="sig-name descname"><span class="pre">BuildAmberSystems</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">manager</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_build_systems.html#BuildAmberSystems"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_build_systems.BuildAmberSystems" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sw_build_systems.BuildSystems" title="sw_build_systems.BuildSystems"><code class="xref py py-class docutils literal notranslate"><span class="pre">BuildSystems</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_build_systems.BuildAmberSystems.add_ter_to_pckml_result">
+<span class="sig-name descname"><span class="pre">add_ter_to_pckml_result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pdb_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_molecule_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_build_systems.html#BuildAmberSystems.add_ter_to_pckml_result"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_build_systems.BuildAmberSystems.add_ter_to_pckml_result" title="Link to this definition"></a></dt>
+<dd><p>Adds ‘TER’ records to a PDB file generated by Packmol after each polymer chain.</p>
+<p>This function is intended to be used after Packmol has built systems of polymers with different
+head, main, and tail units. Packmol does not add ‘TER’ records after each residue, making it
+impossible to construct a parameter file. This function remedies that by adding ‘TER’ after each
+polymer chain in the Packmol file.</p>
+<p>Parameters:
+dirs (object): An object that provides a method <cite>retrieve_polymeric_rescodes</cite> to retrieve</p>
+<blockquote>
+<div><p>residue codes for head, mainchain, and tail units.</p>
+</div></blockquote>
+<p>pdb_file (str): The path to the PDB file generated by Packmol.
+base_molecule_name (str): The base name of the molecule used to identify the polymeric residue codes.</p>
+<p>Returns:
+None</p>
+<p>The function performs the following steps:
+1. Retrieves the residue codes for the head, mainchain, and tail units.
+2. Reads the contents of the specified PDB file.
+3. Iterates through each line in the file to identify points where ‘TER’ records should be added:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Adds a ‘TER’ record when transitioning from a tail residue to a head residue.</p></li>
+<li><p>Adds a ‘TER’ record before the ‘END’ record in the PDB file.</p></li>
+</ul>
+</div></blockquote>
+<ol class="arabic simple" start="4">
+<li><p>Writes the modified contents back to the PDB file with the appropriate ‘TER’ records included.</p></li>
+</ol>
+<dl class="simple">
+<dt>Example usage:</dt><dd><p>add_ter_to_pckml_result(dirs, ‘polymer_system.pdb’, ‘3HB_trimer’)</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>A situation where this function is used by itself is not present and it is used as part of the ‘generate_3_3_polymer_array_pckml’</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_build_systems.BuildAmberSystems.build_2_10_polymer_array">
+<span class="sig-name descname"><span class="pre">build_2_10_polymer_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_molecule_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">molecule_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_build_systems.html#BuildAmberSystems.build_2_10_polymer_array"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_build_systems.BuildAmberSystems.build_2_10_polymer_array" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_build_systems.BuildAmberSystems.build_2_10_polymer_array_infinite">
+<span class="sig-name descname"><span class="pre">build_2_10_polymer_array_infinite</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_molecule_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">molecule_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_build_systems.html#BuildAmberSystems.build_2_10_polymer_array_infinite"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_build_systems.BuildAmberSystems.build_2_10_polymer_array_infinite" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sw_build_systems.BuildAmberSystems.error_param">
+<span class="sig-name descname"><span class="pre">error_param</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Molecule</span> <span class="pre">not</span> <span class="pre">parametrized.</span> <span class="pre">Please</span> <span class="pre">parametrize</span> <span class="pre">pdb_file.'</span></em><a class="headerlink" href="#sw_build_systems.BuildAmberSystems.error_param" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_build_systems.BuildAmberSystems.extract_coordinates_from_pdb">
+<span class="sig-name descname"><span class="pre">extract_coordinates_from_pdb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pdb_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_build_systems.html#BuildAmberSystems.extract_coordinates_from_pdb"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_build_systems.BuildAmberSystems.extract_coordinates_from_pdb" title="Link to this definition"></a></dt>
+<dd><p>Extracts coordinates from a PDB file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pdb_file</strong> (<em>str</em>) – Path to the PDB file.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of (x, y, z) coordinates for each atom.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of tuples</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_build_systems.BuildAmberSystems.gen_ac_file">
+<span class="sig-name descname"><span class="pre">gen_ac_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">molecule_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_build_systems.html#BuildAmberSystems.gen_ac_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_build_systems.BuildAmberSystems.gen_ac_file" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_build_systems.BuildAmberSystems.gen_amber_params_4_pckml_array">
+<span class="sig-name descname"><span class="pre">gen_amber_params_4_pckml_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">system_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_molecule_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_build_systems.html#BuildAmberSystems.gen_amber_params_4_pckml_array"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_build_systems.BuildAmberSystems.gen_amber_params_4_pckml_array" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_build_systems.BuildAmberSystems.gen_polymer_pdb">
+<span class="sig-name descname"><span class="pre">gen_polymer_pdb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">molecule_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_units</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">infinite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_build_systems.html#BuildAmberSystems.gen_polymer_pdb"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_build_systems.BuildAmberSystems.gen_polymer_pdb" title="Link to this definition"></a></dt>
+<dd><p>Generates a polymer PDB file using <cite>tleap</cite> based on the specified molecule and number of units.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>molecule_name</strong> (<em>str</em>) – The base name of the molecule to be used for generating the polymer.</p></li>
+<li><p><strong>number_of_units</strong> (<em>int</em>) – The number of units in the polymer.</p></li>
+</ul>
+</dd>
+</dl>
+<dl>
+<dt>NOTE: The molecule name should be something like “3HB_trimer” and ‘.prepi’ files should be available for that molecule.</dt><dd><p>(these are required for using tleap to make polymers)</p>
+</dd>
+<dt>Description:</dt><dd><p>This function performs the following steps:
+1. Changes the working directory to the specified molecule’s directory.
+2. Constructs file paths for the required input files (<cite>head</cite>, <cite>mainchain</cite>, and <cite>tail</cite> prepi files) and the</p>
+<blockquote>
+<div><p>output directory.</p>
+</div></blockquote>
+<ol class="arabic simple" start="3">
+<li><p>Creates the output directory if it does not already exist.</p></li>
+<li><p>Constructs the polymer name and the paths for the output files (<cite>prmtop</cite>, <cite>rst7</cite>, and <cite>pdb</cite>).</p></li>
+<li><p>Retrieves residue codes for the polymeric units from the <cite>dirs</cite> object.</p></li>
+<li><p>Constructs the polymer sequence command for <cite>tleap</cite>.</p></li>
+<li><p>Creates the <cite>tleap</cite> input script (<cite>.intleap</cite> file) with the appropriate commands to generate the polymer.</p></li>
+<li><p>Executes the <cite>tleap</cite> command to generate the polymer, capturing and printing the output or errors.</p></li>
+</ol>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>Exception</strong> – If there is an error changing the directory or executing the <cite>tleap</cite> command.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Example Usage:</dt><dd><p>dirs = DirectoryPaths(‘path/to/main/project/directory’)
+gen_polymer_pdb(dirs, “3HB_trimer”, 10)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_build_systems.BuildAmberSystems.gen_prepin_file_sing_mol">
+<span class="sig-name descname"><span class="pre">gen_prepin_file_sing_mol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">molecule_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_build_systems.html#BuildAmberSystems.gen_prepin_file_sing_mol"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_build_systems.BuildAmberSystems.gen_prepin_file_sing_mol" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_build_systems.BuildAmberSystems.gen_prepin_files">
+<span class="sig-name descname"><span class="pre">gen_prepin_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">molecule_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_build_systems.html#BuildAmberSystems.gen_prepin_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_build_systems.BuildAmberSystems.gen_prepin_files" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_build_systems.BuildAmberSystems.generate_3_3_polymer_array_crystal">
+<span class="sig-name descname"><span class="pre">generate_3_3_polymer_array_crystal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_molecule_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">molecule_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_build_systems.html#BuildAmberSystems.generate_3_3_polymer_array_crystal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_build_systems.BuildAmberSystems.generate_3_3_polymer_array_crystal" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_build_systems.BuildAmberSystems.generate_3_3_polymer_array_random">
+<span class="sig-name descname"><span class="pre">generate_3_3_polymer_array_random</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_molecule_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">molecule_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_build_systems.html#BuildAmberSystems.generate_3_3_polymer_array_random"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_build_systems.BuildAmberSystems.generate_3_3_polymer_array_random" title="Link to this definition"></a></dt>
+<dd><p>Generates a 3x3 array of polymers using Packmol and adds ‘TER’ records after each polymer chain.</p>
+<p>This function creates a 3x3 array of polymer molecules based on a given input molecule. It uses Packmol
+to arrange the molecules in the specified array and adds ‘TER’ records after each polymer chain to ensure
+proper formatting for subsequent simulations.</p>
+<p>Parameters:
+dirs (object): An object that provides methods for directory and file management.
+molecule_name (str): The name of the molecule to be used for creating the polymer array. i.e. “3HB_10_polymer”
+base_molecule_name (str): The base name of the molecule used to identify the polymeric residue codes. i.e. “3HB_trimer”</p>
+<p>Returns:
+None</p>
+<p>The function performs the following steps:
+1. Defines the file subtype and constructs the PDB file path.
+2. Creates an output directory if it doesn’t exist.
+3. Constructs the output PDB file name for the unsolved array.
+4. Calculates the dimensions of the box required to contain the 3x3 array of polymers.
+5. Generates the Packmol input file content with the specified parameters.
+6. Writes the Packmol input file to the output directory.
+7. Executes the Packmol command to generate the unsolved array PDB file.
+8. Adds ‘TER’ records to the generated PDB file using the <cite>add_ter_to_pckml_result</cite> function.</p>
+<dl class="simple">
+<dt>Example usage:</dt><dd><p>generate_3_3_polymer_array_pckml(dirs, ‘polymer_molecule’, ‘base_polymer’)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_build_systems.BuildAmberSystems.generate_5_5_polymer_array_crystal">
+<span class="sig-name descname"><span class="pre">generate_5_5_polymer_array_crystal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_molecule_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">molecule_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crystal_trans</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_build_systems.html#BuildAmberSystems.generate_5_5_polymer_array_crystal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_build_systems.BuildAmberSystems.generate_5_5_polymer_array_crystal" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_build_systems.BuildAmberSystems.generate_5_5_polymer_array_random">
+<span class="sig-name descname"><span class="pre">generate_5_5_polymer_array_random</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_molecule_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">molecule_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_build_systems.html#BuildAmberSystems.generate_5_5_polymer_array_random"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_build_systems.BuildAmberSystems.generate_5_5_polymer_array_random" title="Link to this definition"></a></dt>
+<dd><p>Generates a 5x5 array of polymers using Packmol and adds ‘TER’ records after each polymer chain.</p>
+<p>This function creates a 5x5 array of polymer molecules based on a given input molecule. It uses Packmol
+to arrange the molecules in the specified array and adds ‘TER’ records after each polymer chain to ensure
+proper formatting for subsequent simulations.</p>
+<p>Parameters:
+dirs (object): An object that provides methods for directory and file management.
+molecule_name (str): The name of the molecule to be used for creating the polymer array. i.e. “3HB_10_polymer”
+base_molecule_name (str): The base name of the molecule used to identify the polymeric residue codes. i.e. “3HB_trimer”</p>
+<p>Returns:
+None</p>
+<p>The function performs the following steps:
+1. Defines the file subtype and constructs the PDB file path.
+2. Creates an output directory if it doesn’t exist.
+3. Constructs the output PDB file name for the unsolved array.
+4. Calculates the dimensions of the box required to contain the 3x3 array of polymers.
+5. Generates the Packmol input file content with the specified parameters.
+6. Writes the Packmol input file to the output directory.
+7. Executes the Packmol command to generate the unsolved array PDB file.
+8. Adds ‘TER’ records to the generated PDB file using the <cite>add_ter_to_pckml_result</cite> function.</p>
+<dl class="simple">
+<dt>Example usage:</dt><dd><p>generate_3_3_polymer_array_pckml(dirs, ‘polymer_molecule’, ‘base_polymer’)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_build_systems.BuildAmberSystems.generate_polymer_3_3_array">
+<span class="sig-name descname"><span class="pre">generate_polymer_3_3_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_molecule_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">molecule_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_build_systems.html#BuildAmberSystems.generate_polymer_3_3_array"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_build_systems.BuildAmberSystems.generate_polymer_3_3_array" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_build_systems.BuildAmberSystems.generate_polymer_5_5_array">
+<span class="sig-name descname"><span class="pre">generate_polymer_5_5_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_molecule_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">molecule_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crystal_trans</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_build_systems.html#BuildAmberSystems.generate_polymer_5_5_array"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_build_systems.BuildAmberSystems.generate_polymer_5_5_array" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_build_systems.BuildAmberSystems.is_mol_parametrized">
+<span class="sig-name descname"><span class="pre">is_mol_parametrized</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">molecule_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_build_systems.html#BuildAmberSystems.is_mol_parametrized"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_build_systems.BuildAmberSystems.is_mol_parametrized" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_build_systems.BuildAmberSystems.is_poly_prepped">
+<span class="sig-name descname"><span class="pre">is_poly_prepped</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">molecule_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_build_systems.html#BuildAmberSystems.is_poly_prepped"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_build_systems.BuildAmberSystems.is_poly_prepped" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_build_systems.BuildAmberSystems.mod_pdb_file">
+<span class="sig-name descname"><span class="pre">mod_pdb_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pdb_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_build_systems.html#BuildAmberSystems.mod_pdb_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_build_systems.BuildAmberSystems.mod_pdb_file" title="Link to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Modify a PDB file by removing duplicate bond information.</dt><dd><p>Note: parametrization does not work if double bond connections are specified.</p>
+</dd>
+</dl>
+<p>Parameters:
+- pdb_file (str): The full path to the PDB file.</p>
+<p>Returns:
+None</p>
+<p>This function reads a PDB file, removes duplicate bond information in lines starting with “CONECT”,
+and writes the modified content back to the same file.</p>
+<p>Note: The modification involves removing duplicate atom connection information while maintaining the original order.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_build_systems.BuildAmberSystems.parameterize_mol">
+<span class="sig-name descname"><span class="pre">parameterize_mol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">molecule_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_build_systems.html#BuildAmberSystems.parameterize_mol"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_build_systems.BuildAmberSystems.parameterize_mol" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_build_systems.BuildAmberSystems.pdb_2_mol2">
+<span class="sig-name descname"><span class="pre">pdb_2_mol2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pdb_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_build_systems.html#BuildAmberSystems.pdb_2_mol2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_build_systems.BuildAmberSystems.pdb_2_mol2" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_build_systems.BuildAmberSystems.relax_molecule">
+<span class="sig-name descname"><span class="pre">relax_molecule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pdb_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">forcefield</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">200</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_build_systems.html#BuildAmberSystems.relax_molecule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_build_systems.BuildAmberSystems.relax_molecule" title="Link to this definition"></a></dt>
+<dd><p>Relax the molecule using the specified force field.</p>
+<p>This isn’t useful for polymers as wiggly conformations can be generated, this will also fail when there are very large molecules with many degrees of freedom
+It is advised to used this function for small molecules.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_build_systems.BuildAmberSystems.replace_coordinates_in_pdb">
+<span class="sig-name descname"><span class="pre">replace_coordinates_in_pdb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_pdb_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pdb_file_with_new_coords</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_build_systems.html#BuildAmberSystems.replace_coordinates_in_pdb"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_build_systems.BuildAmberSystems.replace_coordinates_in_pdb" title="Link to this definition"></a></dt>
+<dd><p>Replaces the coordinates in the original PDB file with new coordinates and writes to a new file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>original_pdb_file</strong> (<em>str</em>) – Path to the original PDB file.</p></li>
+<li><p><strong>pdb_file_with_new_coords</strong> (<em>str</em>) – Path to the PDB file with the new coordinates.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_build_systems.BuildAmberSystems.solvate_frame_from_sim">
+<span class="sig-name descname"><span class="pre">solvate_frame_from_sim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_molecule_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">system_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pdb_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">box</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_build_systems.html#BuildAmberSystems.solvate_frame_from_sim"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_build_systems.BuildAmberSystems.solvate_frame_from_sim" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_build_systems.BuildAmberSystems.solvate_molecule">
+<span class="sig-name descname"><span class="pre">solvate_molecule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">molecule_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_build_systems.html#BuildAmberSystems.solvate_molecule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_build_systems.BuildAmberSystems.solvate_molecule" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="sw_build_systems.BuildSystems">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sw_build_systems.</span></span><span class="sig-name descname"><span class="pre">BuildSystems</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">manager</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_build_systems.html#BuildSystems"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_build_systems.BuildSystems" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A class for building and simulating molecular systems.</p>
+<p>Provides methods for converting SMILES strings to PDB files, running simulations,
+generating residue codes, calculating distances, and aligning molecules.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sw_build_systems.BuildSystems.packmol_path">
+<span class="sig-name descname"><span class="pre">packmol_path</span></span><a class="headerlink" href="#sw_build_systems.BuildSystems.packmol_path" title="Link to this definition"></a></dt>
+<dd><p>Path to the Packmol executable.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sw_build_systems.BuildSystems.manager">
+<span class="sig-name descname"><span class="pre">manager</span></span><a class="headerlink" href="#sw_build_systems.BuildSystems.manager" title="Link to this definition"></a></dt>
+<dd><p>Manager object to handle file paths and directories.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_build_systems.BuildSystems.GenRescode_4_PolyUnits">
+<span class="sig-name descname"><span class="pre">GenRescode_4_PolyUnits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_build_systems.html#BuildSystems.GenRescode_4_PolyUnits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_build_systems.BuildSystems.GenRescode_4_PolyUnits" title="Link to this definition"></a></dt>
+<dd><p>Generates residue codes for polymeric units (e.g., trimers) and updates the CSV.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<em>str</em>) – The name of the trimer molecule.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Updates the residue code CSV.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_build_systems.BuildSystems.SmilesToPDB">
+<span class="sig-name descname"><span class="pre">SmilesToPDB</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smiles_string</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_build_systems.html#BuildSystems.SmilesToPDB"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_build_systems.BuildSystems.SmilesToPDB" title="Link to this definition"></a></dt>
+<dd><p>Converts a SMILES string to a PDB file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>smiles_string</strong> (<em>str</em>) – The SMILES string of the molecule.</p></li>
+<li><p><strong>output_file</strong> (<em>str</em>) – The name of the output PDB file.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Writes the 3D structure of the molecule to a PDB file.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_build_systems.BuildSystems.SmilesToPDB_GenResCode">
+<span class="sig-name descname"><span class="pre">SmilesToPDB_GenResCode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smiles</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_build_systems.html#BuildSystems.SmilesToPDB_GenResCode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_build_systems.BuildSystems.SmilesToPDB_GenResCode" title="Link to this definition"></a></dt>
+<dd><p>Converts a SMILES string to a PDB file and generates a residue code if not found.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>smiles</strong> (<em>str</em>) – The SMILES string of the molecule.</p></li>
+<li><p><strong>name</strong> (<em>str</em>) – The name of the molecule.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Writes the PDB file and updates the residue code CSV.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_build_systems.BuildSystems.align_molecule">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">align_molecule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_pdb</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis_to_align</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_build_systems.html#BuildSystems.align_molecule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_build_systems.BuildSystems.align_molecule" title="Link to this definition"></a></dt>
+<dd><p>Aligns the molecule structure to a specified axis (X, Y, or Z).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_file</strong> (<em>str</em>) – Path to a PDB file containing the molecule.</p></li>
+<li><p><strong>axis</strong> (<em>str</em>) – The axis to align the molecule to (‘X’, ‘Y’, or ‘Z’).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The aligned structure is saved with a new file name.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_build_systems.BuildSystems.find_existing_entry">
+<span class="sig-name descname"><span class="pre">find_existing_entry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">residue_codes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smiles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_build_systems.html#BuildSystems.find_existing_entry"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_build_systems.BuildSystems.find_existing_entry" title="Link to this definition"></a></dt>
+<dd><p>Finds an existing residue code entry by molecule name or SMILES string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>residue_codes</strong> (<em>list</em>) – The list of existing residue codes.</p></li>
+<li><p><strong>name</strong> (<em>str</em>) – The name of the molecule.</p></li>
+<li><p><strong>smiles</strong> (<em>str</em><em>, </em><em>optional</em>) – The SMILES string of the molecule.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The matching entry if found, otherwise None.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list or None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_build_systems.BuildSystems.generate_unique_residue_code">
+<span class="sig-name descname"><span class="pre">generate_unique_residue_code</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">residue_codes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">forbidden_codes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_build_systems.html#BuildSystems.generate_unique_residue_code"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_build_systems.BuildSystems.generate_unique_residue_code" title="Link to this definition"></a></dt>
+<dd><p>Generates a unique 3-letter residue code not in the forbidden or existing codes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>residue_codes</strong> (<em>list</em>) – List of existing residue codes.</p></li>
+<li><p><strong>forbidden_codes</strong> (<em>list</em><em>, </em><em>optional</em>) – List of forbidden residue codes.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A unique 3-letter residue code.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_build_systems.BuildSystems.get_xyz_dists">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_xyz_dists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_build_systems.html#BuildSystems.get_xyz_dists"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_build_systems.BuildSystems.get_xyz_dists" title="Link to this definition"></a></dt>
+<dd><p>Calculates the maximum distance between the largest and smallest XYZ coordinates in a file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>input_file</strong> (<em>str</em>) – Path to a ‘.pdb’ or ‘.xyz’ file.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Maximum distances along the x, y, and z axes.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_build_systems.BuildSystems.get_xyz_dists_help">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_xyz_dists_help</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_build_systems.html#BuildSystems.get_xyz_dists_help"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_build_systems.BuildSystems.get_xyz_dists_help" title="Link to this definition"></a></dt>
+<dd><p>Displays help information for the <cite>get_xyz_dists</cite> method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Prints out the docstring of <cite>get_xyz_dists</cite> method.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_build_systems.BuildSystems.load_residue_codes">
+<span class="sig-name descname"><span class="pre">load_residue_codes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">residue_code_csv</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_build_systems.html#BuildSystems.load_residue_codes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_build_systems.BuildSystems.load_residue_codes" title="Link to this definition"></a></dt>
+<dd><p>Loads existing residue codes from a CSV file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>residue_code_csv</strong> (<em>str</em>) – The path to the residue code CSV file.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of residue codes from the CSV file.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id0">
+<span class="sig-name descname"><span class="pre">packmol_path</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'/home/dan/packmol-20.14.4-docs1/packmol-20.14.4-docs1/packmol'</span></em><a class="headerlink" href="#id0" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_build_systems.BuildSystems.run_packmol">
+<span class="sig-name descname"><span class="pre">run_packmol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_file_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_build_systems.html#BuildSystems.run_packmol"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_build_systems.BuildSystems.run_packmol" title="Link to this definition"></a></dt>
+<dd><p>Runs the Packmol simulation with the specified input file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>input_file_name</strong> (<em>str</em>) – The name of the Packmol input file.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Executes Packmol simulation using the provided input file.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_build_systems.BuildSystems.update_packmol_path">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">update_packmol_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_packmol_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_build_systems.html#BuildSystems.update_packmol_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_build_systems.BuildSystems.update_packmol_path" title="Link to this definition"></a></dt>
+<dd><p>Updates the path to the Packmol executable.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>new_packmol_path</strong> (<em>str</em>) – The new path to the Packmol executable.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Updates the class-level variable for the Packmol path.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_build_systems.BuildSystems.update_residue_codes_csv">
+<span class="sig-name descname"><span class="pre">update_residue_codes_csv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smiles</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">residue_code</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">residue_code_csv</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_build_systems.html#BuildSystems.update_residue_codes_csv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_build_systems.BuildSystems.update_residue_codes_csv" title="Link to this definition"></a></dt>
+<dd><p>Updates the CSV file with a new residue code entry.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – The name of the molecule.</p></li>
+<li><p><strong>smiles</strong> (<em>str</em>) – The SMILES representation of the molecule.</p></li>
+<li><p><strong>residue_code</strong> (<em>str</em>) – The residue code to be added.</p></li>
+<li><p><strong>residue_code_csv</strong> (<em>str</em>) – Path to the CSV file for residue codes.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Appends the new residue code to the CSV file.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="sw_openmm.html" class="btn btn-neutral float-left" title="Module Documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Daniel J. York.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

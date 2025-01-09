@@ -7,6 +7,6 @@ sw_openmm
 ---------
 
 .. automodule:: sw_openmm
-   :members:
-   :undoc-members:
-   :show-inheritance:
+    :members:
+    :undoc-members:
+    :show-inheritance:

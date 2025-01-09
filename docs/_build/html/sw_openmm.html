@@ -1,0 +1,1429 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Module Documentation &mdash; Polymer Simulator 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=01f34227"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="sw_build_systems Documentation" href="sw_build_systems.html" />
+    <link rel="prev" title="Package Contents" href="packagecontents.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Polymer Simulator
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="packagecontents.html">Package Contents</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Module Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-sw_openmm">sw_openmm</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#sw_openmm.ANISimulation"><code class="docutils literal notranslate"><span class="pre">ANISimulation</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.ANISimulation.potential"><code class="docutils literal notranslate"><span class="pre">ANISimulation.potential</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.ANISimulation.directories"><code class="docutils literal notranslate"><span class="pre">ANISimulation.directories</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.ANISimulation.input_file"><code class="docutils literal notranslate"><span class="pre">ANISimulation.input_file</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.ANISimulation.__init__"><code class="docutils literal notranslate"><span class="pre">ANISimulation.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.ANISimulation.__str__"><code class="docutils literal notranslate"><span class="pre">ANISimulation.__str__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.ANISimulation.set_potential"><code class="docutils literal notranslate"><span class="pre">ANISimulation.set_potential()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id0"><code class="docutils literal notranslate"><span class="pre">ANISimulation.potential</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id1"><code class="docutils literal notranslate"><span class="pre">ANISimulation.set_potential()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#sw_openmm.AmberSimulation"><code class="docutils literal notranslate"><span class="pre">AmberSimulation</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.AmberSimulation.manager"><code class="docutils literal notranslate"><span class="pre">AmberSimulation.manager</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.AmberSimulation.filename"><code class="docutils literal notranslate"><span class="pre">AmberSimulation.filename</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.AmberSimulation.amb_coordinates"><code class="docutils literal notranslate"><span class="pre">AmberSimulation.amb_coordinates</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.AmberSimulation.amb_topology"><code class="docutils literal notranslate"><span class="pre">AmberSimulation.amb_topology</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.AmberSimulation.__new__"><code class="docutils literal notranslate"><span class="pre">AmberSimulation.__new__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.AmberSimulation.__init__"><code class="docutils literal notranslate"><span class="pre">AmberSimulation.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.AmberSimulation.__str__"><code class="docutils literal notranslate"><span class="pre">AmberSimulation.__str__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#sw_openmm.BuildSimulation"><code class="docutils literal notranslate"><span class="pre">BuildSimulation</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.BuildSimulation.pressure"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.pressure</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.BuildSimulation.temp"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.temp</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.BuildSimulation.timestep"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.timestep</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.BuildSimulation.friction_coeff"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.friction_coeff</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.BuildSimulation.total_steps"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.total_steps</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.BuildSimulation.reporter_freq"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.reporter_freq</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.BuildSimulation.anneal_parameters"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.anneal_parameters</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.BuildSimulation.type_of_simulation"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.type_of_simulation()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.BuildSimulation.minimize_energy"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.minimize_energy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.BuildSimulation.minimize_energy_help"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.minimize_energy_help()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.BuildSimulation.anneal"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.anneal()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.BuildSimulation.anneal_help"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.anneal_help()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.BuildSimulation.equilibrate"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.equilibrate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.BuildSimulation.equilibrate_help"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.equilibrate_help()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.BuildSimulation.production_run"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.production_run()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.BuildSimulation.production_run_help"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.production_run_help()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.BuildSimulation.__repr__"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.__repr__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.BuildSimulation.__str__"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.__str__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.BuildSimulation.set_temperature"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.set_temperature()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.BuildSimulation.set_pressure"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.set_pressure()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.BuildSimulation.set_timestep"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.set_timestep()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.BuildSimulation.set_friction_coeff"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.set_friction_coeff()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.BuildSimulation.set_total_steps"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.set_total_steps()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.BuildSimulation.set_reporter_freq"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.set_reporter_freq()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.BuildSimulation.set_anneal_parameters"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.set_anneal_parameters()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.BuildSimulation.graph_state_data"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.graph_state_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.BuildSimulation.anneal_NVT"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.anneal_NVT()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.anneal_help()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.anneal_parameters</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.BuildSimulation.basic_NPT"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.basic_NPT()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.BuildSimulation.basic_NVT"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.basic_NVT()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.BuildSimulation.display_start_time"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.display_start_time()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.equilibrate_help()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id5"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.friction_coeff</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id6"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.graph_state_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.BuildSimulation.graph_state_data_help"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.graph_state_data_help()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id7"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.minimize_energy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id8"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.minimize_energy_help()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.BuildSimulation.minimized_only"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.minimized_only</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.BuildSimulation.nonbondedcutoff"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.nonbondedcutoff</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id9"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.pressure</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id10"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.production_run_help()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id11"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.reporter_freq</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.BuildSimulation.savepdb_traj"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.savepdb_traj</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.BuildSimulation.savepdb_trajectories"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.savepdb_trajectories()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id12"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.set_anneal_parameters()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.BuildSimulation.set_anneal_parameters_help"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.set_anneal_parameters_help()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id13"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.set_friction_coeff()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.BuildSimulation.set_nonbondedcutoff"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.set_nonbondedcutoff()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id14"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.set_pressure()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id15"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.set_reporter_freq()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id16"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.set_temperature()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id17"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.set_timestep()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id18"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.set_total_steps()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.BuildSimulation.strain"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.strain()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id19"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.temp</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.BuildSimulation.thermal_ramp"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.thermal_ramp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.BuildSimulation.timestamp"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.timestamp</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id20"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.timestep</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id21"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.total_steps</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id22"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.type_of_simulation()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.BuildSimulation.write_log_csv"><code class="docutils literal notranslate"><span class="pre">BuildSimulation.write_log_csv()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#sw_openmm.DataWriter"><code class="docutils literal notranslate"><span class="pre">DataWriter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.DataWriter.stateDataReporter"><code class="docutils literal notranslate"><span class="pre">DataWriter.stateDataReporter</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#sw_openmm.DcdWriter"><code class="docutils literal notranslate"><span class="pre">DcdWriter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.DcdWriter.dcdReporter"><code class="docutils literal notranslate"><span class="pre">DcdWriter.dcdReporter</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#sw_openmm.PositionsML"><code class="docutils literal notranslate"><span class="pre">PositionsML</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.PositionsML.get_pbc"><code class="docutils literal notranslate"><span class="pre">PositionsML.get_pbc()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#sw_openmm.TopologyML"><code class="docutils literal notranslate"><span class="pre">TopologyML</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.TopologyML.create_chains"><code class="docutils literal notranslate"><span class="pre">TopologyML.create_chains()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.TopologyML.create_residue"><code class="docutils literal notranslate"><span class="pre">TopologyML.create_residue()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.TopologyML.create_residues"><code class="docutils literal notranslate"><span class="pre">TopologyML.create_residues()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.TopologyML.create_topo"><code class="docutils literal notranslate"><span class="pre">TopologyML.create_topo()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.TopologyML.get_chain_obj"><code class="docutils literal notranslate"><span class="pre">TopologyML.get_chain_obj()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.TopologyML.get_pm_atoms"><code class="docutils literal notranslate"><span class="pre">TopologyML.get_pm_atoms()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.TopologyML.get_pm_chains"><code class="docutils literal notranslate"><span class="pre">TopologyML.get_pm_chains()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.TopologyML.get_pm_num_atoms"><code class="docutils literal notranslate"><span class="pre">TopologyML.get_pm_num_atoms()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.TopologyML.get_pm_residues"><code class="docutils literal notranslate"><span class="pre">TopologyML.get_pm_residues()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sw_openmm.TopologyML.get_res_obj"><code class="docutils literal notranslate"><span class="pre">TopologyML.get_res_obj()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#sw_openmm.get_rmsd"><code class="docutils literal notranslate"><span class="pre">get_rmsd()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sw_build_systems.html">sw_build_systems Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Polymer Simulator</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Module Documentation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/sw_openmm.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-documentation">
+<h1>Module Documentation<a class="headerlink" href="#module-documentation" title="Link to this heading"></a></h1>
+<p>This section includes the documentation for the <strong>sw_openmm</strong> module.</p>
+<section id="module-sw_openmm">
+<span id="sw-openmm"></span><h2>sw_openmm<a class="headerlink" href="#module-sw_openmm" title="Link to this heading"></a></h2>
+<p>Created on Wed Mar 13 13:50:12 2024</p>
+<p>&#64;author: danie</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="sw_openmm.ANISimulation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sw_openmm.</span></span><span class="sig-name descname"><span class="pre">ANISimulation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directories</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#ANISimulation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_openmm.ANISimulation" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sw_openmm.BuildSimulation" title="sw_openmm.BuildSimulation"><code class="xref py py-class docutils literal notranslate"><span class="pre">BuildSimulation</span></code></a></p>
+<p>A class representing an ANI (Atomic Neural Network Interaction) molecular dynamics simulation.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sw_openmm.ANISimulation.potential">
+<span class="sig-name descname"><span class="pre">potential</span></span><a class="headerlink" href="#sw_openmm.ANISimulation.potential" title="Link to this definition"></a></dt>
+<dd><p>A string representing the ANI potential used in the simulation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sw_openmm.ANISimulation.directories">
+<span class="sig-name descname"><span class="pre">directories</span></span><a class="headerlink" href="#sw_openmm.ANISimulation.directories" title="Link to this definition"></a></dt>
+<dd><p>A string representing the directories where simulation files are stored.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sw_openmm.ANISimulation.input_file">
+<span class="sig-name descname"><span class="pre">input_file</span></span><a class="headerlink" href="#sw_openmm.ANISimulation.input_file" title="Link to this definition"></a></dt>
+<dd><p>A string representing the path to the input file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_openmm.ANISimulation.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directories</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#ANISimulation.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_openmm.ANISimulation.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initializes an ANISimulation object with specified directories and input file, sets up ANI coordinates, potential, and topology.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_openmm.ANISimulation.__str__">
+<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#ANISimulation.__str__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_openmm.ANISimulation.__str__" title="Link to this definition"></a></dt>
+<dd><p>Returns a string representation of the ANISimulation object.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_openmm.ANISimulation.set_potential">
+<span class="sig-name descname"><span class="pre">set_potential</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">potential</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#ANISimulation.set_potential"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_openmm.ANISimulation.set_potential" title="Link to this definition"></a></dt>
+<dd><p>Class method to set the ANI potential for all instances of the class.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id0">
+<span class="sig-name descname"><span class="pre">potential</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'ani2x'</span></em><a class="headerlink" href="#id0" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id1">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_potential</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">potential</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#ANISimulation.set_potential"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id1" title="Link to this definition"></a></dt>
+<dd><p>Set the potential function for the simulation.</p>
+<p>This method allows the user to change the potential function used in the simulation.
+It can be used to swap between different potential models, such as switching to
+an ANI (Artificial Neural Network) potential.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>potential</strong> (<em>object</em>) – The new potential function or object to be used in the simulation.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p># Set a new potential function
+AmberSimulation.set_potential(new_potential)</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This method currently serves as a placeholder for switching to ANI 1 potential,
+but it can be extended for other potential models as needed.</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="sw_openmm.AmberSimulation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sw_openmm.</span></span><span class="sig-name descname"><span class="pre">AmberSimulation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#AmberSimulation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_openmm.AmberSimulation" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sw_openmm.BuildSimulation" title="sw_openmm.BuildSimulation"><code class="xref py py-class docutils literal notranslate"><span class="pre">BuildSimulation</span></code></a></p>
+<p>A class representing an AMBER molecular dynamics simulation.</p>
+<p>This class is designed to initialize and manage an AMBER simulation using specified
+topology and coordinates files. It inherits from the BuildSimulation class.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sw_openmm.AmberSimulation.manager">
+<span class="sig-name descname"><span class="pre">manager</span></span><a class="headerlink" href="#sw_openmm.AmberSimulation.manager" title="Link to this definition"></a></dt>
+<dd><p>A manager object that handles directories and file paths for simulations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sw_openmm.AmberSimulation.filename">
+<span class="sig-name descname"><span class="pre">filename</span></span><a class="headerlink" href="#sw_openmm.AmberSimulation.filename" title="Link to this definition"></a></dt>
+<dd><p>The base name of the topology file without the extension.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sw_openmm.AmberSimulation.amb_coordinates">
+<span class="sig-name descname"><span class="pre">amb_coordinates</span></span><a class="headerlink" href="#sw_openmm.AmberSimulation.amb_coordinates" title="Link to this definition"></a></dt>
+<dd><p>An object representing the AMBER coordinates file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>app.AmberInpcrdFile</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sw_openmm.AmberSimulation.amb_topology">
+<span class="sig-name descname"><span class="pre">amb_topology</span></span><a class="headerlink" href="#sw_openmm.AmberSimulation.amb_topology" title="Link to this definition"></a></dt>
+<dd><p>An object representing the AMBER topology file,
+which also includes periodic box vectors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>app.AmberPrmtopFile</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_openmm.AmberSimulation.__new__">
+<span class="sig-name descname"><span class="pre">__new__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#AmberSimulation.__new__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_openmm.AmberSimulation.__new__" title="Link to this definition"></a></dt>
+<dd><p>Creates a new instance of AmberSimulation. Ensures the correct number of arguments
+are provided before creating an instance.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_openmm.AmberSimulation.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">manager</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topology_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coordinates_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#AmberSimulation.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_openmm.AmberSimulation.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initializes an AmberSimulation object with the specified manager, topology file,
+and coordinates file.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_openmm.AmberSimulation.__str__">
+<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#AmberSimulation.__str__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_openmm.AmberSimulation.__str__" title="Link to this definition"></a></dt>
+<dd><p>Returns a user-friendly string representation of the AmberSimulation object.</p>
+</dd></dl>
+
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>TypeError</strong> – If an incorrect number of arguments are provided to the __new__ method.</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p># Create a new AmberSimulation object
+sim = AmberSimulation(manager, ‘path/to/topology.prmtop’, ‘path/to/coordinates.inpcrd’)</p>
+<p># Print the string representation
+print(sim)</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="sw_openmm.BuildSimulation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sw_openmm.</span></span><span class="sig-name descname"><span class="pre">BuildSimulation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">manager</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#BuildSimulation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_openmm.BuildSimulation" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class for building and managing molecular simulations.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sw_openmm.BuildSimulation.pressure">
+<span class="sig-name descname"><span class="pre">pressure</span></span><a class="headerlink" href="#sw_openmm.BuildSimulation.pressure" title="Link to this definition"></a></dt>
+<dd><p>The default pressure for simulations, in atmospheres.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sw_openmm.BuildSimulation.temp">
+<span class="sig-name descname"><span class="pre">temp</span></span><a class="headerlink" href="#sw_openmm.BuildSimulation.temp" title="Link to this definition"></a></dt>
+<dd><p>The default temperature for simulations, in Kelvin.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sw_openmm.BuildSimulation.timestep">
+<span class="sig-name descname"><span class="pre">timestep</span></span><a class="headerlink" href="#sw_openmm.BuildSimulation.timestep" title="Link to this definition"></a></dt>
+<dd><p>The default timestep for simulations, in femtoseconds.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sw_openmm.BuildSimulation.friction_coeff">
+<span class="sig-name descname"><span class="pre">friction_coeff</span></span><a class="headerlink" href="#sw_openmm.BuildSimulation.friction_coeff" title="Link to this definition"></a></dt>
+<dd><p>The default friction coefficient for Langevin dynamics simulations, in units of 1/picoseconds.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sw_openmm.BuildSimulation.total_steps">
+<span class="sig-name descname"><span class="pre">total_steps</span></span><a class="headerlink" href="#sw_openmm.BuildSimulation.total_steps" title="Link to this definition"></a></dt>
+<dd><p>The default total number of steps for simulations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sw_openmm.BuildSimulation.reporter_freq">
+<span class="sig-name descname"><span class="pre">reporter_freq</span></span><a class="headerlink" href="#sw_openmm.BuildSimulation.reporter_freq" title="Link to this definition"></a></dt>
+<dd><p>The default frequency for reporting data during simulations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sw_openmm.BuildSimulation.anneal_parameters">
+<span class="sig-name descname"><span class="pre">anneal_parameters</span></span><a class="headerlink" href="#sw_openmm.BuildSimulation.anneal_parameters" title="Link to this definition"></a></dt>
+<dd><p>Parameters for simulated annealing, including start temp, max temp, cycles, holding steps,
+and steps at each temperature.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_openmm.BuildSimulation.type_of_simulation">
+<span class="sig-name descname"><span class="pre">type_of_simulation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#BuildSimulation.type_of_simulation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_openmm.BuildSimulation.type_of_simulation" title="Link to this definition"></a></dt>
+<dd><p>Determine the type of simulation.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_openmm.BuildSimulation.minimize_energy">
+<span class="sig-name descname"><span class="pre">minimize_energy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#BuildSimulation.minimize_energy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_openmm.BuildSimulation.minimize_energy" title="Link to this definition"></a></dt>
+<dd><p>Perform energy minimization of the system.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_openmm.BuildSimulation.minimize_energy_help">
+<span class="sig-name descname"><span class="pre">minimize_energy_help</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#BuildSimulation.minimize_energy_help"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_openmm.BuildSimulation.minimize_energy_help" title="Link to this definition"></a></dt>
+<dd><p>Display help information for the minimize_energy method.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_openmm.BuildSimulation.anneal">
+<span class="sig-name descname"><span class="pre">anneal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simulation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_temp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_temp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cycles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">holding_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">steps_at_temp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sw_openmm.BuildSimulation.anneal" title="Link to this definition"></a></dt>
+<dd><p>Perform simulated annealing on the provided simulation system.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_openmm.BuildSimulation.anneal_help">
+<span class="sig-name descname"><span class="pre">anneal_help</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#BuildSimulation.anneal_help"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_openmm.BuildSimulation.anneal_help" title="Link to this definition"></a></dt>
+<dd><p>Display help information for the anneal method.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_openmm.BuildSimulation.equilibrate">
+<span class="sig-name descname"><span class="pre">equilibrate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simulation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">total_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pressure</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sw_openmm.BuildSimulation.equilibrate" title="Link to this definition"></a></dt>
+<dd><p>Equilibrate the provided simulation.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_openmm.BuildSimulation.equilibrate_help">
+<span class="sig-name descname"><span class="pre">equilibrate_help</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#BuildSimulation.equilibrate_help"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_openmm.BuildSimulation.equilibrate_help" title="Link to this definition"></a></dt>
+<dd><p>Display help information for the equilibrate method.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_openmm.BuildSimulation.production_run">
+<span class="sig-name descname"><span class="pre">production_run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simulation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">total_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sw_openmm.BuildSimulation.production_run" title="Link to this definition"></a></dt>
+<dd><p>Perform a production run simulation.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_openmm.BuildSimulation.production_run_help">
+<span class="sig-name descname"><span class="pre">production_run_help</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#BuildSimulation.production_run_help"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_openmm.BuildSimulation.production_run_help" title="Link to this definition"></a></dt>
+<dd><p>Display help information for the production_run method.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_openmm.BuildSimulation.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#BuildSimulation.__repr__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_openmm.BuildSimulation.__repr__" title="Link to this definition"></a></dt>
+<dd><p>Representation of the simulation parameters.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_openmm.BuildSimulation.__str__">
+<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#BuildSimulation.__str__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_openmm.BuildSimulation.__str__" title="Link to this definition"></a></dt>
+<dd><p>String representation of the simulation object.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_openmm.BuildSimulation.set_temperature">
+<span class="sig-name descname"><span class="pre">set_temperature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#BuildSimulation.set_temperature"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_openmm.BuildSimulation.set_temperature" title="Link to this definition"></a></dt>
+<dd><p>Set the temperature for simulations.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_openmm.BuildSimulation.set_pressure">
+<span class="sig-name descname"><span class="pre">set_pressure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pressure</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#BuildSimulation.set_pressure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_openmm.BuildSimulation.set_pressure" title="Link to this definition"></a></dt>
+<dd><p>Set the pressure for simulations.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_openmm.BuildSimulation.set_timestep">
+<span class="sig-name descname"><span class="pre">set_timestep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timestep</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#BuildSimulation.set_timestep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_openmm.BuildSimulation.set_timestep" title="Link to this definition"></a></dt>
+<dd><p>Set the timestep for simulations.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_openmm.BuildSimulation.set_friction_coeff">
+<span class="sig-name descname"><span class="pre">set_friction_coeff</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">friction_coeff</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#BuildSimulation.set_friction_coeff"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_openmm.BuildSimulation.set_friction_coeff" title="Link to this definition"></a></dt>
+<dd><p>Set the friction coefficient for simulations.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_openmm.BuildSimulation.set_total_steps">
+<span class="sig-name descname"><span class="pre">set_total_steps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">total_steps</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#BuildSimulation.set_total_steps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_openmm.BuildSimulation.set_total_steps" title="Link to this definition"></a></dt>
+<dd><p>Set the total number of steps for simulations.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_openmm.BuildSimulation.set_reporter_freq">
+<span class="sig-name descname"><span class="pre">set_reporter_freq</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reporter_freq</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#BuildSimulation.set_reporter_freq"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_openmm.BuildSimulation.set_reporter_freq" title="Link to this definition"></a></dt>
+<dd><p>Set the reporter frequency for simulations.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_openmm.BuildSimulation.set_anneal_parameters">
+<span class="sig-name descname"><span class="pre">set_anneal_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_anneal_parameters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#BuildSimulation.set_anneal_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_openmm.BuildSimulation.set_anneal_parameters" title="Link to this definition"></a></dt>
+<dd><p>Set annealing parameters.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_openmm.BuildSimulation.graph_state_data">
+<span class="sig-name descname"><span class="pre">graph_state_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#BuildSimulation.graph_state_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_openmm.BuildSimulation.graph_state_data" title="Link to this definition"></a></dt>
+<dd><p>Graph the state data from a data file.</p>
+</dd></dl>
+
+<p class="rubric">Notes</p>
+<p>This class provides a comprehensive interface for setting up, running, and managing molecular simulations.
+It includes methods for energy minimization, simulated annealing, equilibration, production runs, and visualization of data.</p>
+<dl class="simple">
+<dt>Child Classes (this class is used through these child classes, do not try to call BuildSimulaiton on its own unless you plan to only utilise static methods):</dt><dd><ul class="simple">
+<li><p>ANISimulation: A class representing ANI (Atomic Neural Network Interaction) molecular dynamics simulations.</p></li>
+<li><p>AmberSimulation: A class representing AMBER molecular dynamics simulations.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_openmm.BuildSimulation.anneal_NVT">
+<span class="sig-name descname"><span class="pre">anneal_NVT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">simulation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_temp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_temp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cycles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">holding_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">steps_at_temp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#BuildSimulation.anneal_NVT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_openmm.BuildSimulation.anneal_NVT" title="Link to this definition"></a></dt>
+<dd><p>Function to perform simulated annealing on the provided simulation system.</p>
+<dl>
+<dt>USAGE:</dt><dd><p>annealed_sim = sim.anneal(simulation, start_temp, max_temp, cycles, holding_steps, steps_at_temp)</p>
+</dd>
+<dt>Recommended USAGE:</dt><dd><p>annealed_sim = sim.anneal(simulation)</p>
+<p>where annealing parameters are set with the following function:</p>
+<p>simulation_object.set_anneal_parameters([start_temp, max_temp, cycles, holding_steps, steps_at_each_temp])</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>simulation</strong> (<em>app.Simulation</em>) – The simulation object to perform annealing on.</p></li>
+<li><p><strong>start_temp</strong> (<em>float</em><em>, </em><em>optional</em>) – The starting temperature for annealing in Kelvin. Defaults to None,
+in which case the value is fetched from self.anneal_parameters[0].</p></li>
+<li><p><strong>max_temp</strong> (<em>float</em><em>, </em><em>optional</em>) – The maximum temperature for annealing in Kelvin. Defaults to None,
+in which case the value is fetched from self.anneal_parameters[1].</p></li>
+<li><p><strong>cycles</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of annealing cycles to perform. Defaults to None,
+in which case the value is fetched from self.anneal_parameters[2].</p></li>
+<li><p><strong>holding_steps</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of steps to hold the system at each temperature.
+Defaults to None, in which case the value is fetched from self.anneal_parameters[3].</p></li>
+<li><p><strong>steps_at_temp</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of steps to perform at each temperature.
+Defaults to None, in which case the value is fetched from self.anneal_parameters[4].</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>A tuple containing the simulation object after annealing and the filename of the data file generated.</dt><dd><p>in the following format:</p>
+</dd>
+</dl>
+<p>(simulation_object, path_to_data_file)</p>
+</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>This method performs simulated annealing on the provided simulation object. It initializes the system with the</p>
+<p>provided initial conditions and runs annealing cycles adjusting the temperature according to the specified parameters.
+The system’s state is updated throughout the annealing process, and reporters are set up to record trajectory and
+simulation data.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id2">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">anneal_help</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#BuildSimulation.anneal_help"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id2" title="Link to this definition"></a></dt>
+<dd><p>Display help information for the anneal method.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id3">
+<span class="sig-name descname"><span class="pre">anneal_parameters</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[300,</span> <span class="pre">700,</span> <span class="pre">5,</span> <span class="pre">3000,</span> <span class="pre">100]</span></em><a class="headerlink" href="#id3" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_openmm.BuildSimulation.basic_NPT">
+<span class="sig-name descname"><span class="pre">basic_NPT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">simulation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">total_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pressure</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#BuildSimulation.basic_NPT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_openmm.BuildSimulation.basic_NPT" title="Link to this definition"></a></dt>
+<dd><p>Function to equilibrate the provided simulation to reach a specified temperature and pressure.</p>
+<dl>
+<dt>USAGE:</dt><dd><p>equilibrated_sim = sim.anneal(simulation, total_steps, temp, pressure)</p>
+</dd>
+<dt>Recommended USAGE:</dt><dd><p>equilibrated_sim = sim.anneal(simulation)</p>
+<p>where annealing parameters are set with the following functions:</p>
+<p>simulation_object.set_temperature(temperature)
+simulation_object.set_pressure(pressure)
+simulation_object.set_total_steps(total_steps)</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>simulation</strong> (<em>app.Simulation</em>) – The simulation object to equilibrate.</p></li>
+<li><p><strong>total_steps</strong> (<em>int</em><em>, </em><em>optional</em>) – The total number of steps to run for equilibration. Defaults to None,
+in which case the value is fetched from self.total_steps.</p></li>
+<li><p><strong>temp</strong> (<em>float</em><em>, </em><em>optional</em>) – The target temperature for equilibration in Kelvin. Defaults to None,
+in which case the value is fetched from self.temp.</p></li>
+<li><p><strong>pressure</strong> (<em>float</em><em>, </em><em>optional</em>) – The target pressure for equilibration in atmospheres. Defaults to None,
+in which case the value is fetched from self.pressure.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>A tuple containing the simulation object after equilibration and the filename of the data file generated</dt><dd><p>in the following format:</p>
+</dd>
+</dl>
+<p>(simulation_object, path_to_data_file)</p>
+</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>This method performs equilibration on the provided simulation object to reach the specified temperature and pressure.
+It initializes the system with the provided initial conditions and runs the simulation for the specified number
+of steps. The system’s state is updated throughout the equilibration process, and reporters are set up to record
+trajectory and simulation data.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_openmm.BuildSimulation.basic_NVT">
+<span class="sig-name descname"><span class="pre">basic_NVT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">simulation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">total_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#BuildSimulation.basic_NVT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_openmm.BuildSimulation.basic_NVT" title="Link to this definition"></a></dt>
+<dd><p>Function to perform a production run simulation with the provided parameters.</p>
+<dl>
+<dt>USAGE:</dt><dd><p>production_run_sim = sim.anneal(simulation, total_steps, temp)</p>
+</dd>
+<dt>Recommended USAGE:</dt><dd><p>production_run_sim = sim.anneal(simulation)</p>
+<p>where annealing parameters are set with the following functions:</p>
+<p>simulation_object.set_temperature(temperature)
+simulation_object.set_total_steps(total_steps)</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>simulation</strong> (<em>app.Simulation</em>) – The simulation object to run the production simulation on.</p></li>
+<li><p><strong>total_steps</strong> (<em>int</em><em>, </em><em>optional</em>) – The total number of steps to run for the production simulation.
+Defaults to None, in which case the value is fetched from self.total_steps.</p></li>
+<li><p><strong>temp</strong> (<em>float</em><em>, </em><em>optional</em>) – The temperature for the production simulation in Kelvin.
+Defaults to None, in which case the value is fetched from self.temp.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>A tuple containing the simulation object after the production run and the filename of the data file generated.</dt><dd><p>in the following format:</p>
+</dd>
+</dl>
+<p>(simulation_object, path_to_data_file)</p>
+</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>This method performs a production run simulation with the provided simulation object and parameters.
+It initializes the system with the provided initial conditions and runs the simulation for the specified
+number of steps. The system’s state is updated throughout the production run, and reporters are set up to
+record trajectory and simulation data.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_openmm.BuildSimulation.display_start_time">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">display_start_time</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#BuildSimulation.display_start_time"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_openmm.BuildSimulation.display_start_time" title="Link to this definition"></a></dt>
+<dd><p>Display the simulation start time.</p>
+<p>This class method prints the timestamp indicating when the simulation was initiated.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>cls</strong> (<em>type</em>) – The class on which the method is called.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id4">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">equilibrate_help</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#BuildSimulation.equilibrate_help"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id4" title="Link to this definition"></a></dt>
+<dd><p>Display help information for the equilibrate method.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id5">
+<span class="sig-name descname"><span class="pre">friction_coeff</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1.0</span></em><a class="headerlink" href="#id5" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id6">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">graph_state_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#BuildSimulation.graph_state_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id6" title="Link to this definition"></a></dt>
+<dd><p>Function to generate a plot from simulation data and save it as a PNG file.</p>
+<dl>
+<dt>USAGE:</dt><dd><dl class="simple">
+<dt>The variable used for this plot is the second element of the tuple coming from the following method:</dt><dd><p><strong>anneal</strong>
+<strong>equilibrate</strong>
+<strong>production_run</strong></p>
+</dd>
+</dl>
+<p>sim.graph_state_data(returned_simulation_variable)</p>
+<dl class="simple">
+<dt>An example of this returned_simulation_varaible is:</dt><dd><p>sim.anneal(minimized_sim)[0]</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data_file</strong> (<em>str</em>) – The path to the CSV file containing simulation data.</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>This method reads simulation data from a CSV file, creates plots for each column of data
+against time, and saves the resulting plot as a PNG file. The CSV file is expected to have
+a “Time (ps)” column and numerical data columns representing different states of the
+simulation over time.</p>
+<p>The generated plot will contain multiple subplots, each showing a different state variable
+plotted against time. The number of rows and columns of subplots is determined automatically
+based on the number of data columns, with a maximum of 2 columns per row. If there are more
+data columns than can fit in the specified layout, some subplots may be omitted.</p>
+<p>The PNG file containing the plot will be saved in the same directory as the data file with
+the same name, but with the extension changed to “.png”.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_openmm.BuildSimulation.graph_state_data_help">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">graph_state_data_help</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#BuildSimulation.graph_state_data_help"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_openmm.BuildSimulation.graph_state_data_help" title="Link to this definition"></a></dt>
+<dd><p>Display help information for the method to plot state data.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id7">
+<span class="sig-name descname"><span class="pre">minimize_energy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#BuildSimulation.minimize_energy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id7" title="Link to this definition"></a></dt>
+<dd><p>Function to perform energy minimization of the system using Langevin dynamics.</p>
+<dl class="simple">
+<dt>USAGE:</dt><dd><p>minimized_sim = simulation_object.minimize_energy()</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>minimized_simulation_object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id8">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">minimize_energy_help</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#BuildSimulation.minimize_energy_help"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id8" title="Link to this definition"></a></dt>
+<dd><p>Display help information for the minimize_energy method.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sw_openmm.BuildSimulation.minimized_only">
+<span class="sig-name descname"><span class="pre">minimized_only</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#sw_openmm.BuildSimulation.minimized_only" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sw_openmm.BuildSimulation.nonbondedcutoff">
+<span class="sig-name descname"><span class="pre">nonbondedcutoff</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1.0</span></em><a class="headerlink" href="#sw_openmm.BuildSimulation.nonbondedcutoff" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id9">
+<span class="sig-name descname"><span class="pre">pressure</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#id9" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id10">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">production_run_help</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#BuildSimulation.production_run_help"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id10" title="Link to this definition"></a></dt>
+<dd><p>Display help information for the production run method.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id11">
+<span class="sig-name descname"><span class="pre">reporter_freq</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1000</span></em><a class="headerlink" href="#id11" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sw_openmm.BuildSimulation.savepdb_traj">
+<span class="sig-name descname"><span class="pre">savepdb_traj</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#sw_openmm.BuildSimulation.savepdb_traj" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_openmm.BuildSimulation.savepdb_trajectories">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">savepdb_trajectories</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">boolean</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#BuildSimulation.savepdb_trajectories"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_openmm.BuildSimulation.savepdb_trajectories" title="Link to this definition"></a></dt>
+<dd><p>Set whether to save simulation trajectories in PDB format.</p>
+<p>This method allows the user to toggle the saving of simulation trajectories
+in both PDB and DCD formats. If enabled, trajectories are saved in both formats;
+otherwise, only DCD format is used.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>boolean</strong> (<em>bool</em>) – A flag indicating whether to save PDB trajectories.
+- <cite>True</cite> to save both PDB and DCD formats.
+- <cite>False</cite> to save only DCD format.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the provided argument is not a boolean.</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p># Enable PDB trajectory saving
+Simulation.savepdb_trajectories(True)</p>
+<p># Disable PDB trajectory saving
+Simulation.savepdb_trajectories(False)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id12">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_anneal_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_anneal_parameters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#BuildSimulation.set_anneal_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id12" title="Link to this definition"></a></dt>
+<dd><p>Class method to set annealing parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cls</strong> – The class itself.</p></li>
+<li><p><strong>new_anneal_parameters</strong> (<em>list</em>) – List of annealing parameters in the format [start_temp, max_temp, cycles, holding_steps, steps_at_temp].</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ValueError</strong> – If the length of new_anneal_parameters does not match the expected length.</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>This method sets the annealing parameters class attribute to the specified list.
+It prints a confirmation message with the provided parameters.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_openmm.BuildSimulation.set_anneal_parameters_help">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_anneal_parameters_help</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#BuildSimulation.set_anneal_parameters_help"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_openmm.BuildSimulation.set_anneal_parameters_help" title="Link to this definition"></a></dt>
+<dd><p>Display help information for setting annealing parameters.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id13">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_friction_coeff</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">friction_coeff</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#BuildSimulation.set_friction_coeff"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id13" title="Link to this definition"></a></dt>
+<dd><p>Class method to set the friction_coeff for simulations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cls</strong> – The class itself.</p></li>
+<li><p><strong>friction_coeff</strong> (<em>float</em>) – The friction_coeff to set, in Picoseconds.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>This method sets the friction_coeff class attribute to the specified value and prints a confirmation message.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_openmm.BuildSimulation.set_nonbondedcutoff">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_nonbondedcutoff</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nonbondedcutoff</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#BuildSimulation.set_nonbondedcutoff"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_openmm.BuildSimulation.set_nonbondedcutoff" title="Link to this definition"></a></dt>
+<dd><p>Set the non-bonded cutoff distance for the simulation.</p>
+<p>This method allows the user to update the non-bonded cutoff distance, which
+determines how far the simulation considers interactions between non-bonded
+particles.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>nonbondedcutoff</strong> (<em>float</em>) – The new cutoff distance in nanometers.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the provided argument is not a float.</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p>Simulation.set_nonbondedcutoff(5.0)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id14">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_pressure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pressure</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#BuildSimulation.set_pressure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id14" title="Link to this definition"></a></dt>
+<dd><p>Class method to set the pressure for simulations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cls</strong> – The class itself.</p></li>
+<li><p><strong>pressure</strong> (<em>float</em>) – The pressure to set, in Atmospheres.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>This method sets the pressure class attribute to the specified value and prints a confirmation message.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id15">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_reporter_freq</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reporter_freq</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#BuildSimulation.set_reporter_freq"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id15" title="Link to this definition"></a></dt>
+<dd><p>Class method to set the reporter_freq for simulations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cls</strong> – The class itself.</p></li>
+<li><p><strong>reporter_freq</strong> (<em>int</em>) – The reporter_freq to set, as an integer.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>This method sets the reporter_freq class attribute to the specified value and prints a confirmation message.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id16">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_temperature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#BuildSimulation.set_temperature"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id16" title="Link to this definition"></a></dt>
+<dd><p>Class method to set the temperature for simulations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cls</strong> – The class itself.</p></li>
+<li><p><strong>temp</strong> (<em>float</em>) – The temperature to set, in Kelvin.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>This method sets the temperature class attribute to the specified value and prints a confirmation message.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id17">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_timestep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestep</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#BuildSimulation.set_timestep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id17" title="Link to this definition"></a></dt>
+<dd><p>Class method to set the timestep for simulations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cls</strong> – The class itself.</p></li>
+<li><p><strong>timestep</strong> (<em>float</em>) – The timestep to set, in Femtoseconds.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>This method sets the timestep class attribute to the specified value and prints a confirmation message.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id18">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_total_steps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">total_steps</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#BuildSimulation.set_total_steps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id18" title="Link to this definition"></a></dt>
+<dd><p>Class method to set the total_steps for simulations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cls</strong> – The class itself.</p></li>
+<li><p><strong>total_steps</strong> (<em>int</em>) – The total_steps to set, as an integer.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>This method sets the total_steps class attribute to the specified value and prints a confirmation message.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_openmm.BuildSimulation.strain">
+<span class="sig-name descname"><span class="pre">strain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">simulation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">total_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#BuildSimulation.strain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_openmm.BuildSimulation.strain" title="Link to this definition"></a></dt>
+<dd><p>Function to perform a production run simulation with the provided parameters.</p>
+<dl>
+<dt>USAGE:</dt><dd><p>production_run_sim = sim.anneal(simulation, total_steps, temp)</p>
+</dd>
+<dt>Recommended USAGE:</dt><dd><p>production_run_sim = sim.anneal(simulation)</p>
+<p>where annealing parameters are set with the following functions:</p>
+<p>simulation_object.set_temperature(temperature)
+simulation_object.set_total_steps(total_steps)</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>simulation</strong> (<em>app.Simulation</em>) – The simulation object to run the production simulation on.</p></li>
+<li><p><strong>total_steps</strong> (<em>int</em><em>, </em><em>optional</em>) – The total number of steps to run for the production simulation.
+Defaults to None, in which case the value is fetched from self.total_steps.</p></li>
+<li><p><strong>temp</strong> (<em>float</em><em>, </em><em>optional</em>) – The temperature for the production simulation in Kelvin.
+Defaults to None, in which case the value is fetched from self.temp.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>A tuple containing the simulation object after the production run and the filename of the data file generated.</dt><dd><p>in the following format:</p>
+</dd>
+</dl>
+<p>(simulation_object, path_to_data_file)</p>
+</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>This method performs a production run simulation with the provided simulation object and parameters.
+It initializes the system with the provided initial conditions and runs the simulation for the specified
+number of steps. The system’s state is updated throughout the production run, and reporters are set up to
+record trajectory and simulation data.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id19">
+<span class="sig-name descname"><span class="pre">temp</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">300</span></em><a class="headerlink" href="#id19" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_openmm.BuildSimulation.thermal_ramp">
+<span class="sig-name descname"><span class="pre">thermal_ramp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">simulation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">heating</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quench_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ensemble</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_temp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_temp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">total_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pressure</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#BuildSimulation.thermal_ramp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_openmm.BuildSimulation.thermal_ramp" title="Link to this definition"></a></dt>
+<dd><p>Perform a thermal ramp (heating or cooling) on the simulation system.</p>
+<p>This method adjusts the system’s temperature incrementally, either heating or cooling it over
+a range of temperatures in defined steps. It supports both NVT and NPT ensembles, and allows
+for detailed reporting of the simulation process.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>simulation</strong> (<em>app.Simulation</em>) – The simulation object on which the thermal ramp is performed.</p></li>
+<li><p><strong>heating</strong> (<em>bool</em>) – If True, the system is heated; if False, the system is cooled.</p></li>
+<li><p><strong>quench_rate</strong> (<em>int</em>) – The temperature increment (in Kelvin) between successive steps of the ramp.</p></li>
+<li><p><strong>ensemble</strong> (<em>str</em>) – The ensemble used for the ramp, either “NVT” (constant volume) or “NPT” (constant pressure).</p></li>
+<li><p><strong>start_temp</strong> (<em>float</em><em>, </em><em>optional</em>) – The starting temperature for the ramp. Defaults to the first value in <cite>self.anneal_parameters</cite>.</p></li>
+<li><p><strong>max_temp</strong> (<em>float</em><em>, </em><em>optional</em>) – The maximum temperature for the ramp. Defaults to the second value in <cite>self.anneal_parameters</cite>.</p></li>
+<li><p><strong>total_steps</strong> (<em>int</em><em>, </em><em>optional</em>) – The total number of steps for the ramp. Defaults to <cite>self.total_steps</cite>.</p></li>
+<li><p><strong>pressure</strong> (<em>float</em><em>, </em><em>optional</em>) – The pressure to use in NPT ensemble. Defaults to <cite>self.pressure</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The updated simulation object and the path to the output data file.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If an invalid ensemble is specified.</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>This method uses a Langevin integrator with the specified starting temperature.</p></li>
+<li><p>The simulation system can be either AMBER (AMB) or ANI type.</p></li>
+<li><p>Various simulation data and trajectories are saved, including DCD and PDB files.</p></li>
+<li><p>The function updates internal logs with details of the thermal ramp.</p></li>
+</ul>
+<p class="rubric">Example</p>
+<p>simulation = app.Simulation(topology, system, integrator)
+ramp = self.thermal_ramp(simulation, heating=True, quench_rate=10, ensemble=”NVT”, start_temp=300, max_temp=500)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sw_openmm.BuildSimulation.timestamp">
+<span class="sig-name descname"><span class="pre">timestamp</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'2025-01-09_152829'</span></em><a class="headerlink" href="#sw_openmm.BuildSimulation.timestamp" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id20">
+<span class="sig-name descname"><span class="pre">timestep</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2.0</span></em><a class="headerlink" href="#id20" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id21">
+<span class="sig-name descname"><span class="pre">total_steps</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1000</span></em><a class="headerlink" href="#id21" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id22">
+<span class="sig-name descname"><span class="pre">type_of_simulation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#BuildSimulation.type_of_simulation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id22" title="Link to this definition"></a></dt>
+<dd><p>Determine the type of simulation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A string indicating the type of simulation, either “AMB” for AmberSimulation or “ANI” for ANISimulation.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>This method inspects the type of the current object to determine the type of simulation.
+If the object is an instance of AmberSimulation, it returns “AMB”.
+If the object is an instance of ANISimulation, it returns “ANI”.
+If the object is neither, it returns a message prompting the user to specify the type of simulation by calling
+either AmberSimulation or ANISimulation classes.</p>
+<p>This function should never need to be called as we can we can the type of our simulation object with: repr(simulation_object)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_openmm.BuildSimulation.write_log_csv">
+<span class="sig-name descname"><span class="pre">write_log_csv</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#BuildSimulation.write_log_csv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_openmm.BuildSimulation.write_log_csv" title="Link to this definition"></a></dt>
+<dd><p>Write the log information to a CSV file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>This method collects all unique keys across all sections of log_info.
+It then writes the log_info to a CSV file with each section as a row and the keys as columns.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="sw_openmm.DataWriter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sw_openmm.</span></span><span class="sig-name descname"><span class="pre">DataWriter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prefix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">steps</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#DataWriter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_openmm.DataWriter" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A class to handle writing simulation state data to a text file.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sw_openmm.DataWriter.stateDataReporter">
+<span class="sig-name descname"><span class="pre">stateDataReporter</span></span><a class="headerlink" href="#sw_openmm.DataWriter.stateDataReporter" title="Link to this definition"></a></dt>
+<dd><p>An instance of StateDataReporter to log simulation data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>app.StateDataReporter</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">__init__(prefix</span></span></dt>
+<dd><p>str, freq: int, steps: int):
+Initializes the DataWriter with the given prefix, frequency, and total number of steps.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="sw_openmm.DcdWriter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sw_openmm.</span></span><span class="sig-name descname"><span class="pre">DcdWriter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prefix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freq</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#DcdWriter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_openmm.DcdWriter" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A class to handle writing DCD (Dynamics Coordinate Data) files for molecular simulations.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sw_openmm.DcdWriter.dcdReporter">
+<span class="sig-name descname"><span class="pre">dcdReporter</span></span><a class="headerlink" href="#sw_openmm.DcdWriter.dcdReporter" title="Link to this definition"></a></dt>
+<dd><p>An instance of DCDReporter to write the DCD file with specified parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>app.DCDReporter</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">__init__(prefix</span></span></dt>
+<dd><p>str, freq: int):
+Initializes the DcdWriter with the given prefix and frequency for writing frames.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="sw_openmm.PositionsML">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sw_openmm.</span></span><span class="sig-name descname"><span class="pre">PositionsML</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_pdb</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#PositionsML"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_openmm.PositionsML" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_openmm.PositionsML.get_pbc">
+<span class="sig-name descname"><span class="pre">get_pbc</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#PositionsML.get_pbc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_openmm.PositionsML.get_pbc" title="Link to this definition"></a></dt>
+<dd><p>Generate the PBC vectors.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="sw_openmm.TopologyML">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sw_openmm.</span></span><span class="sig-name descname"><span class="pre">TopologyML</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_pdb</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#TopologyML"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_openmm.TopologyML" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Topology</span></code></p>
+<p>TopologyML holds the topology information needed by ANI force filed.
+There are errors with OpenMM-ML importing pdb files built using packmol due to the use of
+non standar residues.</p>
+<p>Parmed is used to load the pdb.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_openmm.TopologyML.create_chains">
+<span class="sig-name descname"><span class="pre">create_chains</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chains</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#TopologyML.create_chains"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_openmm.TopologyML.create_chains" title="Link to this definition"></a></dt>
+<dd><p>Creates OpenMM chains</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>chains</strong> (<em>list</em>) – Chains to be created.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_openmm.TopologyML.create_residue">
+<span class="sig-name descname"><span class="pre">create_residue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chain_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resnum</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#TopologyML.create_residue"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_openmm.TopologyML.create_residue" title="Link to this definition"></a></dt>
+<dd><p>Create residue on Topology object given a set of properties.
+It is necessary to use the method <cite>get_chain_name</cite> to transform
+the chain_name to its associatd chain object created previously.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>resname</strong> (<em>string</em>) – Residue name given by parmed.</p></li>
+<li><p><strong>resnum</strong> (<em>string</em>) – Residue number given by parmed.</p></li>
+<li><p><strong>chain_name</strong> (<em>string</em>) – Chain name given by parmed</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>_residues</strong> – Residues list</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_openmm.TopologyML.create_residues">
+<span class="sig-name descname"><span class="pre">create_residues</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">residues</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#TopologyML.create_residues"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_openmm.TopologyML.create_residues" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_openmm.TopologyML.create_topo">
+<span class="sig-name descname"><span class="pre">create_topo</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#TopologyML.create_topo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_openmm.TopologyML.create_topo" title="Link to this definition"></a></dt>
+<dd><p>This method creates an OpenMM Topology object. The pdb file is parsed
+and translated to an OpenMM object.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_openmm.TopologyML.get_chain_obj">
+<span class="sig-name descname"><span class="pre">get_chain_obj</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#TopologyML.get_chain_obj"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_openmm.TopologyML.get_chain_obj" title="Link to this definition"></a></dt>
+<dd><p>Return the OpenMM chain object associated to the PDB chain readed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>id</strong> (<em>string</em>) – Chain identificator string.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_openmm.TopologyML.get_pm_atoms">
+<span class="sig-name descname"><span class="pre">get_pm_atoms</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#TopologyML.get_pm_atoms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_openmm.TopologyML.get_pm_atoms" title="Link to this definition"></a></dt>
+<dd><p>Gets lists of atoms from parmed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>atoms</strong> – Atoms list of lists [[number, name, chain, resnum], …]</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_openmm.TopologyML.get_pm_chains">
+<span class="sig-name descname"><span class="pre">get_pm_chains</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#TopologyML.get_pm_chains"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_openmm.TopologyML.get_pm_chains" title="Link to this definition"></a></dt>
+<dd><p>Gets PDB chains from Parmed</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>_chains</strong></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_openmm.TopologyML.get_pm_num_atoms">
+<span class="sig-name descname"><span class="pre">get_pm_num_atoms</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#TopologyML.get_pm_num_atoms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_openmm.TopologyML.get_pm_num_atoms" title="Link to this definition"></a></dt>
+<dd><p>Calculate and return the number of atoms in the <cite>pdb</cite> attribute.</p>
+<p>The function iterates through the <cite>pdb</cite> attribute (assumed to be an iterable
+containing atomic data) and counts the number of elements (atoms).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The number of atoms in the <cite>pdb</cite> attribute.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_openmm.TopologyML.get_pm_residues">
+<span class="sig-name descname"><span class="pre">get_pm_residues</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#TopologyML.get_pm_residues"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_openmm.TopologyML.get_pm_residues" title="Link to this definition"></a></dt>
+<dd><p>Gets residue list using parmed</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>_residues</strong> – Residues list</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sw_openmm.TopologyML.get_res_obj">
+<span class="sig-name descname"><span class="pre">get_res_obj</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chain</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#TopologyML.get_res_obj"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_openmm.TopologyML.get_res_obj" title="Link to this definition"></a></dt>
+<dd><p>Returns the OpenMM residue object associated to the PDB residue
+created before.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>chain</strong> (<em>string</em>) – Chain name in PDB file</p></li>
+<li><p><strong>res_id</strong> (<em>string</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>self._r</strong></p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>OpenMM residue object</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sw_openmm.get_rmsd">
+<span class="sig-prename descclassname"><span class="pre">sw_openmm.</span></span><span class="sig-name descname"><span class="pre">get_rmsd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pdb_ref</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pdb_prb</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sw_openmm.html#get_rmsd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sw_openmm.get_rmsd" title="Link to this definition"></a></dt>
+<dd><p>Calculate the Root Mean Square Deviation (RMSD) between two molecular structures.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pdb_ref</strong> (<em>str</em>) – The path to the PDB file of the reference molecule.</p></li>
+<li><p><strong>pdb_prb</strong> (<em>str</em>) – The path to the PDB file of the probe molecule.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The RMSD between the reference and probe molecules after alignment.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="packagecontents.html" class="btn btn-neutral float-left" title="Package Contents" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="sw_build_systems.html" class="btn btn-neutral float-right" title="sw_build_systems Documentation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Daniel J. York.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
