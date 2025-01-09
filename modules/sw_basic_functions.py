@@ -103,20 +103,79 @@ def write_output(filepath, lines):
     return()
 
 def get_homo_lumo_from_xyz(xyz_filepath):
-    atomic_numbers = {'C': 6, 'H': 1, 'O': 8, 'S':16, 'F':9, 'N':14, 'Cl':17}
+    atomic_numbers = {'C': 6, 'H': 1, 'O': 8, 'S': 16, 'F': 9, 'N': 7, 'Cl': 17}
     atoms = []
 
     with open(xyz_filepath, 'r') as xyz_file:
         for i, line in enumerate(xyz_file):
-            if i == 0:
+            # Skip the first two lines (header lines)
+            if i < 2:
                 continue
-            if i == 1:
-                continue
-            else: 
-                atom = (line.split(" ")[0]).strip()
-                atoms.append(atom)
-                
+            
+            # Split the line and extract the atomic symbol
+            parts = line.split()
+            if parts:  # Ensure the line isn't empty
+                atom = parts[0].strip()
+                # Verify that the atom is in the atomic_numbers dictionary
+                if atom in atomic_numbers:
+                    atoms.append(atom)
+                else:
+                    raise KeyError(f"Unknown atomic symbol '{atom}' in line: {line.strip()}")
+    
+    # Calculate the total atomic number and derive HOMO and LUMO indices
     atomic_num = sum(atomic_numbers[atom] for atom in atoms)
-    homo_num = int(atomic_num/2 - 1)
+    homo_num = int(atomic_num / 2 - 1)
     lumo_num = homo_num + 1
-    return(homo_num, lumo_num)
+    return homo_num, lumo_num
+
+def SmilesToPDB(smiles_string, output_file):
+    """
+    Converts a SMILES string to a PDB file.
+
+    Args:
+        smiles_string (str): The SMILES string of the molecule.
+        output_file (str): The name of the output PDB file.
+
+    Returns:
+        None. Writes the 3D structure of the molecule to a PDB file.
+        
+    Note: 
+        This function is utilised by the SmilesToPDB_GenerateRescode function and carries out
+        the same functionality but additionally generates a residue code for the pdb file generated.
+        These generated residue codes are stored in a database.
+    """
+    # Create a molecule from the SMILES string
+    molecule = pybel.readstring("smi", smiles_string)
+
+    # Generate the 3D structure
+    molecule.make3D()
+
+    # Convert the molecule to PDB format
+    pdb_string = molecule.write("pdb")
+
+    # Write the PDB string to a file
+    with open(output_file, "w") as f:
+        f.write(pdb_string)
+
+def pdb_to_mol(pdb_filename):
+    """
+    Converts a PDB file to a molecule object.
+
+    Parameters:
+    - pdb_filename (str): Path to the PDB file.
+
+    Returns:
+    Chem.Mol or None: A molecule object if conversion is successful, else None.
+
+    The function reads the content of the PDB file, converts it to a molecule object,
+    and assigns chiral tags based on the molecular structure. If the conversion is
+    unsuccessful or the PDB file is empty, None is returned.
+    """
+    with open(pdb_filename, 'r') as pdb_file:
+        pdb_content = pdb_file.read()
+
+    mol = Chem.MolFromPDBBlock(pdb_content)
+    if mol is not None:
+        AllChem.AssignAtomChiralTagsFromStructure(mol)
+
+    return mol
