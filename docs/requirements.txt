@@ -5,10 +5,7 @@ numpy
 pandas>=2.0.0
 
 matplotlib
-shutil
-datetime
 
-openmm
 
 rdkit
 math
