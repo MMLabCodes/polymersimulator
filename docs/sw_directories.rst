@@ -1,4 +1,4 @@
-sw\_directories module
+sw_directories module
 ======================
 
 .. automodule:: sw_directories

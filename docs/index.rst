@@ -13,10 +13,11 @@ Contents
    introduction
    installation
    packagecontents
-   sw_openmm
-   sw_build_systems
-   sw_analysis
+   sw_directories
    sw_basic_functions
+   sw_build_systems
+   sw_openmm
+   sw_analysis
    sw_complex_fluid_models
    sw_orca
    usage
