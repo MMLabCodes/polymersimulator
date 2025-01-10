@@ -1,9 +1,9 @@
 sphinx
 sphinx-rtd-theme
 
-import datetime
-import time
-import collections
+datetime
+time
+collections
 
 
 
