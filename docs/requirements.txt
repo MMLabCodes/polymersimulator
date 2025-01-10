@@ -3,8 +3,6 @@ sphinx-rtd-theme
 
 datetime
 
-warnings
-
 parmed
 numpy
 pandas>=2.0.0
