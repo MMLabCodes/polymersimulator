@@ -14,6 +14,7 @@ Contents
    installation
    packagecontents
    sw_directories
+   sw_directories_tutorial
    sw_basic_functions
    sw_build_systems
    sw_openmm
