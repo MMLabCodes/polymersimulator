@@ -1,5 +1,5 @@
-Module Documentation
-====================
+sw_openmm module
+================
 
 This section includes the documentation for the **sw_openmm** module.
 
