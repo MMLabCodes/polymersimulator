@@ -2,9 +2,8 @@ sphinx
 sphinx-rtd-theme
 
 datetime
-collections
 
-
+warnings
 
 parmed
 numpy
