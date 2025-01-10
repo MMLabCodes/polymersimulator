@@ -9,4 +9,5 @@ scikit-learn
 seaborn
 nglview
 MDAnalysis
+openmm
 
