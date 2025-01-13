@@ -1,7 +1,12 @@
 Welcome to the **Polymer Simulator** Documentation
 ==================================================
 
-This is the main entry point for the documentation.
+In this documentation you will find many things:
+
+- Introduction
+- Installation instructions
+- Documented python code
+- Tutorials and examples of what each python module does
 
 Contents
 --------
@@ -13,14 +18,17 @@ Contents
    introduction
    installation
    packagecontents
-   sw_directories
    sw_directories_tutorial
+   sw_directories
    sw_basic_functions
+   sw_build_systems_tutorial
    sw_build_systems
+   sw_openmm_tutorial
    sw_openmm
+   sw_analysis_tutorial
    sw_analysis
-   sw_complex_fluid_models
    sw_orca
+   sw_complex_fluid_models
    usage
    api
    contributing
