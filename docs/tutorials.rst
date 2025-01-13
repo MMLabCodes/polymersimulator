@@ -1,4 +1,10 @@
 Tutorials
 =========
 
-PLACEHOLDER: tutorial info and tutorial index to go here.
+.. toctree::
+   :maxdepth: 2
+   :caption: Tutorials
+
+   sw_directories_tutorial
+   sw_build_systems_tutorial
+   sw_openmm_tutorial

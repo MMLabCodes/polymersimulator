@@ -69,9 +69,9 @@ Loading and showing available files
 -----------------------------------
 
 The filepath manager can show many different types of avaialable files and load specific filepaths.
-To show avaialable files there are a range of class methods that are called as below:
+To show avaialable files there are a range of class methods that are called as below.
 
-..code-block:: python
+.. code-block:: python
 
    manager.ac_files_avail()
    manager.amber_systems_avail()
@@ -88,7 +88,7 @@ Calling one of these methods will print every available file of that type, as an
 
 Printing available files is potentially pointless (but a nice addition to the user experience) and the real usefulness comes from being able to load files for a specifc molecule or system with a single line of code.
 
-..code-block:: python
+.. code-block:: python
 
    filepath = manager.load_amber_filepaths(name)
    filepath = manager.load_mol2_filepath(name)
