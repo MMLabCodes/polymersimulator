@@ -18,6 +18,7 @@ Contents
    introduction
    installation
    packagecontents
+   tutorials
    modules
    usage
    api
