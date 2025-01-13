@@ -174,3 +174,7 @@ The arguments in this simulation are:
 - holding_steps: the number of steps that the system is held at for each temperature
 - steps_at_temp: the number of steps each temperature is simulated for
 
+sw_openmm advanced notes
+========================
+
+The sw_openmm tutorial provide a sort of quickstart guide
