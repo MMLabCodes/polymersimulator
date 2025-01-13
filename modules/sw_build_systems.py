@@ -94,7 +94,7 @@ class BuildSystems():
                 lines[i] = line.replace(" UNL", f" {residue_code}")   
         with open(pdb_filepath, "w") as pdb_file:              
             pdb_file.writelines(lines)
-        return(None)
+        return(pdb_filepath)
 
     def load_residue_codes(self, residue_code_csv):
         """
@@ -497,7 +497,7 @@ class BuildAmberSystems(BuildSystems):
         ac_name = os.path.join(self.manager.molecules_dir, molecule_name, molecule_name) + ".ac"
         antechamber_command = "antechamber -fi mol2 -fo ac -i " + mol2_name + " -o " + ac_name + " -c bcc -s 2"
         subprocess.run(antechamber_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-        return(None)
+        return(ac_name)
 
     def gen_prepin_files(self, molecule_name):
         # NOTE: this function is for generating prepin files of polymers, for single molecules, please use 'gen_prepin_files_single_mol'
@@ -819,7 +819,7 @@ class BuildAmberSystems(BuildSystems):
             print("Exception:", e)
         return(pdb_filepath)
 
-    def solvate_molecule(self, molecule_name, buffer=None):
+    def gen_amber_params_sing_mol_solvated(self, molecule_name, buffer=None):
         if buffer == None:
             buffer = "10"
         else:
@@ -1996,7 +1996,87 @@ class BuildAmberSystems(BuildSystems):
         cd_command = "cd " + str(self.manager.main_dir)
         result = subprocess.run(cd_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         return(system_name)
-        
+    
+    def gen_amber_params_sing_mol(self, molecule_name):
+        """
+        Generates a polymer PDB file using `tleap` based on the specified molecule and number of units.
+
+        Args:
+            molecule_name (str): The base name of the molecule to be used for generating the polymer.
+            number_of_units (int): The number of units in the polymer.
+
+        NOTE: The molecule name should be something like "3HB_trimer" and '.prepi' files should be available for that molecule.
+            (these are required for using tleap to make polymers)
+
+        Description:
+            This function performs the following steps:
+            1. Changes the working directory to the specified molecule's directory.
+            2. Constructs file paths for the required input files (`head`, `mainchain`, and `tail` prepi files) and the
+               output directory.
+            3. Creates the output directory if it does not already exist.
+            4. Constructs the polymer name and the paths for the output files (`prmtop`, `rst7`, and `pdb`).
+            5. Retrieves residue codes for the polymeric units from the `dirs` object.
+            6. Constructs the polymer sequence command for `tleap`.
+            7. Creates the `tleap` input script (`.intleap` file) with the appropriate commands to generate the polymer.
+            8. Executes the `tleap` command to generate the polymer, capturing and printing the output or errors.
+
+        Raises:
+            Exception: If there is an error changing the directory or executing the `tleap` command.
+
+        Example Usage:
+            dirs = DirectoryPaths('path/to/main/project/directory')
+            gen_polymer_pdb(dirs, "3HB_trimer", 10)
+        """
+        molecule_prepi_file = os.path.join(self.manager.molecules_dir, molecule_name, (molecule_name + ".prepi"))
+        molecule_frcmod_file = os.path.join(self.manager.molecules_dir, molecule_name, (molecule_name + ".frcmod"))
+
+        file_subtype = "_sing_mol"
+        output_name = molecule_name + file_subtype
+
+        output_dir = os.path.join(self.manager.systems_dir, output_name)
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
+
+        intleap_path = os.path.join(output_dir, output_name + ".intleap")
+        prmtop_filepath = os.path.join(output_dir, output_name + ".prmtop")
+        rst_filepath = os.path.join(output_dir, output_name + ".rst7")
+        pdb_filepath = os.path.join(output_dir, output_name + ".pdb")
+
+        rescode = self.manager.retrieve_rescode(molecule_name)
+
+        file_content = f"""source leaprc.gaff
+             source leaprc.water.fb3
+             source leaprc.protein.ff14SB
+
+             loadamberprep {molecule_prepi_file}
+             loadamberparams {molecule_frcmod_file}
+
+             list
+
+             system = {rescode}
+             setBox system vdw 0.0
+             saveamberparm system {prmtop_filepath} {rst_filepath}
+             savepdb system {pdb_filepath}
+             quit
+             """
+        with open(intleap_path, 'w') as file:
+             file.write(file_content)
+
+        leap_command = "tleap -f " + intleap_path
+
+        try:
+            result = subprocess.run(leap_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            if result.returncode == 0:
+               # Command executed successfully
+               print("Output:", result.stdout)
+            else:
+                # Command failed, print error message
+                print("Error:", result.stderr)
+        except Exception as e:
+            # Exception occurred during subprocess execution
+            print("Exception:", e)
+        return(output_name)  
 #class BuildBioOilSystems(BuildSystems):
 #    def __init__:
  #       pass

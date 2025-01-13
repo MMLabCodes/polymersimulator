@@ -18,6 +18,7 @@ Contents
    introduction
    installation
    packagecontents
+   tutorials
    sw_directories_tutorial
    sw_directories
    sw_basic_functions

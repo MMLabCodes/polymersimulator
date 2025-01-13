@@ -3,9 +3,9 @@ sw_directories tutorial
 
 This module is the workhorse of the package and ensures every file is sent to the correct place and each file can be found for its required purpose.
 
-It is recommended that you launch and follow *tutorial_1_filepath_manager* with jupyter notebook to get a handle on how this module works.
+It is recommended that you launch and follow **tutorial_1_filepath_manager** with jupyter notebook to get a handle on how this module works and for a more comprehensive explanation of how this module works.
 
-*Note: this is the first of many class based modules in this package so it may be useful to familiarise yourself with python classes with this video https://www.youtube.com/watch?v=ZDa-Z5JzLYM*
+*Note: this is the first of many class based modules in this package so it may be useful to familiarise yourself with python classes with this video `link text <https://www.youtube.com/watch?v=ZDa-Z5JzLYM>`_
 
 Intialising an instance of the filepath manager
 -----------------------------------------------
@@ -19,7 +19,6 @@ This is **extremely important** as this class will intialise a series of subdire
 To intialise an instance of **SnippetSimManage** in jupyter notebook or the python interpreter you must pass the base directory path to **SnippetSimManage** which is generated with **os.getcwd**.
 
 .. code-block:: python
-   :emphasize-lines: 2
 
    from modules.sw_directories import *
    import os as os
@@ -43,7 +42,6 @@ An **attribute** is a variable stored in the class and a **method** is a python 
 As mentioned above (somehwhere) this class creates some subdirectories, the paths to all of these are stored within the instance and can be found with:
 
 .. code-block:: python
-   :emphasize-lines: 2
 
    manager.main_dir
    manager.python_script_dir
@@ -59,13 +57,13 @@ These directories and files found by the code lines above will be in a directory
 
 Each of these directories has a specific function:
 
-- main_dir: this is the base directory of the project
-- python_script_dir: this is a place to store pythons scripts; however, it is rather redundant with how the module works
-- pdb_file_dir: this is the place where the **molecules_dir** and **systems_dir** are found. The name of this directory is a bit misleading compared to its first existence, but I a wary to change the name in fear of breaking something.
-- csv_to_pdb_dir: the directory where a csv file of molecule names and smilestrings can be kept for building them, a little redundant unless you are doing high-throughput system building
-- molecules_dir: the directroy where files for individual molecules are kept (i.e. pdb_files, amber_files, etc..)
-- systems_dir: the directory where files for systems constructed are kept (i.e. pdb_files, amber_files, etc..)
-- residues_code_csv: an important file where unique residue codes are stored for each molecule. The use of this will become clear when you build some molecules.
+- **main_dir**: this is the base directory of the project
+- **python_script_dir**: this is a place to store pythons scripts; however, it is rather redundant with how the module works
+- **pdb_file_dir**: this is the place where the **molecules_dir** and **systems_dir** are found. The name of this directory is a bit misleading as it contains a lot more than just pdb files, but it was initially called "pdb_file_dir" and I am wary to change it in fear of breaking something in the code.
+- **csv_to_pdb_dir**: the directory where a csv file of molecule names and smilestrings can be kept for building them, a little redundant unless you are doing high-throughput system building
+- **molecules_dir**: the directroy where files for individual molecules are kept (i.e. pdb_files, amber_files, etc..)
+- **systems_dir**: the directory where files for systems constructed are kept (i.e. pdb_files, amber_files, etc..)
+- **residues_code_csv**: an important file where unique residue codes are stored for each molecule. The use of this will become clear when you build some molecules.
 
 Loading and showing available files
 -----------------------------------
@@ -106,18 +104,23 @@ An example of loading the filepath for the mol2 file for phenol is shown below.
 
 There are a couple of other class methods in the filepath manager:
 
-- manager.bash_submission() : does nothing, a placeholder for future
-- manager.packmol_path : returns the path to packmol in your pc (or hpc facility), if you want to use packmol you will need to configure this in the source code
-- manager.unpack_csv(csv_file) : a function that will unpack a csv file that contains molecule names and smilestrings into two lists.
+- **manager.bash_submission()** : does nothing, a placeholder for future
+- **manager.packmol_path** : returns the path to packmol in your pc (or hpc facility), if you want to use packmol you will need to configure this in the source code
+- **manager.unpack_csv(csv_file)** : a function that will unpack a csv file that contains molecule names and smilestrings into two lists.
 
 Other classes
 -------------
 
 Everything critical to the performance of the module has been explained and is found in the class **SnippetSimManage**. However, you may notice that there are 2 other classes in this module:
 
-- BioOilDirs
-- DFT_manager
+- **BioOilDirs**
+- **DFT_manager**
 
 Documentation besides docstrings will not be added for these for the forseeable future and these may be eventually wrapped into another, dedicated module. They are not required for the builing or simulation of polymer systems for molecular dyanmics.
 
+Summary
+-------
 
+This module itself doesn't carry out any tasks that are particularly cool or useful to your project but it is the most **important** in terms of keeping every file organised
+and 'findable'. A lot of the time, an instance of **SnippetSimManage** will be passed to another class or function and the file handling will be carried out for you. However, learning how
+it works will allow you to add your own functionality and the ability to direct files where you desire with relative ease.
