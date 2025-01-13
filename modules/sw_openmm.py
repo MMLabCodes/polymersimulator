@@ -418,8 +418,8 @@ class BuildSimulation():
             os.makedirs(self.output_dir)
         self.log_info = {'Minimization': {'Temperature':None,'Time taken': None},
                             'Annealing_NPT': {'Time taken': None, 'Simulation time': None, 'Start temp': None, 'Target temp': None, 'Cycles': None, 'Steps at plateaus': None, 'Steps at incremental temps': None, 'Timestep': None},
-                            'basic_NPT': {'Time taken': None, 'Simulation time': None, 'Temperature': None, 'Pressure': None, 'Timestep': None},
-                            'basic_NVT': {'Time taken': None, 'Simulation time': None, 'Temperature': None, 'Timestep': None},
+                            'Basic_NPT': {'Time taken': None, 'Simulation time': None, 'Temperature': None, 'Pressure': None, 'Timestep': None},
+                            'Basic_NVT': {'Time taken': None, 'Simulation time': None, 'Temperature': None, 'Timestep': None},
                         'Thermal Ramp' : {'Time taken':None, 'Simulation time':None, 'Start temp':None, 'Target temp':None, 'Quench Rate':None, 'Steps at incremental temps':None, 'Timestep':None, 'Ensemble':None, 'Method':None}}
         self.log_csv = os.path.join(self.output_dir, (self.filename + "_" + self.timestamp + "_log.csv"))
                              
