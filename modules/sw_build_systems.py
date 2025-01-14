@@ -1229,10 +1229,11 @@ class BuildAmberSystems(BuildSystems):
         
     def generate_polymer_3_3_array(self, base_molecule_name, molecule_name, method):
         if method == "crystal":
-            self.generate_3_3_polymer_array_crystal(base_molecule_name, molecule_name)
+            syste_name = self.generate_3_3_polymer_array_crystal(base_molecule_name, molecule_name)
         if method == "random":
-            system = self.generate_3_3_polymer_array_random(base_molecule_name, molecule_name)
-            self.gen_amber_params_4_pckml_array(system, base_molecule_name)
+            system_name = self.generate_3_3_polymer_array_random(base_molecule_name, molecule_name)
+            self.gen_amber_params_4_pckml_array(system_name, base_molecule_name)
+        return(system_name)
             
     def generate_5_5_polymer_array_crystal(self, base_molecule_name=None, molecule_name=None, crystal_trans=None):
         # Thsis function builds arrays of polymers using the pre generated pdb files
@@ -1510,10 +1511,11 @@ class BuildAmberSystems(BuildSystems):
         
     def generate_polymer_5_5_array(self, base_molecule_name, molecule_name, method, crystal_trans=None):
         if method == "crystal":
-            self.generate_5_5_polymer_array_crystal(base_molecule_name, molecule_name, crystal_trans)
+            system_name = self.generate_5_5_polymer_array_crystal(base_molecule_name, molecule_name, crystal_trans)
         if method == "random":
-            system = self.generate_5_5_polymer_array_random(base_molecule_name, molecule_name)
-            self.gen_amber_params_4_pckml_array(system, base_molecule_name)  
+            system_name = self.generate_5_5_polymer_array_random(base_molecule_name, molecule_name)
+            self.gen_amber_params_4_pckml_array(system_name, base_molecule_name)
+        return(system_name)
             
     def build_2_10_polymer_array(self, base_molecule_name=None, molecule_name=None, buffer=None):
          # Thsis function builds arrays of polymers using the pre generated pdb files
