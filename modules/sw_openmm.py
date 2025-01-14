@@ -832,10 +832,10 @@ class BuildSimulation():
 
         prod_end_time = time.time()
         time_taken = prod_end_time - prod_start_time
-        self.log_info['basic_NVT']['Time taken'] = time_taken
-        self.log_info['basic_NVT']['Simulation time'] = total_steps * self.timestep
-        self.log_info['basic_NVT']['Temperature'] = temp
-        self.log_info['basic_NVT']['Timestep'] = self.timestep
+        self.log_info['Basic_NVT']['Time taken'] = time_taken
+        self.log_info['Basic_NVT']['Simulation time'] = total_steps * self.timestep
+        self.log_info['Basic_NVT']['Temperature'] = temp
+        self.log_info['Basic_NVT']['Timestep'] = self.timestep
 
         # Write the final structure to pdb
         self.final_pdbname = os.path.join(self.output_dir, ("final_prod_" + self.filename + ".pdb"))

@@ -231,7 +231,119 @@ This will add a buffer of water 10 angstroms around the caffeine molecule and th
 
 INSERT PIC
 
-   
+Building polymers
+-----------------
+
+The next stage is to build and parameterize some polymers. This is a bit more complicated that a single molecule as the approach here is a **building block** approach.
+The idea is to split a trimer of the polymer into a **head**, **mainchain** and **tail** unit and then concateneate these together into a larger polymer.
+This method has an advantage in the parameterization of a large polymer as we start with a parameterized trimer - meaning all 3 units of the polymer are parameterized.
+
+The initial step to generating a parameterized polymer is the same as with a small molecule - we must generate the trimer with a unique rescode.
+
+.. code-block ::python
+
+   pdb_file = builder.SmilesToPDB_GenResCode("OC(C)CC(=O)OC(C)CC(=O)OC(C)CC(=O)O", "3HB_trimer")
+   print(pdb_file)
+
+Then we need to generate the .ac file and parameterize the mol in the same way as was done for caffeine.
+
+.. code-block:: python
+
+   ac_file = builder.gen_ac_file("3HB_trimer")
+   print(ac_file)
+   builder.parameterize_mol("3HB_trimer")
+
+The next stage is to use a class method to generate residue code for the polymer units (head, mainchain and tail unit). For example, if your trimer was
+assigned the rescode **AAA** the head, mainchain and tail will be asigned **hAA**, **mAA** and **tAA** as their res codes.
+
+..code-block:: python
+
+   builder.GenRescode_4_PolyUnits("3HB_trimer")
+
+This will print the new associated rescodes - however, this class method will not return any information as all of the info is now saved in the residue_codes.csv.
+The reason for assigning rescodes to each unit is critical for the building of polymers as these codes can be made into patterns that say how many units are in each polymer.
+
+The next step is generate amber parameter files **.prepi** files for each unit. Their is a prerequisite of creating a file for the head, mainchain and tail unit denoting
+what atoms make up each unit and saving it in the appropriate directory (i.e. **home/pdb_files/molecules/3HB_trimer/head_3HB_trimer.txt**). An explanation of that will come in the future but for now I will point you to the amber tutorial for generating these files for PET trimer https://ambermd.org/tutorials/advanced/tutorial27/pet.php .
+However, example files denoting what atoms are in each unit of a 3HB_trimer can be found in the github.
+
+..code-block:: python
+
+   builder.gen_prepin_files("3HB_trimer")
+
+If this line executes and there are no errors (there will likely be some on the first try) we can proceed with building polymers. The class method to build polymers is very simple,
+the arguments are the base_trimer followed by the number of units you desire you polymer to have.
+
+..code-block:: python
+
+   pdb = builder.gen_polymer_pdb(base_trimer, number_of_units)
+
+For example if I wanted to build a 3HB decamer (10 units), I would run this:
+
+..code-block:: python
+
+   pdb = builder.gen_polymer_pdb("3HB_trimer", 10)
+   print(pdb)
+
+This will also return the path to the pdb file. There is one thing to note here, whenever you generate a polymer from its base trimer, the files for the new polymer
+will be saved as in the systems directory and not the molecules directory. This polymer will be saved as **3HB_10_polymer**. 
+
+Generaing amber parameters for a single polymer
+-----------------------------------------------
+
+Currently, the same methods that were used to generate amber parameters for caffeine and a water solvated caffeine molecule do not work for generated polymers.
+This is something that will added if it is required at any point.
+
+Building polymer systems - arrays
+---------------------------------
+
+Now a polymer is parameterized systems can be built that contain multiple polymers so bulk properties can be investigated. The basis for generating polymer systems
+is to build ordered arrays of either 3x3 or 5x5 of the polymer. This can be an ordered array or a random array (so this one isn't really an array at all!).
+
+There are some issues when running simulations of the 3x3 polymers - especially when the polymer is small. In molecular dynamics a cut off distance for long range interactions
+is specified (normally 10 angstroms or 1 nanometre) and in a small system it can be less than 20 angstroms in size in one direction. This means that if you select any atom, within 
+10 angstroms of itself it will see itself and the simulation will break. This is just something to be aware of if you are trying to build 3x3 array systems.
+
+The code for generating these systems is rather simple:
+
+..code-block:: python
+
+   builder.generate_polymer_3_3_array(base_trimer_name, polymer_name, crystalline//random)
+   builder.generate_polymer_5_5_array(base_trimer_name, polymer_name, crystalline//random)
+
+For context, there are 2 class methods for both the 3x3 array and 5x5 array (so 4 in total) that build either a crystalline or random array. These are called by the above class method
+based on whether you specified "crystalline" or "random". It should also be noted that the random array generation calls packmol so this may not work if packmol or your packmol path are 
+not configured correctly.
+
+As an example with the 3HB decamer, a crystalline and random 5x5 array will be built.
+
+..code-block:: python
+
+   system_name = builder.generate_polymer_5_5_array("3HB_trimer", "3HB_10_polymer", "crystalline")
+   print(system_name)
+   system_name = builder.generate_polymer_5_5_array("3HB_trimer", "3HB_10_polymer", "random")
+   print(system_name)
+
+The system names for 3HB decamer systems will be **3HB_10_polymer_5_5_array_crystal** and **3HB_10_polymer_5_5_array_random**. The amber files can be retrieved for these just as before.
+
+..code-block:: python
+
+   top, coord = manager.load_amber_filepaths(system_name)
+   print(f"The topology file for {system_name} is {top}")
+   print(f"The coordinate file for {system_name} is {coord}")    
+
+Other
+-----
+
+If you look in the dropdown list on the left, there are a lot of other functions contained in this module. Many of these are usable but never really went anywhere
+so lack explanation in this tutorial. In the future this statement may be redundant as functions will either be documented fully or removed.
+
+Summary
+-------
+
+The **BuildAmberSystems** class in the **sw_build_systems** module generates amber parameters for single molecules, solvated single molecules and systems of polymers. It also generates
+parameters for single molecules and polymers in addition to having the capability to be able to build polymers of any length. All of the funcionality of the **BuildSystems** module
+is inherited here so any class method or attribute found in the **BuildSystems** class is also accesible via an instance of the **BuildAmberSystems** class.   
 
 
 
