@@ -179,3 +179,29 @@ def pdb_to_mol(pdb_filename):
         AllChem.AssignAtomChiralTagsFromStructure(mol)
 
     return mol
+
+def clean_mol_name(molecule_name):
+    chars_to_replace = ["(", ")", " ", ","] 
+    for char in chars_to_replace:
+        molecule_name = molecule_name.replace(char, '')
+    return(molecule_name)
+
+def remove_conect_master_lines(file_path):
+    """
+    Removes lines containing 'CONECT' or 'MASTER' from a PDB file and overwrites the file.
+    
+    :param file_path: Path to the PDB file.
+    """
+    try:
+        # Read the content of the file
+        with open(file_path, 'r') as file:
+            lines = file.readlines()
+
+        # Filter out lines containing 'CONECT' or 'MASTER'
+        filtered_lines = [line for line in lines if not ('CONECT' in line or 'MASTER' in line)]
+
+        # Overwrite the file with the filtered content
+        with open(file_path, 'w') as file:
+            file.writelines(filtered_lines)
+    except Exception as e:
+        print(f"An error occurred when removing lines from PDB file: {e}")

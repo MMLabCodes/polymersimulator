@@ -482,6 +482,126 @@ class BioOilDirs(SnippetSimManage):
                     except Exception as e:
                         print(f"Error reading {csv_file}: {e}")
 
+    def bio_oil_pckml_inputs_avail(self):
+        avail_files = []
+        # Walk through the directory tree recursively
+        for root, dirs, files in os.walk(self.bio_oil_systems_dir):
+            dirs[:] = [d for d in dirs if d != 'depreceated']
+            # Check each file in the current directory
+            for file in files:
+                # Check if the file has a .pdb extension
+                if file.endswith(".pdckml") or file.endswith(".inp"):
+                    # Construct the full path to the .pdb file
+                    pdb_file_path = os.path.join(root, file)
+                    # Extract molecule name
+                    pdb_file = pdb_file_path.split("/")[-1]
+                    avail_files.append(pdb_file_path)
+                    print(pdb_file)
+        return(avail_files)
+
+    def bio_oil_amber_systems_avail(self):
+        a = False
+        amber_system_avail =[]
+        for root, dirs, files in os.walk(self.bio_oil_systems_dir):
+            dirs[:] = [d for d in dirs if d != 'depreceated']
+            # Check each file in the current directory
+            for file in files:
+                # Check if the file has a .pdb extension
+                if file.endswith(".prmtop"):
+                    a = True
+                    # Construct the full path to the .pdb file
+                    prmtop_filepath = os.path.join(root, file)
+                    # Extract molecule name
+                    prmtop_file = prmtop_filepath.split("/")[-1]
+                    amber_system_avail.append(prmtop_file)
+                    #print(pdb_file)
+                if file.endswith(".rst7"):
+                    a = True
+                    # Construct the full path to the .pdb file
+                    rst7_filepath = os.path.join(root, file)
+                    amber_system_avail.append(rst7_filepath)
+                    # Extract molecule name
+                    rst7_file = rst7_filepath.split("/")[-1]
+                    #print(pdb_file)
+        if a == True:
+            print("")
+            print("Remember you need both .prmtop and .rst7 files to run a simulation")    
+            return(amber_system_avail)
+        if a == False:
+            print("No parametrized molecules.")
+            return(None)
+
+    def load_bio_oil_amber_filepaths(self, system_name=None):
+        prmtop_file_path = None
+        coord_file_path = None
+        if system_name == None:
+            print("Please provide the name of the system you are retrieving files as follows: 'topology_file, coordinate_file = directories.retrieve_top_crds('ethane')")
+            print("Change ethane for the name of the desired system")
+            print("NOTE: Amber files must be generated using tleap prior to this step")
+            return(None)
+        for root, dirs, files in os.walk(self.bio_oil_systems_dir):
+            dirs[:] = [d for d in dirs if d != 'depreceated']
+            # Check each file in the current directory
+            for file in files:
+                # Check if the file has a .pdb extension
+                #if file.endswith(".prmtop") and system_name in file: 
+                if file == (system_name + ".prmtop"):
+                    # Construct the full path to the .pdb file
+                    prmtop_file_path = os.path.join(root, file)
+                #if file.endswith(".rst7") and system_name in file:
+                if file == (system_name + ".rst7"):
+                    # Construct the full path to the .pdb file
+                    coord_file_path = os.path.join(root, file)
+        if (prmtop_file_path is not None) and (coord_file_path is not None):
+            return(prmtop_file_path, coord_file_path)
+        else:
+            print("Files not found. Check name of molecule/system and if files have been generated.")
+            return(None)
+
+
+# This class should be inititated when you start handing specific data for a model
+# i.e. there will be an instance of this specific to each model
+class complex_model_dirs(BioOilDirs):
+    def __init__(self, main_dir, model_name, *args, **kwargs):
+        super().__init__(main_dir, *args, **kwargs)
+        
+        self.complex_model_dir = os.path.join(self.bio_oil_dir, model_name)
+        if not os.path.exists(self.complex_model_dir):
+            os.makedirs(self.complex_model_dir)
+
+        self.dft_input_dir = os.path.join(self.complex_model_dir, "DFT_inputs")
+        if not os.path.exists(self.dft_input_dir):
+            os.makedirs(self.dft_input_dir)
+
+        self.packmol_inputs = os.path.join(self.complex_model_dir, "packmol_inputs")
+        if not os.path.exists(self.packmol_inputs):
+            os.makedirs(self.packmol_inputs)
+
+        self.packmol_systems = os.path.join(self.complex_model_dir, "packmol_systems")
+        if not os.path.exists(self.packmol_systems):
+            os.makedirs(self.packmol_systems)
+
+        self.output_files = os.path.join(self.complex_model_dir, "output_files")
+        if not os.path.exists(self.output_files):
+            os.makedirs(self.output_files)
+
+    def packmol_systems_avail(self):
+        avail_files = []
+        # Walk through the directory tree recursively
+        for root, dirs, files in os.walk(self.packmol_systems):
+            dirs[:] = [d for d in dirs if d != 'depreceated']
+            # Check each file in the current directory
+            for file in files:
+                # Check if the file has a .pdb extension
+                if file.endswith(".pdb"):
+                    # Construct the full path to the .pdb file
+                    pdb_file_path = os.path.join(root, file)
+                    # Extract molecule name
+                    pdb_file = pdb_file_path.split("/")[-1]
+                    avail_files.append(pdb_file_path)
+                    #print(pdb_file)
+        return(avail_files)
+
 
 class DFT_manager(SnippetSimManage):
     max_jobs = 8

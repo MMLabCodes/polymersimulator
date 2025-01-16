@@ -1,5 +1,7 @@
 from modules.sw_orca import *
 from modules.sw_basic_functions import *
+import os as os
+import subprocess
 import csv
 import math
 import pandas as pd
@@ -24,6 +26,7 @@ class complex_fluid_model:
         self.wa_sulfur_content = complex_fluid_models.calculate_heteroatom_percentages(self.molecules)['S']
         self.min_mols_for_sim = complex_fluid_models.min_mols_4_simulation(self)
         self.min_atoms_for_sim = complex_fluid_models.min_atoms_4_simulation(self)
+        self.min_vol_for_sim = complex_fluid_models.min_vol_4_simulation(self)
         
 class complex_fluid_models:
     # This  class contains all the functions to generate complex_fluid_models as described in the paper
@@ -395,9 +398,9 @@ class complex_fluid_models:
             group_peaks.append(group_peak)
 
             if len(model.molecules) == 1:
-                scored_molecules[0].append(model[0])
+                scored_molecules[0].append(model.molecules[0])
                 scored_molecules[1].append(1.0)
-                selected_molecules.append(model[0])
+                selected_molecules.append(model.molecules[0])
                 continue
             print(model)
             # These don't need to be calculated here - can be called from the instance
@@ -561,6 +564,15 @@ class complex_fluid_models:
             num_atoms = num_atoms + (mol.GetNumAtoms()*(float(model.molecule_ratios[i]) / float(min_peak))*(len(model.molecules) + 1))
             
         return int(num_atoms)
+        
+    @staticmethod
+    def min_vol_4_simulation(model):
+        tot_volume = 0      
+        for i in range(len(model.molecules)):
+            volume_of_mol = model.molecules[i].volume*(model.molecule_ratios[i]*model.min_mols_for_sim)
+            tot_volume = tot_volume + volume_of_mol
+         
+        return tot_volume
 
     @staticmethod
     def model_output_block(all_model, model, ranked_data):
@@ -645,3 +657,200 @@ class complex_fluid_models:
             model_lines.append(model.molecules[i].smiles)
        
         return(model_lines) 
+
+class complex_fluid_model_builder:
+    # This  class contains all the functions to generate complex_fluid_models as described in the paper
+    # The inputs are orca molecules
+    # The outputs are instances of the 'complex_fluid_model' class - all standardised so it is easier to work with
+    
+    def __init__(self):
+        pass
+
+    @staticmethod
+    def generate_packmol_bio_oil_cube(model_dirs, model, tolerance=None, filetype=None): # csv_name (i.e. pine bark phenolic), molecules selected by model generation, model type
+        total_volume = model.min_vol_for_sim
+        size = int((math.pow(total_volume, (1/3))) * 1.5) # Note this is the side of one length of the box
+
+        ## NEED A CLAUSE TO ENSURE BOX length is bigger than the longest molecule ##
+
+        packmol_input_filename = model.model_name + ".inp"
+        packmol_input_filepath = os.path.join(model_dirs.packmol_inputs, packmol_input_filename)
+
+        packmol_output_filename = model.model_name + ".pdb"
+        packmol_output_filepath = os.path.join(model_dirs.packmol_systems, packmol_output_filename)
+      
+        lines = []
+    
+        if tolerance is None:
+            tolerance = 2.0
+        if filetype is None:
+            filetype = "pdb"
+        tolerance = "tolerance " + str(tolerance)
+        output = "output " + packmol_output_filepath
+        filetype = "filetype " + filetype
+        lines.extend([tolerance, output, filetype])
+
+        def write_packmol_struct_block(model_dirs, lines, name, ratio, total_mols_in_model, size):#
+         
+            name = "structure " + model_dirs.molecules_dir + f"/{name}/{name}.pdb" 
+            if ratio == False:
+                number = "	" + "number " + str(1)
+            else:
+                number = "	" + "number " + str(int(total_mols_in_model*ratio))     
+            cube = "	inside cube 0. 0. 0. " + str(size+5) + "."
+            end = "end structure"
+            lines.extend([name, number, cube, end])
+            return(lines) 
+
+        # NOTE ALL RATIOS ARE NOW CALCULATED CORRECTLY and sum to 1.0 in the model object!! ##
+        for i in range(len(model.molecules)):
+            lines = write_packmol_struct_block(model_dirs, lines, model.molecules[i].name, model.molecule_ratios[i], model.min_mols_for_sim, size)
+         
+        #print(input_filepath)
+        f = open(packmol_input_filepath, "w")
+        for line in lines:
+            f.write(line)
+            f.write('\n')
+        f.close()   
+
+        packmol_command = str(model_dirs.packmol_path) + " < " + packmol_input_filepath
+        print(packmol_command)
+        try:
+            result = subprocess.run(packmol_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            if result.returncode == 0:
+            # Command executed successfully
+                print("Output:", result.stdout)
+            else:
+            # Command failed, print error message
+                print("Error:", result.stderr)
+        except Exception as e:
+        # Exception occurred during subprocess execution
+            print("Exception:", e)
+    
+        return()
+
+    @staticmethod
+    def extract_unique_rescodes(pdb_file):
+        unique_residues = set()
+        with open(pdb_file, 'r') as file:
+            for line in file:
+                if line.startswith("ATOM") or line.startswith("HETATM"):
+                    residue_code = line[17:20].strip()
+                    unique_residues.add(residue_code)
+        return unique_residues
+
+    @staticmethod
+    def load_molecule_list(manager):
+        molecule_dict = {}
+        with open(manager.residue_code_csv, 'r') as file:
+            for line in file:
+                parts = line.strip().split(',')
+                if len(parts) == 3:
+                    molecule_dict[parts[2]] = parts[0]
+        return molecule_dict
+
+    @staticmethod
+    def find_matching_molecules(residue_codes, molecule_dict):
+        matching_molecules = []
+        for code in residue_codes:
+            if code in molecule_dict:
+                matching_molecules.append(molecule_dict[code])
+        return matching_molecules
+
+    @staticmethod
+    def add_ter_to_pckml_result(pdb_file):
+    # NOTE: this is different to the other version - the other version is specifically for polymers
+
+        # Open file
+        with open(pdb_file) as file:
+            lines = file.readlines()
+
+        # Initiate an empty list foe new lines and set the residue code to None before itereating
+        modified_lines = []
+        previous_residue_num = None
+
+        # Iterate over each line in the file
+        for line in lines:
+            # Split the line into columns based on spaces
+            columns = line.split()
+            if "HEADER" in line or "TITLE" in line or "REMARK" in line:
+                continue
+            if len(columns) > 3:
+                # Extract the current residue code (4th column in this case)
+                current_residue_num = columns[5]
+
+                # Check if the previous residue is different
+                if previous_residue_num == current_residue_num:
+                    pass
+                else:
+                    # Append the "TER" line to the modified lines list
+                    modified_lines.append("TER\n")
+
+                # Update the previous residue code
+                previous_residue_num = current_residue_num
+
+            if "END" in columns:
+                modified_lines.append("TER\n")
+    
+            # Append the current line to the modified lines list
+            modified_lines.append(line)
+
+        with open(pdb_file, 'w') as file:
+            file.writelines(modified_lines)
+        return(None)
+
+    @staticmethod
+    def generate_amber_params_from_packmol_bio_oil(manager, molecule_list, system_pdb_path):
+        system_name = (system_pdb_path.split("/")[-1]).split(".")[0]
+
+         #Write and exectute the intleap file. PROBLEMS LOADING SYSTEM PDB -not sure why though
+        file_content = ""
+        file_content = "source leaprc.gaff\n"
+
+        for molecule in molecule_list:
+            prepi_path = os.path.join(manager.molecules_dir, molecule, (molecule + ".prepi"))
+            file_content += f"loadamberprep {prepi_path}\n"
+            frcmod_path = os.path.join(manager.molecules_dir, molecule, (molecule + ".frcmod"))
+            file_content += f"loadamberparams {frcmod_path}\n"
+
+        file_content += f"system = loadpdb {system_pdb_path}\n"
+
+        output_dir = os.path.join(manager.bio_oil_systems_dir, system_name)
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+    
+        prmtop_file = os.path.join(output_dir, (system_name + ".prmtop"))
+        rst7_file = os.path.join(output_dir, (system_name + ".rst7"))
+
+
+        #x, y, z = build.get_xyz_dists(system_pdb) # get x,y,z for periodic dists
+        #x, y, z = x+2, y+2, z+2 # Add a buffer into it
+        #file_content += f"setBox system vdw {x} {y} {z}\n" 
+
+        file_content += f"setBox system centers\n" # this method of setting pbc didnt work. ACTUALLY DID WORK, just in the wrong place
+        file_content += f"saveamberparm system {prmtop_file} {rst7_file}\n"
+
+        file_content += "quit\n"
+
+        intleap_path = os.path.join(output_dir, (system_name + ".intleap"))
+
+
+        with open(intleap_path, 'w') as file:
+            file.write(file_content)
+            
+        leap_command = "tleap -f " + intleap_path
+        #print("The command that would be run in the shell is: ")
+        #print(leap_command)
+        print(intleap_path)
+        try:
+            result = subprocess.run(leap_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            if result.returncode == 0:
+                # Command executed successfully
+                print("Output:", result.stdout)
+            else:
+                 # Command failed, print error message
+                print("Error:", result.stderr)
+        except Exception as e:
+                     # Exception occurred during subprocess execution
+                    print("Exception:", e)
+    
