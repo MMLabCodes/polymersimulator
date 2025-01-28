@@ -390,7 +390,7 @@ class BuildSimulation():
     nonbondedcutoff = 1.0
     timestamp = datetime.datetime.now().strftime('%Y-%m-%d_%H%M%S')
     # Start temp, max temp, cycles, holding_steps, steps at each temp
-    anneal_parameters = [300, 700, 5, 3000, 100]
+    anneal_parameters = [300, 700, 5, 10, 500000]
     minimized_only = None # This will change to True/False and will determine how periodic box vectors are set
     
     def __init__(self, manager, filename):
@@ -417,7 +417,7 @@ class BuildSimulation():
         if not os.path.exists(self.output_dir):
             os.makedirs(self.output_dir)
         self.log_info = {'Minimization': {'Temperature':None,'Time taken': None},
-                            'Annealing_NPT': {'Time taken': None, 'Simulation time': None, 'Start temp': None, 'Target temp': None, 'Cycles': None, 'Steps at plateaus': None, 'Steps at incremental temps': None, 'Timestep': None},
+                            'Annealing_NVT': {'Time taken': None, 'Simulation time': None, 'Start temp': None, 'Target temp': None, 'Cycles': None, 'Steps at plateaus': None, 'Steps at incremental temps': None, 'Timestep': None},
                             'Basic_NPT': {'Time taken': None, 'Simulation time': None, 'Temperature': None, 'Pressure': None, 'Timestep': None},
                             'Basic_NVT': {'Time taken': None, 'Simulation time': None, 'Temperature': None, 'Timestep': None},
                         'Thermal Ramp' : {'Time taken':None, 'Simulation time':None, 'Start temp':None, 'Target temp':None, 'Quench Rate':None, 'Steps at incremental temps':None, 'Timestep':None, 'Ensemble':None, 'Method':None}}
@@ -491,7 +491,7 @@ class BuildSimulation():
         """Display help information for the minimize_energy method."""
         print(cls.minimize_energy.__doc__)    
      
-    def anneal_NVT(self, simulation, start_temp=None, max_temp=None, cycles=None, holding_steps=None, steps_at_temp=None):
+    def anneal_NVT(self, simulation, start_temp=None, max_temp=None, cycles=None, quench_rate=None, steps_per_cycle=None):
         """
         Function to perform simulated annealing on the provided simulation system.
         
@@ -543,10 +543,10 @@ class BuildSimulation():
             max_temp = self.anneal_parameters[1]
         if cycles is None:
             cycles = self.anneal_parameters[2]
-        if holding_steps is None:
-            holding_steps = self.anneal_parameters[3]
-        if steps_at_temp is None:
-            steps_at_temp = self.anneal_parameters[4]
+        if quench_rate is None:
+            quench_rate = self.anneal_parameters[3]
+        if steps_per_cycle is None:
+            steps_per_cycle = self.anneal_parameters[4]
          
         # Extract positional info
         state = simulation.context.getState(getPositions=True, getEnergy=True, enforcePeriodicBox=True) # Define state object 
@@ -570,7 +570,7 @@ class BuildSimulation():
         simulation.context.setPositions(xyz)
         
         # Total up all steps of the equilibration so the rpeorters record properly
-        total_steps = (((max_temp-start_temp)*1000 + holding_steps)*2)*cycles
+        total_steps = steps_per_cycle*cycles
         
         # Set up reporters
         # PDB trajectory - this is slighlty redundant with the addition of the DCD trajectory, but it is still useful for 
@@ -590,34 +590,43 @@ class BuildSimulation():
         dataWriter = DataWriter(output_dataname, self.reporter_freq, total_steps)
         simulation.reporters.append(dataWriter.stateDataReporter)
         
-        increments = int(max_temp-start_temp)
-        
-        for i in range(cycles):
-            for j in range(increments):
-                integrator.setTemperature(start_temp+j)
-                simulation.step(steps_at_temp)
-            
+        increments = int((max_temp-start_temp)/quench_rate)
+        steps_per_slope = int(steps_per_cycle*0.4)
+        holding_steps = int(steps_per_cycle*0.1) 
+        steps_at_increment = int(steps_per_slope/increments)
+
+        def cycle(start_temp, max_temp, steps_at_increment, holding_steps, increments, quench_rate):
+            integrator.setTemperature(start_temp)
+            simulation.step(steps_at_increment)
+
+            for i in range(increments):
+                integrator.setTemperature(start_temp + (i*quench_rate))
+                simulation.step(steps_at_increment)
+
             integrator.setTemperature(max_temp)
             simulation.step(holding_steps)
             
-            for j in range(increments):
-                integrator.setTemperature(max_temp-j)
-                simulation.step(steps_at_temp)
-                
+            for i in range(increments):
+                integrator.setTemperature(max_temp - (i*quench_rate))
+                simulation.step(steps_at_increment)                
+
             integrator.setTemperature(start_temp)
             simulation.step(holding_steps)
-
+                
+        for i in range(cycles):
+            cycle(start_temp, max_temp, steps_at_increment, holding_steps, increments, quench_rate)
+            
         anneal_end_time = time.time()  
         time_taken = anneal_end_time - anneal_start_time
 
-        self.log_info['Annealing']['Time taken'] = time_taken
-        self.log_info['Annealing']['Simulation time'] = total_steps*self.timestep
-        self.log_info['Annealing']['Start temp'] = start_temp
-        self.log_info['Annealing']['Target temp'] = max_temp
-        self.log_info['Annealing']['Cycles'] = cycles
-        self.log_info['Annealing']['Steps at plateaus'] = holding_steps
-        self.log_info['Annealing']['Steps at incremental temps'] = steps_at_temp
-        self.log_info['Annealing']['Timestep'] = self.timestep
+        self.log_info['Annealing_NVT']['Time taken'] = time_taken
+        self.log_info['Annealing_NVT']['Simulation time'] = total_steps*self.timestep
+        self.log_info['Annealing_NVT']['Start temp'] = start_temp
+        self.log_info['Annealing_NVT']['Target temp'] = max_temp
+        self.log_info['Annealing_NVT']['Cycles'] = cycles
+        self.log_info['Annealing_NVT']['Steps at plateaus'] = holding_steps
+        self.log_info['Annealing_NVT']['Steps at incremental temps'] = steps_at_increment
+        self.log_info['Annealing_NVT']['Timestep'] = self.timestep
 
         # Write the final structure to pdb
         self.final_pdbname = os.path.join(self.output_dir, ("final_anneal_" + self.filename + ".pdb"))
@@ -1308,7 +1317,7 @@ class BuildSimulation():
             It prints a confirmation message with the provided parameters.
         """
         if len(new_anneal_parameters) != len(cls.anneal_parameters):
-            format_str = "Expected format: [start_temp, max_temp, cycles, holding_steps, steps_at_temp]"
+            format_str = "Expected format: [start_temp, max_temp, cycles, quench_rate, steps_per_cycle]"
             raise ValueError(f"Invalid parameters provided. {format_str}")
         else: 
             # new_anneal_parameters = [start_temp, max_temp, cycles, holding_steps]
@@ -1317,8 +1326,8 @@ class BuildSimulation():
             print("Starting temperature is: ", str(new_anneal_parameters[0]))
             print("Target temperature is: ", str(new_anneal_parameters[1]))
             print("Number of annealing cycles is: ", str(new_anneal_parameters[2]))
-            print("Steps at target/start temperature is: ", str(new_anneal_parameters[3]))
-            print("Steps at each incremental temperature is: ", str(new_anneal_parameters[4]))
+            print("The quench rate is: ", str(new_anneal_parameters[3]))
+            print("The number of steps per cycle is: ", str(new_anneal_parameters[4]))
 
     @classmethod
     def set_anneal_parameters_help(cls):
