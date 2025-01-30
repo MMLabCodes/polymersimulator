@@ -36,9 +36,9 @@ def initialise_poly_analysis(manager, system_name, base_molecule_name, poly_len,
     universe = Universe(masterclass, 'temp_ramp_cool', '.dcd')
     return(universe)
 
-def intialise_bio_oil_analysis(manager, system_name, sim_index=0):
+def initialise_bio_oil_analysis(manager, system_name, sim_index=0):
 
-    sim_avail = manager.simulation_avail(system_name)
+    sim_avail = manager.simulations_avail(system_name)
     masterclass = master_bio_oil_anal(manager, system_name, sim_avail[sim_index])
     universe = Universe(masterclass, 'prod')
 
