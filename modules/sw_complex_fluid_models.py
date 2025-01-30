@@ -686,9 +686,10 @@ class complex_fluid_model_builder:
         if filetype is None:
             filetype = "pdb"
         tolerance = "tolerance " + str(tolerance)
+        ter = "add_amber_ter"
         output = "output " + packmol_output_filepath
         filetype = "filetype " + filetype
-        lines.extend([tolerance, output, filetype])
+        lines.extend([tolerance, ter, output, filetype])
 
         def write_packmol_struct_block(model_dirs, lines, name, ratio, total_mols_in_model, size):#
          
@@ -756,48 +757,6 @@ class complex_fluid_model_builder:
             if code in molecule_dict:
                 matching_molecules.append(molecule_dict[code])
         return matching_molecules
-
-    @staticmethod
-    def add_ter_to_pckml_result(pdb_file):
-    # NOTE: this is different to the other version - the other version is specifically for polymers
-
-        # Open file
-        with open(pdb_file) as file:
-            lines = file.readlines()
-
-        # Initiate an empty list foe new lines and set the residue code to None before itereating
-        modified_lines = []
-        previous_residue_num = None
-
-        # Iterate over each line in the file
-        for line in lines:
-            # Split the line into columns based on spaces
-            columns = line.split()
-            if "HEADER" in line or "TITLE" in line or "REMARK" in line:
-                continue
-            if len(columns) > 3:
-                # Extract the current residue code (4th column in this case)
-                current_residue_num = columns[5]
-
-                # Check if the previous residue is different
-                if previous_residue_num == current_residue_num:
-                    pass
-                else:
-                    # Append the "TER" line to the modified lines list
-                    modified_lines.append("TER\n")
-
-                # Update the previous residue code
-                previous_residue_num = current_residue_num
-
-            if "END" in columns:
-                modified_lines.append("TER\n")
-    
-            # Append the current line to the modified lines list
-            modified_lines.append(line)
-
-        with open(pdb_file, 'w') as file:
-            file.writelines(modified_lines)
-        return(None)
 
     @staticmethod
     def generate_amber_params_from_packmol_bio_oil(manager, molecule_list, system_pdb_path):
