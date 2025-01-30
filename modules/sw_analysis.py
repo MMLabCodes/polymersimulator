@@ -27,16 +27,32 @@ import pandas as pd
 import warnings
 warnings.filterwarnings("ignore", message="DCDReader currently makes independent timesteps")
 
-def initialise_analysis(manager, system_name, base_molecule_name, poly_len, sim_index=0):
+def initialise_poly_analysis(manager, system_name, base_molecule_name, poly_len, sim_index=0):
     '''
     This function will require an update as it only parses one type of simulation stage at the minute
     '''
     sim_avail = manager.simulations_avail(system_name)
-    masterclass = master_anal(manager, system_name, base_molecule_name, sim_avail[sim_index], poly_len)
+    masterclass = master_poly_anal(manager, system_name, base_molecule_name, sim_avail[sim_index], poly_len)
     universe = Universe(masterclass, 'temp_ramp_cool', '.dcd')
     return(universe)
 
-class master_anal():
+def intialise_bio_oil_analysis(manager, system_name, sim_index=0):
+
+    sim_avail = manager.simulation_avail(system_name)
+    masterclass = master_bio_oil_anal(manager, system_name, sim_avail[sim_index])
+    universe = Universe(masterclass, 'prod')
+
+class master_bio_oil_anal():
+    def __init__(self, manager, system_name, simulation_directory):
+        self.manager = manager
+        self.system_name = system_name
+        self.topology_file = self.manager.load_amber_filepath(system_name)[0]
+        self.simulation_directory = simulation_directory
+        self.simulation_files = self.group_files()
+        self.min_filepath = os.path.join(self.simulation_directory, self.simulation_files["min"][0])
+        self.simulation_stages = list(self.simulation_files.keys())
+
+class master_poly_anal():
     def __init__(self, manager, system_name, base_molecule_name, simulation_directory, poly_length=None):
         self.manager = manager
         self.polymer_code = base_molecule_name.split("_")[0]
