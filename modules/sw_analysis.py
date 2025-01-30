@@ -41,18 +41,37 @@ def initialise_bio_oil_analysis(manager, system_name, sim_index=0):
     sim_avail = manager.simulations_avail(system_name)
     masterclass = master_bio_oil_anal(manager, system_name, sim_avail[sim_index])
     universe = Universe(masterclass, 'prod')
+    return(universe)
 
-class master_bio_oil_anal():
+class initialise():
+    def __init__():
+        pass
+
+    def group_files(self):
+        grouped_files = defaultdict(list)
+
+        sim_step_strings = ["1_atm", "temp_ramp_heat", "temp_ramp_cool", "min", "prod"]
+
+        for file in os.listdir(self.simulation_directory):
+            if file.endswith(('.txt', '.dcd', '.pdb')):
+                base_name = os.path.splitext(file)[0]
+                for string in sim_step_strings:
+                    if string in base_name:
+                        grouped_files[string].append(file)
+
+        return(grouped_files)
+
+class master_bio_oil_anal(initialise):
     def __init__(self, manager, system_name, simulation_directory):
         self.manager = manager
         self.system_name = system_name
-        self.topology_file = self.manager.load_amber_filepath(system_name)[0]
+        self.topology_file = self.manager.load_amber_filepaths(system_name)[0]
         self.simulation_directory = simulation_directory
         self.simulation_files = self.group_files()
         self.min_filepath = os.path.join(self.simulation_directory, self.simulation_files["min"][0])
         self.simulation_stages = list(self.simulation_files.keys())
 
-class master_poly_anal():
+class master_poly_anal(initialise):
     def __init__(self, manager, system_name, base_molecule_name, simulation_directory, poly_length=None):
         self.manager = manager
         self.polymer_code = base_molecule_name.split("_")[0]
@@ -85,22 +104,6 @@ class master_poly_anal():
             self.residue_codes = self.extract_rescodes_and_resnums(self.min_filepath)[1]
             self.system_vol = None
         self.simulation_stages = list(self.simulation_files.keys())
-        
-
-        
-    def group_files(self):
-        grouped_files = defaultdict(list)
-
-        sim_step_strings = ["1_atm", "temp_ramp_heat", "temp_ramp_cool", "min"]
-
-        for file in os.listdir(self.simulation_directory):
-            if file.endswith(('.txt', '.dcd', '.pdb')):
-                base_name = os.path.splitext(file)[0]
-                for string in sim_step_strings:
-                    if string in base_name:
-                        grouped_files[string].append(file)
-
-        return(grouped_files)
 
     def extract_rescodes_and_resnums(self, pdb_file_path):
         largest_residue_number = None  # Variable to track the largest residue number
