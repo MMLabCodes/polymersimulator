@@ -5,6 +5,7 @@ Created on Tue Jun  4 11:13:57 2024
 @author: danie
 """
 from modules.sw_basic_functions import *
+from modules.sw_complex_fluid_models import *
 #from modules.sw_custom_decorators import *
 from collections import defaultdict
 import os as os
@@ -12,6 +13,7 @@ import os as os
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from sklearn.metrics import r2_score
+from scipy.optimize import curve_fit
 import seaborn as sns
 import numpy as np
 import nglview as nv
@@ -40,7 +42,10 @@ def initialise_bio_oil_analysis(manager, system_name, sim_index=0):
 
     sim_avail = manager.simulations_avail(system_name)
     masterclass = master_bio_oil_anal(manager, system_name, sim_avail[sim_index])
-    universe = Universe(masterclass, 'prod')
+    residue_codes = complex_fluid_model_builder.extract_unique_rescodes(masterclass.min_filepath)
+    molecule_names = complex_fluid_model_builder.find_matching_molecules(residue_codes, complex_fluid_model_builder.load_molecule_list(manager))
+    molecule_dictionary =  dict(zip(molecule_names, residue_codes))
+    universe = bio_oil_Universe(masterclass, 'prod', molecule_dictionary)
     return(universe)
 
 class initialise():
@@ -182,6 +187,28 @@ class Universe():
         else:
             return f"Key '{self.sim_stage}' not found in the dictionary."
 
+class poly_Universe(Universe):
+    def __init__(self, master_anal, sim_stage, traj_format=None):
+        if traj_format is None:
+            self.traj_format = ".pdb"
+        else:
+            if traj_format != ".pdb" and traj_format != ".dcd":
+                print(f"{traj_format} is not supported")
+                print("please enter '.pdb' or '.dcd' format.")
+            else:
+                self.traj_format = traj_format
+        self.sim_stage = sim_stage
+        self.masterclass = master_anal
+        self.topology = self.masterclass.topology_file
+        # True tells 'select_file' we are searching for the traj
+        self.trajectory = os.path.join(self.masterclass.simulation_directory, self.select_file(True))
+        self.universe = mda.Universe(self.topology, self.trajectory)
+        self.output_filename = os.path.join(self.masterclass.simulation_directory, self.masterclass.system_name + f"_{self.sim_stage}")
+        # False tells 'select_file' we are searching for the data file
+        self.data_file = os.path.join(self.masterclass.simulation_directory, self.select_file(False))
+        self.data = pd.read_csv(self.data_file)
+
+        
     def select_polymer(self, polymer_name, select_rest=False):
         # Select the first polymer (Polymer_1)
         first_polymer_indices = self.masterclass.poly_sel_dict[polymer_name]
@@ -217,7 +244,28 @@ class Universe():
         print("No backbone identified, consider adding a backbone pattern to this functions source code")
         return(None)
 
-        
+class bio_oil_Universe(Universe):
+    def __init__(self, master_anal, sim_stage, molecule_dictionary, traj_format=None):
+        if traj_format is None:
+            self.traj_format = ".pdb"
+        else:
+            if traj_format != ".pdb" and traj_format != ".dcd":
+                print(f"{traj_format} is not supported")
+                print("please enter '.pdb' or '.dcd' format.")
+            else:
+                self.traj_format = traj_format
+        self.sim_stage = sim_stage
+        self.masterclass = master_anal
+        self.topology = self.masterclass.topology_file
+        # True tells 'select_file' we are searching for the traj
+        self.trajectory = os.path.join(self.masterclass.simulation_directory, self.select_file(True))
+        self.universe = mda.Universe(self.topology, self.trajectory)
+        self.output_filename = os.path.join(self.masterclass.simulation_directory, self.masterclass.system_name + f"_{self.sim_stage}")
+        # False tells 'select_file' we are searching for the data file
+        self.data_file = os.path.join(self.masterclass.simulation_directory, self.select_file(False))
+        self.data = pd.read_csv(self.data_file)
+        self.molecule_dictionary = molecule_dictionary
+       
         
         
 
@@ -625,6 +673,86 @@ class Analysis:
         plt.show()
     
         return pls, pbs
+
+    @staticmethod
+    def plot_expansion_coeff(universe_object, bin_params=None, fit=True):
+        if bin_params is None:
+            print("Please specify the bin parameters for your system: [start_temp, target_temp, temp_increments]")
+            return
+    
+        # Set title
+        graph_title_1 = f"{universe_object.masterclass.system_name}_{universe_object.sim_stage} vol. vs temp." 
+        graph_title_2 = f"{universe_object.masterclass.system_name}_{universe_object.sim_stage} α vs temp."    
+        
+        # Define dataframe
+        df = universe_object.data
+    
+        # Define bin edges
+        bin_width = bin_params[2]  # Temperature bin size
+        bins = np.arange(bin_params[0], bin_params[1] + bin_width, bin_width)
+    
+        # Assign temperature values to bins
+        df["Temp_Bin"] = pd.cut(df["Temperature (K)"], bins, labels=(bins[:-1] + bin_width / 2))
+    
+        # Group by bins and calculate average box volume
+        binned_data = df.groupby("Temp_Bin")["Box Volume (nm^3)"].mean().reset_index()
+        binned_data["Temp_Bin"] = binned_data["Temp_Bin"].astype(float)
+    
+        # Extract binned temperature and volume data
+        T_bin = binned_data["Temp_Bin"].values
+        V_bin = binned_data["Box Volume (nm^3)"].values
+    
+        plt.figure(figsize=(8, 6))
+        plt.scatter(T_bin, V_bin, marker="o", color="b", label="Binned Data")
+    
+        fit_equations = {}
+    
+        if fit:
+            # Define quadratic volume model
+            def volume_model(T, a, b, c):
+                return a + b*T + c*T**2
+        
+            # Fit model to data
+            params, _ = curve_fit(volume_model, T_bin, V_bin)
+            a, b, c = params
+        
+            # Generate smooth data for plotting
+            T_smooth = np.linspace(min(T_bin), max(T_bin), 200)
+            V_smooth = volume_model(T_smooth, *params)
+        
+            # Compute smoothed dV/dT and thermal expansion coefficient α(T)
+            dVdT_smooth = b + 2*c*T_smooth
+            alpha_smooth = (dVdT_smooth / V_smooth) * 1e4  # Scale factor for visualization
+        
+            # Compute α(T) at each temperature bin
+            dVdT_bin = b + 2*c*T_bin
+            alpha_bin = (dVdT_bin / V_bin) * 1e4
+        
+            # Store fit equations
+            fit_equations["Volume Fit"] = f"V(T) = {a:.10f} + {b:.10f}T + {c:.10f}T²"
+            fit_equations["Expansion Coefficient Fit"] = f"α(T) = ({b:.10f} + 2*{c:.10f}T) / V(T) * 10⁴"
+        
+            # Plot fitted volume curve
+            plt.plot(T_smooth, V_smooth, linestyle="--", color="r", label="Fitted Volume Curve")
+            plt.xlabel("Temperature (K)")
+            plt.ylabel("Average Box Volume (nm³)")
+            plt.title(graph_title_1)
+            plt.grid(True)
+            plt.legend()
+            plt.show()
+        
+            # Plot thermal expansion coefficient
+            plt.figure(figsize=(8, 6))
+            plt.scatter(T_bin, alpha_bin, color="b", label="Binned α(T)")
+            plt.plot(T_smooth, alpha_smooth, linestyle="--", color="g", label="Fitted α(T)")
+            plt.xlabel("Temperature (K)")
+            plt.ylabel(r"Thermal Expansion Coefficient α ($\times 10^{-4}$ K⁻¹)")
+            plt.title(graph_title_2)
+            plt.grid(True)
+            plt.legend()
+            plt.show()
+    
+        return fit_equations
         
 class universe_coord_extraction():
     # This class can extract coordinates and atom types of from mdanalysis universes and can write them to xyz files
