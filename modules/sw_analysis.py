@@ -678,12 +678,11 @@ class Analysis:
     def plot_expansion_coeff(universe_object, bin_params=None, fit=True):
         if bin_params is None:
             print("Please specify the bin parameters for your system: [start_temp, target_temp, temp_increments]")
-            return
+            return None, None
     
         # Set title
-        graph_title_1 = f"{universe_object.masterclass.system_name}_{universe_object.sim_stage} vol. vs temp." 
-        graph_title_2 = f"{universe_object.masterclass.system_name}_{universe_object.sim_stage} α vs temp."    
-        
+        graph_title = f"{universe_object.masterclass.system_name}_{universe_object.sim_stage} vol. vs temp."
+    
         # Define dataframe
         df = universe_object.data
     
@@ -706,12 +705,9 @@ class Analysis:
         plt.scatter(T_bin, V_bin, marker="o", color="b", label="Binned Data")
     
         fit_equations = {}
+        params = None
     
-        if fit:
-            # Define quadratic volume model
-            def volume_model(T, a, b, c):
-                return a + b*T + c*T**2
-        
+        if fit:     
             # Fit model to data
             params, _ = curve_fit(volume_model, T_bin, V_bin)
             a, b, c = params
@@ -729,14 +725,14 @@ class Analysis:
             alpha_bin = (dVdT_bin / V_bin) * 1e4
         
             # Store fit equations
-            fit_equations["Volume Fit"] = f"V(T) = {a:.10f} + {b:.10f}T + {c:.10f}T²"
-            fit_equations["Expansion Coefficient Fit"] = f"α(T) = ({b:.10f} + 2*{c:.10f}T) / V(T) * 10⁴"
+            fit_equations["Volume Fit"] = f"V(T) = {a:.4f} + {b:.4f}T + {c:.4f}T²"
+            fit_equations["Expansion Coefficient Fit"] = f"α(T) = ({b:.4f} + 2*{c:.4f}T) / V(T) * 10⁴"
         
             # Plot fitted volume curve
             plt.plot(T_smooth, V_smooth, linestyle="--", color="r", label="Fitted Volume Curve")
             plt.xlabel("Temperature (K)")
             plt.ylabel("Average Box Volume (nm³)")
-            plt.title(graph_title_1)
+            plt.title(graph_title)
             plt.grid(True)
             plt.legend()
             plt.show()
@@ -747,13 +743,34 @@ class Analysis:
             plt.plot(T_smooth, alpha_smooth, linestyle="--", color="g", label="Fitted α(T)")
             plt.xlabel("Temperature (K)")
             plt.ylabel(r"Thermal Expansion Coefficient α ($\times 10^{-4}$ K⁻¹)")
-            plt.title(graph_title_2)
+            plt.title("Thermal Expansion Coefficient vs Temperature")
             plt.grid(True)
             plt.legend()
             plt.show()
     
-        return fit_equations
-        
+        return fit_equations, params
+
+    @staticmethod
+    def predict_expansion(params, T1, T2):
+        if params is None:
+            print("No fitted parameters available. Please fit the model first.")
+            return None
+    
+        a, b, c = params
+    
+        # Define the fitted alpha(T) function
+        def alpha_T_func(T):
+            return (b + 2 * c * T) / volume_model(T, a, b, c)  # α(T) = (dV/dT) / V(T)
+    
+        # Integrate α(T) over the given range
+        integral_alpha, _ = quad(alpha_T_func, T1, T2)
+    
+        # Compute total volume change ΔV
+        V_0 = volume_model(T1, a, b, c)  # Initial volume at T1
+        delta_V = V_0 * integral_alpha  # Integrated expansion effect
+    
+        return delta_V
+
 class universe_coord_extraction():
     # This class can extract coordinates and atom types of from mdanalysis universes and can write them to xyz files
     # Optional ability to make orca input files too
