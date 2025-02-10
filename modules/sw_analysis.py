@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from sklearn.metrics import r2_score
 from scipy.optimize import curve_fit
+from scipy.integrate import quad
 import seaborn as sns
 import numpy as np
 import nglview as nv
@@ -702,7 +703,7 @@ class Analysis:
         V_bin = binned_data["Box Volume (nm^3)"].values
     
         plt.figure(figsize=(8, 6))
-        plt.scatter(T_bin, V_bin, marker="o", color="b", label="Binned Data")
+        plt.scatter(T_bin, V_bin, marker="o", color="b", label="Volume")
     
         fit_equations = {}
         params = None
@@ -739,7 +740,7 @@ class Analysis:
         
             # Plot thermal expansion coefficient
             plt.figure(figsize=(8, 6))
-            plt.scatter(T_bin, alpha_bin, color="b", label="Binned α(T)")
+            plt.scatter(T_bin, alpha_bin, color="b", label="α(T)")
             plt.plot(T_smooth, alpha_smooth, linestyle="--", color="g", label="Fitted α(T)")
             plt.xlabel("Temperature (K)")
             plt.ylabel(r"Thermal Expansion Coefficient α ($\times 10^{-4}$ K⁻¹)")
