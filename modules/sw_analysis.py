@@ -752,7 +752,7 @@ class Analysis:
         return fit_equations, params
 
     @staticmethod
-    def predict_expansion(params, T1, T2):
+    def predict_expansion(params, V1, T1, T2):
         if params is None:
             print("No fitted parameters available. Please fit the model first.")
             return None
@@ -767,8 +767,7 @@ class Analysis:
         integral_alpha, _ = quad(alpha_T_func, T1, T2)
     
         # Compute total volume change ΔV
-        V_0 = volume_model(T1, a, b, c)  # Initial volume at T1
-        delta_V = V_0 * integral_alpha  # Integrated expansion effect
+        delta_V = V1 * integral_alpha  # Integrated expansion effect
     
         return delta_V
 
