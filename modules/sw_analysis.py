@@ -703,7 +703,7 @@ class Analysis:
         V_bin = binned_data["Box Volume (nm^3)"].values
     
         plt.figure(figsize=(8, 6))
-        plt.scatter(T_bin, V_bin, marker="o", color="b", label="Volume")
+        plt.scatter(T_bin, V_bin, marker="o", color="b", label="V(T)")
     
         fit_equations = {}
         params = None
