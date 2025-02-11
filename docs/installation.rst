@@ -58,7 +58,7 @@ To exit tleap hold ctrl+c
 
 A test for python and some associated packages is also important.
 
-..literal-block::
+.. literal-block::
 	
 	python3
 
@@ -70,7 +70,7 @@ If python is available, you will see something similar to the following:
 
 With the python interpreter still open, check if the openmm python packages can be imported:
 
-..literal-block::
+.. literal-block::
 	
 	from simtk.openmm import app
 
@@ -86,7 +86,7 @@ If openmm is not installed properly you will see this:
 
 If you see this, exit the python interpreter with 'ctr+d' and execute the following in the command line:
 
-..literal-block::
+.. literal-block::
 	
 	conda update -c conda-forge openmm
 
@@ -125,17 +125,48 @@ Now you can navigate to your home directory and execute the following commands:
 The final 'cd' command navigate to the directory containing the notebooks and scripts required for the tutorials.
 
 Jupyter Notebook tutorials
---------------------------
+==========================
 
 There are a series of jupyter notebooks that contain tutorials and are aptly labelled. A section can be found explaining the contents of each notebook.
 To launch jupyter notebooks execute the following in the command line (ubuntu in windows):
 
-..literal-block::
+.. literal-block::
 	
 	jupyter notebook
 
 This will launch a local jupyter notebook server and a series of URLs will be returned. Copy the **first link** containing ('localhost:8888') and copy//paste into a browser.
 From there, refer to the section in this documentation about different tutorials.
+
+sw_directories tutorial
+-----------------------
+
+The first tutorial is **Tutorial_1_filepath_manager** and will explain how files are organised and functions wrapped around them throughout the package.
+
+sw_build_systems tutorial
+-------------------------
+
+This encompasses the second and third tutorials; **Tutorial_2_build_systems** and **Tutorial_3_build_amber_systems**. These encompass building molecules from SMILES strings,
+parameterizing them and generating amber topology and coordinate files for molecular dynamics simulation. The building and parameterizaiton of polymers and
+generation of amber files for systems containing these polymers is also covered.
+
+sw_openmm tutorial
+------------------
+
+The fourth tutorial (**Tutorial_4_Running_Openmm_Simulations**) uses systems generated in tutorials 2 and 3 and runs molecular dynamics simulations of them. It 
+contains a **quickstart guide** but also runs through the intricacies of the module.
+
+sw_analysis tutorial
+--------------------
+
+Coming one day.....
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Tutorials
+
+   sw_directories_tutorial
+   sw_build_systems_tutorial
+   sw_openmm_tutorial
 
 
 
