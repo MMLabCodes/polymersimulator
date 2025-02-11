@@ -15,18 +15,18 @@ To get started, please check out the installation instructions below.
 Authors
 -------
 
-All of the code has been written and compiled by:
+All of the code has been written and compiled by:  
 
-**Daniel J. York**|
-**Dr. Isaac Vidal-Daza**
+**Daniel J. York**  
+**Dr. Isaac Vidal-Daza**  
 
-With invaluable advice from:
+With invaluable advice from:  
 
-**Dr. Francisco Martin-Martinez**
+**Dr. Francisco Martin-Martinez**  
 
-And testing from:
+And testing from:  
 
-**Sinem Bektas**|
-**Daniel Clarke**
+**Sinem Bektas**  
+**Daniel Clarke**  
 
 Who are all current or past members of the `Martin-Martinez Lab <https://www.martinmartinezlab.com/>`_.
