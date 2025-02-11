@@ -17,8 +17,8 @@ Authors
 
 All of the code has been written and compiled by:  
 
-**Daniel J. York**  
-**Dr. Isaac Vidal-Daza**  
+**Daniel J. York**    
+**Dr. Isaac Vidal-Daza**    
 
 With invaluable advice from:  
 
@@ -26,7 +26,7 @@ With invaluable advice from:
 
 And testing from:  
 
-**Sinem Bektas**  
+**Sinem Bektas**    
 **Daniel Clarke**  
 
 Who are all current or past members of the `Martin-Martinez Lab <https://www.martinmartinezlab.com/>`_.
