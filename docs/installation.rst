@@ -15,7 +15,7 @@ Creating an environment
 
 To create an environment, open the command prompt (ubuntu if you are using windows) and execute the following:
 
-.. literal-block::
+.. code-block:: bash
 
 	conda create --name AmberTools23
 	conda activate AmberTools23
@@ -25,7 +25,7 @@ To create an environment, open the command prompt (ubuntu if you are using windo
 Now the packages and different dependancies can be installed. These are all located in the **environment.yml** file in the **docs** folder of the github repository.
 This file can be used to install of the required pacakges.
 
-.. literal-block::
+.. code-block:: bash
 	
 	conda env update --file docs/environment.yml
 
@@ -36,7 +36,7 @@ To ensure some key packages are installed it is important to run some tests. Exe
 
 **Antechamber** is part of AmberTools and carries out the parameterization of the molecules//polymers.
 
-.. literal-block::
+.. code-block:: bash
 	
 	Antechamber
 
@@ -46,7 +46,7 @@ If antechamber is available, you will see something similar to the following:
 
 **Tleap** is an AmberTools programme that allows for the building of systems and generation of topology and coordinate files for 
 
-.. literal-block::
+.. code-block:: bash
 	
 	Tleap
 
@@ -58,7 +58,7 @@ To exit tleap hold ctrl+c
 
 A test for python and some associated packages is also important.
 
-.. literal-block::
+.. code-block:: bash
 	
 	python3
 
@@ -70,7 +70,7 @@ If python is available, you will see something similar to the following:
 
 With the python interpreter still open, check if the openmm python packages can be imported:
 
-.. literal-block::
+.. code-block:: bash
 	
 	from simtk.openmm import app
 
@@ -86,7 +86,7 @@ If openmm is not installed properly you will see this:
 
 If you see this, exit the python interpreter with 'ctr+d' and execute the following in the command line:
 
-.. literal-block::
+.. code-block:: bash
 	
 	conda update -c conda-forge openmm
 
@@ -98,7 +98,7 @@ Cloning the repository - Normal method
 Now the repository needs to be cloned to give access to pyton modules within this pacakge. Go to the repository page in github https://github.com/MMLabCodes/polymersimulator and find the blue button labelled '<> code'.
 Click here and select 'HTTPS' and copy the link. Now return to command line (ubuntu in windows), ensure you are in your home directory and execute the folowing:
 
-.. literal-block::
+.. code-block:: bash
 	
 	git clone copied link
 
@@ -117,7 +117,7 @@ Now scroll to the bottom and "generate token". This will give you a token you wi
 
 Now you can navigate to your home directory and execute the following commands:
 
-.. literal-block::
+.. code-block:: bash
 	
 	git clone https://USERNAME:YOUR_TOKEN@github.com/MMLabCodes/polymersimulator.git
 	cd polymersimulator
@@ -130,12 +130,15 @@ Jupyter Notebook tutorials
 There are a series of jupyter notebooks that contain tutorials and are aptly labelled. A section can be found explaining the contents of each notebook.
 To launch jupyter notebooks execute the following in the command line (ubuntu in windows):
 
-.. literal-block::
+.. code-block:: bash
 	
 	jupyter notebook
 
 This will launch a local jupyter notebook server and a series of URLs will be returned. Copy the **first link** containing ('localhost:8888') and copy//paste into a browser.
 From there, refer to the section in this documentation about different tutorials.
+
+Even though there are pre-existing jupyter notebook notebook tutorials, there is enough guidance and explantion in the following section of this documentation
+to carry out all the tasks within this python package related to the simulation of polymers.
 
 .. toctree::
    :maxdepth: 2

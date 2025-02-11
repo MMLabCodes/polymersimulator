@@ -302,7 +302,7 @@ to call the original parameters for the atoms in the polymer. The code to genera
 
 For running a simulation if is useful to return the topology and coordinates.
 
-..code-block:: python
+.. code-block:: python
 
    top, coord = manager.load_amber_filepaths(system_name)
    print(f"The topology file for {system_name} is {top}")
@@ -321,7 +321,7 @@ is specified (normally 10 angstroms or 1 nanometre) and in a small system it can
 
 The code for generating these systems is rather simple:
 
-..code-block:: python
+.. code-block:: python
 
    builder.generate_polymer_3_3_array(base_trimer_name, polymer_name, crystalline//random)
    builder.generate_polymer_5_5_array(base_trimer_name, polymer_name, crystalline//random)
@@ -332,7 +332,7 @@ not configured correctly.
 
 As an example with the 3HB decamer, a crystalline and random 5x5 array will be built.
 
-..code-block:: python
+.. code-block:: python
 
    system_name = builder.generate_polymer_5_5_array("3HB_trimer", "3HB_10_polymer", "crystalline")
    print(system_name)
@@ -341,7 +341,7 @@ As an example with the 3HB decamer, a crystalline and random 5x5 array will be b
 
 The system names for 3HB decamer systems will be **3HB_10_polymer_5_5_array_crystal** and **3HB_10_polymer_5_5_array_random**. The amber files can be retrieved for these just as before.
 
-..code-block:: python
+.. code-block:: python
 
    top, coord = manager.load_amber_filepaths(system_name)
    print(f"The topology file for {system_name} is {top}")

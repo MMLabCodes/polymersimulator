@@ -1,5 +1,5 @@
-Package Contents
-================
+Overview of modules
+===================
 
 With the amount of code in this package, it is useful to introduce the different python modules and functionalites within the package before diving in depth into how to use them with further documentation and tutorials.
 
