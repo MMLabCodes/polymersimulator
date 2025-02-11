@@ -256,7 +256,7 @@ Then we need to generate the .ac file and parameterize the mol in the same way a
 The next stage is to use a class method to generate residue code for the polymer units (head, mainchain and tail unit). For example, if your trimer was
 assigned the rescode **AAA** the head, mainchain and tail will be asigned **hAA**, **mAA** and **tAA** as their res codes.
 
-..code-block:: python
+.. code-block:: python
 
    builder.GenRescode_4_PolyUnits("3HB_trimer")
 
@@ -267,20 +267,20 @@ The next step is generate amber parameter files **.prepi** files for each unit. 
 what atoms make up each unit and saving it in the appropriate directory (i.e. **home/pdb_files/molecules/3HB_trimer/head_3HB_trimer.txt**). An explanation of that will come in the future but for now I will point you to the amber tutorial for generating these files for PET trimer https://ambermd.org/tutorials/advanced/tutorial27/pet.php .
 However, example files denoting what atoms are in each unit of a 3HB_trimer can be found in the github.
 
-..code-block:: python
+.. code-block:: python
 
    builder.gen_prepin_files("3HB_trimer")
 
 If this line executes and there are no errors (there will likely be some on the first try) we can proceed with building polymers. The class method to build polymers is very simple,
 the arguments are the base_trimer followed by the number of units you desire you polymer to have.
 
-..code-block:: python
+.. code-block:: python
 
    pdb = builder.gen_polymer_pdb(base_trimer, number_of_units)
 
 For example if I wanted to build a 3HB decamer (10 units), I would run this:
 
-..code-block:: python
+.. code-block:: python
 
    pdb = builder.gen_polymer_pdb("3HB_trimer", 10)
    print(pdb)
@@ -291,8 +291,23 @@ will be saved as in the systems directory and not the molecules directory. This 
 Generaing amber parameters for a single polymer
 -----------------------------------------------
 
-Currently, the same methods that were used to generate amber parameters for caffeine and a water solvated caffeine molecule do not work for generated polymers.
-This is something that will added if it is required at any point.
+A similar method is used for generating amber parameters of a polymer to that of a single molecule. There is an extra argument here though, you will of course need
+to pass the name of your polymer (i.e. **3HB_10_polymer**) but you will also need to pass the name of the base trimer too (i.e. **3HB_trimer**) and this is needed
+to call the original parameters for the atoms in the polymer. The code to generate these amber parameters is below.
+
+.. code-block:: python
+
+   system_name = builder.gen_amber_params_sing_poly("3HB_trimer", "3HB_10_polymer")
+   print(system_name)
+
+For running a simulation if is useful to return the topology and coordinates.
+
+..code-block:: python
+
+   top, coord = manager.load_amber_filepaths(system_name)
+   print(f"The topology file for {system_name} is {top}")
+   print(f"The coordinate file for {system_name} is {coord}")
+
 
 Building polymer systems - arrays
 ---------------------------------
