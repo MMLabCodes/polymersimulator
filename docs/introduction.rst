@@ -9,3 +9,17 @@ The main features of the Polymer Simulator include:
 - Carrying out various different molecular dynamic simulation 'recipes'  
 
 To get started, please check out the installation instructions below.
+
+Authors
+-------
+
+All of the code has been written and compiled by:
+
+Daniel J. York
+Isaac Vidal-Daza
+
+With advice and testing from:
+
+Francisco Martin-Martinez
+Sinem Bektas
+Daniel Clarke

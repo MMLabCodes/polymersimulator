@@ -2,7 +2,7 @@ modules
 =======
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 5
 
    sw_analysis
    sw_basic_functions
