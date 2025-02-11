@@ -17,14 +17,16 @@ Authors
 
 All of the code has been written and compiled by:
 
-**Daniel J. York**
-
+**Daniel J. York**|
 **Dr. Isaac Vidal-Daza**
 
-With advice and testing from:
+With invaluable advice from:
 
 **Dr. Francisco Martin-Martinez**
 
-**Sinem Bektas**
+And testing from:
 
+**Sinem Bektas**|
 **Daniel Clarke**
+
+Who are all current or past members of the `Martin-Martinez Lab <https://www.martinmartinezlab.com/>`_.
