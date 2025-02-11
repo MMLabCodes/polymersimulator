@@ -137,29 +137,6 @@ To launch jupyter notebooks execute the following in the command line (ubuntu in
 This will launch a local jupyter notebook server and a series of URLs will be returned. Copy the **first link** containing ('localhost:8888') and copy//paste into a browser.
 From there, refer to the section in this documentation about different tutorials.
 
-sw_directories tutorial
------------------------
-
-The first tutorial is **Tutorial_1_filepath_manager** and will explain how files are organised and functions wrapped around them throughout the package.
-
-sw_build_systems tutorial
--------------------------
-
-This encompasses the second and third tutorials; **Tutorial_2_build_systems** and **Tutorial_3_build_amber_systems**. These encompass building molecules from SMILES strings,
-parameterizing them and generating amber topology and coordinate files for molecular dynamics simulation. The building and parameterizaiton of polymers and
-generation of amber files for systems containing these polymers is also covered.
-
-sw_openmm tutorial
-------------------
-
-The fourth tutorial (**Tutorial_4_Running_Openmm_Simulations**) uses systems generated in tutorials 2 and 3 and runs molecular dynamics simulations of them. It 
-contains a **quickstart guide** but also runs through the intricacies of the module.
-
-sw_analysis tutorial
---------------------
-
-Coming one day.....
-
 .. toctree::
    :maxdepth: 2
    :caption: Tutorials
