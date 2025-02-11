@@ -15,11 +15,11 @@ Authors
 
 All of the code has been written and compiled by:
 
-Daniel J. York
-Isaac Vidal-Daza
+**Daniel J. York**
+**Dr. Isaac Vidal-Daza**
 
 With advice and testing from:
 
-Francisco Martin-Martinez
-Sinem Bektas
-Daniel Clarke
+**Dr. Francisco Martin-Martinez**
+**Sinem Bektas**
+**Daniel Clarke**
