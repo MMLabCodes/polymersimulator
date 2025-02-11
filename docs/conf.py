@@ -24,7 +24,7 @@ sys.modules['pybel'] = mock.MagicMock()
 # Project information
 project = 'Polymer Simulator'
 copyright = '2025, Daniel J. York'
-author = 'Daniel J. York'
+author = 'Daniel J. York, Isaac Vidal-Daza'
 release = '0.1.0'
 
 # Sphinx extensions
@@ -44,7 +44,7 @@ html_theme = 'sphinx_rtd_theme'
 html_theme_options = {
     "collapse_navigation": False,  # Ensures the sidebar is expandable
     "sticky_navigation": True,     # Keeps the sidebar visible while scrolling
-    "navigation_depth": 4,         # Allows deeper levels of nesting
+    "navigation_depth": 5,         # Allows deeper levels of nesting
 }
 
 html_static_path = ['_static']

@@ -15,7 +15,7 @@ Creating an environment
 
 To create an environment, open the command prompt (ubuntu if you are using windows) and execute the following:
 
-..literal-block::
+.. literal-block::
 
 	conda create --name AmberTools23
 	conda activate AmberTools23
@@ -25,7 +25,7 @@ To create an environment, open the command prompt (ubuntu if you are using windo
 Now the packages and different dependancies can be installed. These are all located in the **environment.yml** file in the **docs** folder of the github repository.
 This file can be used to install of the required pacakges.
 
-..literal-block::
+.. literal-block::
 	
 	conda env update --file docs/environment.yml
 
@@ -36,7 +36,7 @@ To ensure some key packages are installed it is important to run some tests. Exe
 
 **Antechamber** is part of AmberTools and carries out the parameterization of the molecules//polymers.
 
-..literal-block::
+.. literal-block::
 	
 	Antechamber
 
@@ -46,7 +46,7 @@ If antechamber is available, you will see something similar to the following:
 
 **Tleap** is an AmberTools programme that allows for the building of systems and generation of topology and coordinate files for 
 
-..literal-block::
+.. literal-block::
 	
 	Tleap
 
@@ -98,7 +98,7 @@ Cloning the repository - Normal method
 Now the repository needs to be cloned to give access to pyton modules within this pacakge. Go to the repository page in github https://github.com/MMLabCodes/polymersimulator and find the blue button labelled '<> code'.
 Click here and select 'HTTPS' and copy the link. Now return to command line (ubuntu in windows), ensure you are in your home directory and execute the folowing:
 
-..literal-block::
+.. literal-block::
 	
 	git clone copied link
 
@@ -117,7 +117,7 @@ Now scroll to the bottom and "generate token". This will give you a token you wi
 
 Now you can navigate to your home directory and execute the following commands:
 
-..literal-block::
+.. literal-block::
 	
 	git clone https://USERNAME:YOUR_TOKEN@github.com/MMLabCodes/polymersimulator.git
 	cd polymersimulator
