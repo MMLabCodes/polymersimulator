@@ -40,6 +40,13 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 # HTML output
 html_theme = 'sphinx_rtd_theme'
+
+html_theme_options = {
+    "collapse_navigation": False,  # Ensures the sidebar is expandable
+    "sticky_navigation": True,     # Keeps the sidebar visible while scrolling
+    "navigation_depth": 4,         # Allows deeper levels of nesting
+}
+
 html_static_path = ['_static']
 
 master_doc = 'index'
