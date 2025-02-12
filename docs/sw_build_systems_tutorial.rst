@@ -351,7 +351,7 @@ Building copolymers - repeating pattern
 ---------------------------------------
 
 Everything up until this point has been centred around using homopolymers to build systems. However, copolymers are also critical for studies with polymer systems.
-Let's start simple and build a copolymer of 2 polymers in an **AB** patter.
+Let's start simple and build a copolymer of 2 polymers in an **AB** pattern.
 
 .. code-block:: python
 	
@@ -388,13 +388,13 @@ can be run straight from their topologies and coordinates. The topology and coor
    print(f"The coordinate file for {system_name} is {coord}")
 
 
-Building copolymers - repeating pattern
----------------------------------------
+Building copolymers - unique pattern
+------------------------------------
 
 The copolymers so far have been built with repeating patterns. However, it is also possible to build a copolymer with any given pattern as long as its pattern
 is the length of the desired polymer chain. 
 
-For example, if you wanted to build a copolymer of length 10 with **3HB_trimer** and **3HV_trimer** units but in no particular order, you can do this by specifying a pattern of **A**s and **B**s 
+For example, if you wanted to build a copolymer of length 10 with **3HB_trimer** and **3HV_trimer** units but in no particular order, you can do this by specifying a pattern of **A** s and **B** s 
 that is 10 long. Like so:
 
 .. code-block:: python
