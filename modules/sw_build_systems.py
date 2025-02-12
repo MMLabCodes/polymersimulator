@@ -818,6 +818,142 @@ class BuildAmberSystems(BuildSystems):
         except Exception as e:
             print("Exception:", e)
         return(pdb_filepath)
+        
+    def gen_copolymer_pdb(self, pattern, base_trimers, number_of_units):
+        # Check base_trimers were passed as a list
+        if isinstance(base_trimers, list):
+            pass
+        else:
+            print(f"Arguments should be passed the function as follows.")
+            print("Pattern (string): 'AB'")
+            print("Base trimers (list): ['3HB_trimer', '3HV_trimer']")
+            print("Number of units (int): 10")
+            return
+
+        # Create the output dircotry and name the system
+        file_subtype = "_copolymer_" + pattern
+        copolymer_name = "_".join([item.split("_")[0] for item in base_trimers]) + "_" + str(number_of_units) + file_subtype 
+        print(copolymer_name)  
+    
+        # If only a copolymer of 2 polymers (and not 3) append the first polymers to the list of base trimers
+        if len(base_trimers) == 3:
+            pass
+        if len(base_trimers) == 2:
+            # Need to append something else to the list so the function works, but this will not be needed (it loads 3 polymers every time and the code will break if not, easiest thing is to load the third to be the same as one of the others)
+            base_trimers.append(base_trimers[0])
+
+        # Get paths to prepi files for head, mainchain and tail of the desired trimers
+        base_trimer_dirs = [os.path.join(self.manager.molecules_dir, base_trimers[0]), os.path.join(self.manager.molecules_dir, base_trimers[1]), os.path.join(self.manager.molecules_dir, base_trimers[2])]
+        head_prepi_filenames = [f"head_{base_trimers[0]}.prepi", f"head_{base_trimers[1]}.prepi", f"head_{base_trimers[2]}.prepi"]
+        main_prepi_filenames = [f"mainchain_{base_trimers[0]}.prepi", f"mainchain_{base_trimers[1]}.prepi", f"mainchain_{base_trimers[2]}.prepi"]
+        tail_prepi_filenames = [f"tail_{base_trimers[0]}.prepi", f"tail_{base_trimers[1]}.prepi", f"tail_{base_trimers[2]}.prepi"]
+        head_prepi_filepaths = [os.path.join(base_trimer_dirs[0], head_prepi_filenames[0]), os.path.join(base_trimer_dirs[1], head_prepi_filenames[1]), os.path.join(base_trimer_dirs[2], head_prepi_filenames[2])]
+        main_prepi_filepaths = [os.path.join(base_trimer_dirs[0], main_prepi_filenames[0]), os.path.join(base_trimer_dirs[1], main_prepi_filenames[1]), os.path.join(base_trimer_dirs[2], main_prepi_filenames[2])]
+        tail_prepi_filepaths = [os.path.join(base_trimer_dirs[0], tail_prepi_filenames[0]), os.path.join(base_trimer_dirs[1], tail_prepi_filenames[1]), os.path.join(base_trimer_dirs[2], tail_prepi_filenames[2])]
+
+        # Get paths to the .frcmod files
+        base_trimer_frcmods = [os.path.join(base_trimer_dirs[0], f"{base_trimers[0]}.frcmod"), os.path.join(base_trimer_dirs[1], f"{base_trimers[1]}.frcmod"), os.path.join(base_trimer_dirs[2], f"{base_trimers[2]}.frcmod")]
+ 
+        output_dir = os.path.join(self.manager.systems_dir, copolymer_name)
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
+        # Create files for use with tleap
+        intleap_path = os.path.join(output_dir, copolymer_name + ".intleap")
+        rst_path = os.path.join(output_dir, copolymer_name + ".rst7")
+        prmtop_path = os.path.join(output_dir, copolymer_name + ".prmtop")
+        pdb_path = os.path.join(output_dir, copolymer_name + ".pdb")
+
+        # Retrieve residue codes for each polymeric unit
+        A_head_rescode, A_mainchain_rescode, A_tail_rescode = self.manager.retrieve_polymeric_rescodes(base_trimers[0])
+        B_head_rescode, B_mainchain_rescode, B_tail_rescode = self.manager.retrieve_polymeric_rescodes(base_trimers[1])
+        C_head_rescode, C_mainchain_rescode, C_tail_rescode = self.manager.retrieve_polymeric_rescodes(base_trimers[2])
+    
+        # Store residue codes in a dictionary
+        rescode_dict = {
+            "A": {
+                "head": A_head_rescode,
+                "mainchain": A_mainchain_rescode,
+                "tail": A_tail_rescode
+            },
+            "B": {
+                "head": B_head_rescode,
+                "mainchain": B_mainchain_rescode,
+                "tail": B_tail_rescode
+            },
+            "C": {
+                "head": C_head_rescode,
+                "mainchain": C_mainchain_rescode,
+                "tail": C_tail_rescode
+            }
+        }
+
+        # This section of code makes a pattern for the copolymer (i.e. if a decamer in 'AB' configuration, the pattern is 'ABABABABAB')
+        if len(pattern) == number_of_units:
+            pass
+        elif (number_of_units / len(pattern)).is_integer():
+            making_pattern = pattern * int(number_of_units / len(pattern))
+        else:
+            print("Pattern and number of units incompatible. Please revise your pattern and retry this function")
+
+        # Parse the pattern and attach the specific residue codes 
+        copolymer_pattern = ""
+        for i in range(number_of_units):
+            if i == 0:
+                copolymer_pattern = rescode_dict[making_pattern[i]]["head"]
+            elif i != number_of_units-1:
+                copolymer_pattern = copolymer_pattern + " " + rescode_dict[making_pattern[i]]["mainchain"]
+            else:
+                copolymer_pattern = copolymer_pattern + " " + rescode_dict[making_pattern[i]]["tail"]
+
+        copolymer_command = "{" + copolymer_pattern + "}"
+        print(copolymer_command)
+
+        file_content = f"""source leaprc.gaff
+            source leaprc.water.fb3
+            source leaprc.protein.ff14SB
+
+            loadamberprep {head_prepi_filepaths[0]}
+            loadamberprep {head_prepi_filepaths[1]}
+            loadamberprep {head_prepi_filepaths[2]}
+            loadamberprep {main_prepi_filepaths[0]}
+            loadamberprep {main_prepi_filepaths[1]}
+            loadamberprep {main_prepi_filepaths[2]}
+            loadamberprep {tail_prepi_filepaths[0]}
+            loadamberprep {tail_prepi_filepaths[1]}
+            loadamberprep {tail_prepi_filepaths[2]}
+
+            loadamberparams {base_trimer_frcmods[0]}
+            loadamberparams {base_trimer_frcmods[1]}
+            loadamberparams {base_trimer_frcmods[2]}
+
+            list
+
+            polymer = sequence {copolymer_command}
+            setBox polymer vdw 0.0
+            saveamberparm polymer {prmtop_path} {rst_path}
+            savepdb polymer {pdb_path}
+            quit
+            """
+
+        with open(intleap_path, 'w') as file:
+            file.write(file_content)
+
+        leap_command = "tleap -f " + intleap_path
+
+        try:
+            result = subprocess.run(leap_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            if result.returncode == 0:
+                # Command executed successfully
+                print("Output:", result.stdout)
+            else:
+                # Command failed, print error message
+                print("Error:", result.stderr)
+        except Exception as e:
+            # Exception occurred during subprocess execution
+            print("Exception:", e)
+
+        return(copolymer_name)
 
     def gen_amber_params_sing_mol_solvated(self, molecule_name, buffer=None):
         if buffer == None:
@@ -902,76 +1038,6 @@ class BuildAmberSystems(BuildSystems):
 
         os.chdir(self.manager.main_dir)
         return(filename)
-
-    def add_ter_to_pckml_result(self, pdb_file, base_molecule_name):
-        """
-        Adds 'TER' records to a PDB file generated by Packmol after each polymer chain.
-
-        This function is intended to be used after Packmol has built systems of polymers with different
-        head, main, and tail units. Packmol does not add 'TER' records after each residue, making it 
-        impossible to construct a parameter file. This function remedies that by adding 'TER' after each 
-        polymer chain in the Packmol file.
-
-        Parameters:
-        dirs (object): An object that provides a method `retrieve_polymeric_rescodes` to retrieve 
-                   residue codes for head, mainchain, and tail units.
-        pdb_file (str): The path to the PDB file generated by Packmol.
-        base_molecule_name (str): The base name of the molecule used to identify the polymeric residue codes.
-
-        Returns:
-        None
-
-        The function performs the following steps:
-        1. Retrieves the residue codes for the head, mainchain, and tail units.
-        2. Reads the contents of the specified PDB file.
-        3. Iterates through each line in the file to identify points where 'TER' records should be added:
-            - Adds a 'TER' record when transitioning from a tail residue to a head residue.
-            - Adds a 'TER' record before the 'END' record in the PDB file.
-        4. Writes the modified contents back to the PDB file with the appropriate 'TER' records included.
-
-        Example usage:
-            add_ter_to_pckml_result(dirs, 'polymer_system.pdb', '3HB_trimer')
-
-        Note:
-            A situation where this function is used by itself is not present and it is used as part of the 'generate_3_3_polymer_array_pckml'
-        """
-        # Retrieve residue codes
-        head_rescode, mainchain_rescode, tail_rescode = self.manager.retrieve_polymeric_rescodes(base_molecule_name)
-
-        # Open file
-        with open(pdb_file) as file:
-            lines = file.readlines()
-
-        # Initiate an empty list foe new lines and set the residue code to None before itereating
-        modified_lines = []
-        previous_residue_code = None
-
-        # Iterate over each line in the file
-        for line in lines:
-            # Split the line into columns based on spaces
-            columns = line.split()
-
-            if len(columns) > 3:
-                # Extract the current residue code (4th column in this case)
-                current_residue_code = columns[3]
-
-                # Check if the previous residue code was 'tAD' and the current is 'hAD'
-                if previous_residue_code == tail_rescode and current_residue_code == head_rescode:
-                    # Append the "TER" line to the modified lines list
-                    modified_lines.append("TER\n")
-
-                # Update the previous residue code
-                previous_residue_code = current_residue_code
-
-            if "END" in columns:
-                modified_lines.append("TER\n")
-    
-            # Append the current line to the modified lines list
-            modified_lines.append(line)
-
-        with open(pdb_file, 'w') as file:
-            file.writelines(modified_lines)
-        return(None)
 
     def generate_3_3_polymer_array_crystal(self, base_molecule_name=None, molecule_name=None):
         # Thsis function builds arrays of polymers using the pre generated pdb files
