@@ -347,6 +347,75 @@ The system names for 3HB decamer systems will be **3HB_10_polymer_5_5_array_crys
    print(f"The topology file for {system_name} is {top}")
    print(f"The coordinate file for {system_name} is {coord}")    
 
+Building copolymers - repeating pattern
+---------------------------------------
+
+Everything up until this point has been centred around using homopolymers to build systems. However, copolymers are also critical for studies with polymer systems.
+Let's start simple and build a copolymer of 2 polymers in an **AB** patter.
+
+.. code-block:: python
+	
+   system_name = builder.gen_copolymer_pdb_and_params("AB", ["3HB_trimer", "3HV_trimer"], 10)
+
+This will create a copolymer using 3HB and 3HV units in an **AB** configuration that is 10 units long. This useful but we can go further and build copolymers
+from 3 different units. This would be a good time to show a general form of the function:
+
+
+.. code-block:: python
+	
+   system_name = builder.gen_copolymer_pdb_and_params(pattern, [A,B,C], polymer_length)
+
+
+Where; pattern = "AB" (or something simular), [A,B,C] = Names of base trimers and polymer_length is the length of the constructed polymer chain.
+
+The only thing to note here is that the pattern must either contain the same number of characters as the indicated polymer length (i.e. "ABABABABAB" and polymer_length = 10)
+**or** be a factor of the polymer length (i.e. "AB" and polymer_length = 10).
+
+So translating this information to building a copolymer with **ABC** pattern, we must have the polymer length be a multiple of 3 (i.e. 12 or 15)
+
+.. code-block:: python
+	
+   system_name = builder.gen_copolymer_pdb_and_params("ABC", ["3HB_trimer", "3HV_trimer", "5HV_trimer"], 15)
+
+These polymers are also parameterized and given a periodic box when they are built (it would be too complicated to do this at a later stage as was done for single molecules and homopolymers) so a simulation
+can be run straight from their topologies and coordinates. The topology and coordinate file can be returned as shown many times before:
+
+
+.. code-block:: python
+
+   top, coord = manager.load_amber_filepaths(system_name)
+   print(f"The topology file for {system_name} is {top}")
+   print(f"The coordinate file for {system_name} is {coord}")
+
+
+Building copolymers - repeating pattern
+---------------------------------------
+
+The copolymers so far have been built with repeating patterns. However, it is also possible to build a copolymer with any given pattern as long as its pattern
+is the length of the desired polymer chain. 
+
+For example, if you wanted to build a copolymer of length 10 with **3HB_trimer** and **3HV_trimer** units but in no particular order, you can do this by specifying a pattern of **A**s and **B**s 
+that is 10 long. Like so:
+
+.. code-block:: python
+	
+   system_name = builder.gen_copolymer_pdb_and_params("ABBBABAAB", ["3HB_trimer", "3HV_trimer"], 10)
+
+This will also work if you a third copolymer into the mix:
+
+.. code-block:: python
+	
+   system_name = builder.gen_copolymer_pdb_and_params("ACCBACACBBACBAC", ["3HB_trimer", "3HV_trimer", "5HV_trimer"], 15)
+
+The parameter files of this system can be obtained for simulation using the same methods as before.
+
+
+.. code-block:: python
+
+   top, coord = manager.load_amber_filepaths(system_name)
+   print(f"The topology file for {system_name} is {top}")
+   print(f"The coordinate file for {system_name} is {coord}")
+
 Other
 -----
 

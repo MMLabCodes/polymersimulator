@@ -819,7 +819,7 @@ class BuildAmberSystems(BuildSystems):
             print("Exception:", e)
         return(pdb_filepath)
         
-    def gen_copolymer_pdb(self, pattern, base_trimers, number_of_units):
+    def gen_copolymer_pdb_and_params(self, pattern, base_trimers, number_of_units):
         # Check base_trimers were passed as a list
         if isinstance(base_trimers, list):
             pass
