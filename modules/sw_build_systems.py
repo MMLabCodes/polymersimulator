@@ -2146,7 +2146,7 @@ class BuildAmberSystems(BuildSystems):
             print("Exception:", e)
         return(output_name)  
 
-    def gen_amber_params_sing_poly(self, base_molecule_name, polymer_name):
+    def gen_amber_params_sing_poly(self, base_molecule_name, polymer_name, box_radius=None):
 
         head_prepi_file = os.path.join(self.manager.molecules_dir, base_molecule_name, ("head_" + base_molecule_name + ".prepi"))
         mainchain_prepi_file = os.path.join(self.manager.molecules_dir, base_molecule_name, ("mainchain_" + base_molecule_name + ".prepi"))
@@ -2167,6 +2167,9 @@ class BuildAmberSystems(BuildSystems):
         rst_filepath = os.path.join(output_dir, output_name + ".rst7")
         pdb_filepath = os.path.join(output_dir, output_name + ".pdb")
 
+        if box_radius = None:
+            box_radius = 0.0
+        
         file_content = f"""source leaprc.gaff
              source leaprc.water.fb3
              source leaprc.protein.ff14SB
@@ -2179,7 +2182,7 @@ class BuildAmberSystems(BuildSystems):
              list
 
              system = loadpdb {polymer_pdb_file}
-             setBox system vdw 0.0
+             setBox system vdw {box_radius}
              saveamberparm system {prmtop_filepath} {rst_filepath}
              savepdb system {pdb_filepath}
              quit
