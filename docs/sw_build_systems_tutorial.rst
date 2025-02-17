@@ -293,11 +293,12 @@ Generaing amber parameters for a single polymer
 
 A similar method is used for generating amber parameters of a polymer to that of a single molecule. There is an extra argument here though, you will of course need
 to pass the name of your polymer (i.e. **3HB_10_polymer**) but you will also need to pass the name of the base trimer too (i.e. **3HB_trimer**) and this is needed
-to call the original parameters for the atoms in the polymer. The code to generate these amber parameters is below.
+to call the original parameters for the atoms in the polymer. The code to generate these amber parameters is below. The number (**which must be a float**) is the
+the distance assigned for the periodic box from the centre.
 
 .. code-block:: python
 
-   system_name = builder.gen_amber_params_sing_poly("3HB_trimer", "3HB_10_polymer")
+   system_name = builder.gen_amber_params_sing_poly("3HB_trimer", "3HB_10_polymer", 20.0)
    print(system_name)
 
 For running a simulation if is useful to return the topology and coordinates.

@@ -2169,6 +2169,14 @@ class BuildAmberSystems(BuildSystems):
 
         if box_radius == None:
             box_radius = 0.0
+        else:
+            box_radius = box_radius
+            if type(box_radius) is float:
+                pass
+            else:
+                print("Plase pass the box radius as a float")
+                print("Example: gen_amber_params_sing_poly('base_trimer_name', 'polymer_name', 20.0)")
+                return()
         
         file_content = f"""source leaprc.gaff
              source leaprc.water.fb3
