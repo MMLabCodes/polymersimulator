@@ -416,6 +416,30 @@ class SnippetSimManage:
 #class PolymerConformerDFT(SnipperSimManage):
     #def __init__(self, 
 
+class PolyDataDirs(SnippetSimManage):
+
+    def __init__(self, main_dir, *args, **kwargs):
+        """
+        Initialize PolymerSimulatorDirs object.
+
+        Args:
+            main_dir (str): The main directory for polymer simulation setup.
+                            Example: '/path/to/main/dir/'
+
+        Raises:
+            FileNotFoundError: If main_dir does not exist.
+        """
+        # Call the parent class's __init__ method with all arguments
+        super().__init__(main_dir, *args, **kwargs)
+        
+        if not os.path.exists(main_dir):
+            raise FileNotFoundError
+
+        self.poly_data = os.path.join(self.systems_dir, "poly_data.csv")
+        if not os.path.exists(self.poly_data):
+            os.makedirs(self.poly_data)
+
+
 class BioOilDirs(SnippetSimManage):
 
     def __init__(self, main_dir, *args, **kwargs):
