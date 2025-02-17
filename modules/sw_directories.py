@@ -10,6 +10,7 @@ import time
 import re
 import subprocess
 import shutil
+import pandas as pd
 
 from modules.sw_file_formatter import DFT_input_generator
 from modules.sw_basic_functions import get_homo_lumo_from_xyz
@@ -437,8 +438,38 @@ class PolyDataDirs(SnippetSimManage):
 
         self.poly_data = os.path.join(self.systems_dir, "poly_data.csv")
         if not os.path.exists(self.poly_data):
-            os.makedirs(self.poly_data)
+            with open(self.poly_data, 'w') as file:
+                file.write("Name\n") # Create the very first column so pandas can read the empty csv
+        else:
+            pass # Pass as the file already exists
 
+    def update_poly_csv(self, name, column, value):
+        file_path = self.poly_data
+        # Check if the file exists
+        if os.path.exists(file_path):
+            df = pd.read_csv(file_path)
+        else:
+            df = pd.DataFrame(columns=["Name"])  # Create empty DataFrame with 'Name' column
+
+        # Ensure 'Name' column exists
+        if "Name" not in df.columns:
+            df["Name"] = ""
+
+        # Check if the name exists, if not, add it
+        if name not in df["Name"].values:
+            new_row = pd.DataFrame({"Name": [name]})
+            df = pd.concat([df, new_row], ignore_index=True)
+
+        # Ensure the column exists
+        if column not in df.columns:
+            df[column] = ""
+
+        # Update the value
+        df.loc[df["Name"] == name, column] = value
+
+        # Save back to CSV
+        df.to_csv(file_path, index=False)
+        print(f"Updated {file_path} successfully!")
 
 class BioOilDirs(SnippetSimManage):
 
