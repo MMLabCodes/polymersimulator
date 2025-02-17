@@ -2182,7 +2182,7 @@ class BuildAmberSystems(BuildSystems):
              list
 
              system = loadpdb {polymer_pdb_file}
-             setBox system vdw {box_radius}
+             setBox system centers {box_radius}
              saveamberparm system {prmtop_filepath} {rst_filepath}
              savepdb system {pdb_filepath}
              quit
