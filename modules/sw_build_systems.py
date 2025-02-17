@@ -2167,7 +2167,7 @@ class BuildAmberSystems(BuildSystems):
         rst_filepath = os.path.join(output_dir, output_name + ".rst7")
         pdb_filepath = os.path.join(output_dir, output_name + ".pdb")
 
-        if box_radius = None:
+        if box_radius == None:
             box_radius = 0.0
         
         file_content = f"""source leaprc.gaff
