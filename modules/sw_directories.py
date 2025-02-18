@@ -6,11 +6,13 @@ Created on Wed Mar 13 14:18:48 2024
 """
 import os 
 import csv
+import ast
 import time
 import re
 import subprocess
 import shutil
 import pandas as pd
+import numpy as np
 
 from modules.sw_file_formatter import DFT_input_generator
 from modules.sw_basic_functions import get_homo_lumo_from_xyz
@@ -442,20 +444,83 @@ class PolyDataDirs(SnippetSimManage):
                 file.write("Name\n") # Create the very first column so pandas can read the empty csv
         else:
             pass # Pass as the file already exists
+            
+    @staticmethod
+    def parse_list(value):
+        """ Convert a string representation of a list into a proper Python list of floats. """
+        # Used for returning parameters from the csv file - lists are stored as strings, we need to move them back
+        if isinstance(value, str):
+            # Remove brackets and split by spaces
+            cleaned = re.sub(r"[\[\]]", "", value).strip()
+            return [float(x) for x in cleaned.split()]
+        return value
+    
+    def get_poly_param(self, name, column, condition=None):
+        """
+        Retrieve a parameter value from the CSV for a given molecule name.
+    
+        Parameters:
+        - file_path (str): Path to the CSV file.
+        - name (str): The molecule name to search for.
+        - column (str): The parameter name to retrieve.
+        - condition (function, optional): A function to apply extra conditions on the result.
+
+        Returns:
+        - The extracted parameter (list, float, etc.), or None if not found.
+        """
+        if column == "Thermal expansion params":
+            condition = self.parse_list
+        try:
+            # Read the CSV file
+            df = pd.read_csv(self.poly_data)
+
+            # Ensure columns exist
+            if "Name" not in df.columns or column not in df.columns:
+                print("Requested column or 'Name' column does not exist.")
+                return None
+
+            # Find the row for the given molecule
+            value = df.loc[df["Name"] == name, column]
+
+            if value.empty:
+                print("No entry found for this molecule.")
+                return None
+
+            # Extract first match
+            value = value.iloc[0]
+
+            # Convert list-like strings back into Python lists
+            try:
+                value = ast.literal_eval(value)  # Safely convert if it's a list
+            except (ValueError, SyntaxError):
+                pass  # If conversion fails, keep it as a string/float
+
+            # Apply a condition if provided
+            if condition is not None and callable(condition):
+                if condition == self.parse_list:
+                    value = condition(value)
+                return(value)  # Apply condition function
+            else:
+                return value
+
+        except Exception as e:
+            print(f"Error reading CSV: {e}")
+            return None
 
     def update_poly_csv(self, name, column, value):
         file_path = self.poly_data
-        # Check if the file exists
-        if os.path.exists(file_path):
+
+        # Load CSV if it exists, otherwise create an empty DataFrame
+        if os.path.exists(file_path) and os.path.getsize(file_path) > 0:
             df = pd.read_csv(file_path)
         else:
-            df = pd.DataFrame(columns=["Name"])  # Create empty DataFrame with 'Name' column
+            df = pd.DataFrame(columns=["Name"])
 
         # Ensure 'Name' column exists
         if "Name" not in df.columns:
             df["Name"] = ""
 
-        # Check if the name exists, if not, add it
+        # Check if the row with 'name' exists
         if name not in df["Name"].values:
             new_row = pd.DataFrame({"Name": [name]})
             df = pd.concat([df, new_row], ignore_index=True)
@@ -464,12 +529,17 @@ class PolyDataDirs(SnippetSimManage):
         if column not in df.columns:
             df[column] = ""
 
-        # Update the value
+        # Convert value to string if it's a list/array
+        if isinstance(value, (list, tuple, dict, pd.Series, pd.DataFrame, np.ndarray)):  
+            value = str(value)  
+
+        # Assign value properly
         df.loc[df["Name"] == name, column] = value
 
-        # Save back to CSV
+        # Save the updated CSV
         df.to_csv(file_path, index=False)
         print(f"Updated {file_path} successfully!")
+
 
 class BioOilDirs(SnippetSimManage):
 
