@@ -902,7 +902,7 @@ class BuildAmberSystems(BuildSystems):
 
         # This section of code makes a pattern for the copolymer (i.e. if a decamer in 'AB' configuration, the pattern is 'ABABABABAB')
         if len(pattern) == number_of_units:
-            pass
+            making_pattern = pattern
         elif (number_of_units / len(pattern)).is_integer():
             making_pattern = pattern * int(number_of_units / len(pattern))
         else:
