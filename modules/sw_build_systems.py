@@ -819,7 +819,7 @@ class BuildAmberSystems(BuildSystems):
             print("Exception:", e)
         return(pdb_filepath)
         
-    def gen_copolymer_pdb_and_params(self, pattern, base_trimers, number_of_units):
+    def gen_copolymer_pdb_and_params(self, pattern, base_trimers, number_of_units, box_radius=None):
         # Check base_trimers were passed as a list
         if isinstance(base_trimers, list):
             pass
@@ -829,6 +829,18 @@ class BuildAmberSystems(BuildSystems):
             print("Base trimers (list): ['3HB_trimer', '3HV_trimer']")
             print("Number of units (int): 10")
             return
+
+        if box_radius == None:
+            box_radius = 0.0
+        else:
+            box_radius = box_radius
+            if type(box_radius) is float:
+                pass
+            else:
+                print("Plase pass the box radius as a float")
+                print("Example: gen_copolymer_pdb_and_params('AB', ['base_trimer_1', 'base_trimer_2'], 10, 20.0)")
+                return()
+            
 
         # Create the output dircotry and name the system
         file_subtype = "_copolymer_" + pattern
@@ -930,7 +942,7 @@ class BuildAmberSystems(BuildSystems):
             list
 
             polymer = sequence {copolymer_command}
-            setBox polymer vdw 0.0
+            setBox polymer centers {box_radius}
             saveamberparm polymer {prmtop_path} {rst_path}
             savepdb polymer {pdb_path}
             quit
