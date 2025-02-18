@@ -465,11 +465,15 @@ class PolyDataDirs(SnippetSimManage):
         Launch a multi-select dropdown to assign multiple identifiers to a system.
         """
         df = pd.read_csv(self.poly_data)
+
         if system_name not in df["Name"].values:
             print(f"System '{system_name}' not found in CSV.")
             return
-        
-        identifier_options = ["Type A", "Type B", "Type C", "Experimental", "High Temperature", "Low Density"]
+
+        identifier_options = [
+            "Type A", "Type B", "Type C",
+            "Experimental", "High Temperature", "Low Density"
+        ]
 
         multi_select = widgets.SelectMultiple(
             options=identifier_options,
@@ -482,24 +486,53 @@ class PolyDataDirs(SnippetSimManage):
             description="Custom:"
         )
 
+        clear_checkbox = widgets.Checkbox(
+            value=False,
+            description="Clear all identifiers",
+            indent=False
+        )
+
         def on_button_click(b):
             """Save the selected identifiers to the DataFrame."""
-            selected_identifiers = list(multi_select.value)  # Get selected identifiers
-            if custom_text.value:
-                selected_identifiers.extend(custom_text.value.split(","))  # Add custom identifiers
-            
-            # Remove any whitespace from custom inputs
-            selected_identifiers = [id.strip() for id in selected_identifiers if id.strip()]
-            
-            # Convert to a string for storage
-            df.loc[df["Name"] == system_name, "Identifiers"] = str(selected_identifiers)
-            self.data = pd.read_csv(self.poly_data)
-            print(f"Updated {system_name} with identifiers: {selected_identifiers}")
+            if clear_checkbox.value:
+                # Clear identifiers if checkbox is selected
+                df.loc[df["Name"] == system_name, "Identifiers"] = "[]"
+                updated_identifiers = []
+                print(f"Cleared all identifiers for '{system_name}'.")
+            else:
+                # Retrieve existing identifiers
+                existing_identifiers = df.loc[df["Name"] == system_name, "Identifiers"].values
+                if existing_identifiers and isinstance(existing_identifiers[0], str):
+                    try:
+                        existing_identifiers = ast.literal_eval(existing_identifiers[0])  # Convert string to list
+                        if not isinstance(existing_identifiers, list):
+                            existing_identifiers = []
+                    except (ValueError, SyntaxError):
+                        existing_identifiers = []
+                else:
+                    existing_identifiers = []
+
+                # Get new selections
+                selected_identifiers = list(multi_select.value)
+                if custom_text.value:
+                    selected_identifiers.extend(custom_text.value.split(","))
+
+                # Clean and merge identifiers
+                selected_identifiers = [id.strip() for id in selected_identifiers if id.strip()]
+                updated_identifiers = list(set(existing_identifiers + selected_identifiers))
+
+                # Save to CSV
+                df.loc[df["Name"] == system_name, "Identifiers"] = str(updated_identifiers)
+                print(f"Updated '{system_name}' with identifiers: {updated_identifiers}")
+
+            # Save changes
+            df.to_csv(self.poly_data, index=False)
+            self.data = pd.read_csv(self.poly_data)  # Reload updated data
 
         button = widgets.Button(description="Apply Identifiers")
         button.on_click(on_button_click)
 
-        display(multi_select, custom_text, button)
+        display(multi_select, custom_text, clear_checkbox, button)
     
     def get_poly_param(self, name, column, condition=None):
         """
