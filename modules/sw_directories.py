@@ -444,6 +444,8 @@ class PolyDataDirs(SnippetSimManage):
                 file.write("Name\n") # Create the very first column so pandas can read the empty csv
         else:
             pass # Pass as the file already exists
+
+        self.data = pd.read_csv(self.poly_data)
             
     @staticmethod
     def parse_list(value):
@@ -539,6 +541,9 @@ class PolyDataDirs(SnippetSimManage):
         # Save the updated CSV
         df.to_csv(file_path, index=False)
         print(f"Updated {file_path} successfully!")
+
+        # Update dataframe attribute
+        self.data = pd.read_csv(self.poly_data)
 
 
 class BioOilDirs(SnippetSimManage):
