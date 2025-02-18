@@ -14,6 +14,9 @@ import shutil
 import pandas as pd
 import numpy as np
 
+import ipywidgets as widgets
+from IPython.display import display
+
 from modules.sw_file_formatter import DFT_input_generator
 from modules.sw_basic_functions import get_homo_lumo_from_xyz
 '''
@@ -263,7 +266,7 @@ class SnippetSimManage:
                     # Construct the full path to the .pdb file
                     prmtop_file_path = os.path.join(root, file)
                 #if file.endswith(".rst7") and system_name in file:
-                if file == (system_name + ".rst7") or if file == (system_name + ".inpcrd"):
+                if file == (system_name + ".rst7") or file == (system_name + ".inpcrd"):
                     # Construct the full path to the .pdb file
                     coord_file_path = os.path.join(root, file)
         if (prmtop_file_path is not None) and (coord_file_path is not None):
@@ -456,6 +459,47 @@ class PolyDataDirs(SnippetSimManage):
             cleaned = re.sub(r"[\[\]]", "", value).strip()
             return [float(x) for x in cleaned.split()]
         return value
+
+    def assign_identifiers(self, system_name):
+        """
+        Launch a multi-select dropdown to assign multiple identifiers to a system.
+        """
+        df = pd.read_csv(self.poly_data)
+        if system_name not in df["Name"].values:
+            print(f"System '{system_name}' not found in CSV.")
+            return
+        
+        identifier_options = ["Type A", "Type B", "Type C", "Experimental", "High Temperature", "Low Density"]
+
+        multi_select = widgets.SelectMultiple(
+            options=identifier_options,
+            description="Identifiers:",
+            disabled=False
+        )
+
+        custom_text = widgets.Text(
+            placeholder="Enter custom identifiers (comma-separated)...",
+            description="Custom:"
+        )
+
+        def on_button_click(b):
+            """Save the selected identifiers to the DataFrame."""
+            selected_identifiers = list(multi_select.value)  # Get selected identifiers
+            if custom_text.value:
+                selected_identifiers.extend(custom_text.value.split(","))  # Add custom identifiers
+            
+            # Remove any whitespace from custom inputs
+            selected_identifiers = [id.strip() for id in selected_identifiers if id.strip()]
+            
+            # Convert to a string for storage
+            df.loc[df["Name"] == system_name, "Identifiers"] = str(selected_identifiers)
+            self.data = pd.read_csv(self.poly_data)
+            print(f"Updated {system_name} with identifiers: {selected_identifiers}")
+
+        button = widgets.Button(description="Apply Identifiers")
+        button.on_click(on_button_click)
+
+        display(multi_select, custom_text, button)
     
     def get_poly_param(self, name, column, condition=None):
         """
