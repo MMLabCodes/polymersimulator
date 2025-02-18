@@ -263,7 +263,7 @@ class SnippetSimManage:
                     # Construct the full path to the .pdb file
                     prmtop_file_path = os.path.join(root, file)
                 #if file.endswith(".rst7") and system_name in file:
-                if file == (system_name + ".rst7"):
+                if file == (system_name + ".rst7") or if file == (system_name + ".inpcrd"):
                     # Construct the full path to the .pdb file
                     coord_file_path = os.path.join(root, file)
         if (prmtop_file_path is not None) and (coord_file_path is not None):
