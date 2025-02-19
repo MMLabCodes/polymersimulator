@@ -449,6 +449,9 @@ class PolyDataDirs(SnippetSimManage):
             pass # Pass as the file already exists
 
         self.data = pd.read_csv(self.poly_data)
+
+        # Load available identifiers (if any exist)
+        self.available_identifiers = self.load_available_identifiers()
             
     @staticmethod
     def parse_list(value):
@@ -460,6 +463,24 @@ class PolyDataDirs(SnippetSimManage):
             return [float(x) for x in cleaned.split()]
         return value
 
+    def load_available_identifiers(self):
+        """ Load stored available identifiers or set defaults. """
+        if "Available Identifiers" in self.data.columns:
+            try:
+                return ast.literal_eval(self.data["Available Identifiers"].dropna().iloc[0])
+            except (ValueError, IndexError, SyntaxError):
+                pass  # If invalid, fall back to default list
+        
+        return []
+
+    def save_available_identifiers(self):
+        """ Save updated available identifiers list to the CSV. """
+        if "Available Identifiers" not in self.data.columns:
+            self.data["Available Identifiers"] = ""
+        
+        self.data.loc[0, "Available Identifiers"] = str(self.available_identifiers)
+        self.data.to_csv(self.poly_data, index=False)
+
     def assign_identifiers(self, system_name):
         """
         Launch a multi-select dropdown to assign multiple identifiers to a system.
@@ -470,13 +491,8 @@ class PolyDataDirs(SnippetSimManage):
             print(f"System '{system_name}' not found in CSV.")
             return
 
-        identifier_options = [
-            "Type A", "Type B", "Type C",
-            "Experimental", "High Temperature", "Low Density"
-        ]
-
         multi_select = widgets.SelectMultiple(
-            options=identifier_options,
+            options=self.available_identifiers,
             description="Identifiers:",
             disabled=False
         )
@@ -493,9 +509,8 @@ class PolyDataDirs(SnippetSimManage):
         )
 
         def on_button_click(b):
-            """Save the selected identifiers to the DataFrame."""
+            """Save the selected identifiers to the DataFrame and update available list."""
             if clear_checkbox.value:
-                # Clear identifiers if checkbox is selected
                 df.loc[df["Name"] == system_name, "Identifiers"] = "[]"
                 updated_identifiers = []
                 print(f"Cleared all identifiers for '{system_name}'.")
@@ -515,24 +530,32 @@ class PolyDataDirs(SnippetSimManage):
                 # Get new selections
                 selected_identifiers = list(multi_select.value)
                 if custom_text.value:
-                    selected_identifiers.extend(custom_text.value.split(","))
+                    new_custom_identifiers = [id.strip() for id in custom_text.value.split(",") if id.strip()]
+                    selected_identifiers.extend(new_custom_identifiers)
 
-                # Clean and merge identifiers
-                selected_identifiers = [id.strip() for id in selected_identifiers if id.strip()]
+                    # Add new custom identifiers to the dropdown list
+                    for identifier in new_custom_identifiers:
+                        if identifier not in self.available_identifiers:
+                            self.available_identifiers.append(identifier)
+
+                # Remove duplicates and update CSV
                 updated_identifiers = list(set(existing_identifiers + selected_identifiers))
-
-                # Save to CSV
                 df.loc[df["Name"] == system_name, "Identifiers"] = str(updated_identifiers)
+
                 print(f"Updated '{system_name}' with identifiers: {updated_identifiers}")
 
             # Save changes
             df.to_csv(self.poly_data, index=False)
             self.data = pd.read_csv(self.poly_data)  # Reload updated data
 
+            # Save updated available identifiers list
+            self.save_available_identifiers()
+
         button = widgets.Button(description="Apply Identifiers")
         button.on_click(on_button_click)
 
         display(multi_select, custom_text, clear_checkbox, button)
+
     
     def get_poly_param(self, name, column, condition=None):
         """
