@@ -96,6 +96,26 @@ class BuildSystems():
             pdb_file.writelines(lines)
         return(pdb_filepath)
 
+    def PDBToXYZ(self, molecule_name):
+        # Get pdb filepath
+        pdb_file = self.manager.load_pdb_filepath(molecule_name)
+
+        # Make xyz filepath
+        xyz_file = pdb_file.replace(".pdb", ".xyz")
+    
+        obConversion = openbabel.OBConversion()
+        obConversion.SetInAndOutFormats("pdb", "xyz")
+
+        mol = openbabel.OBMol()
+        if not obConversion.ReadFile(mol, pdb_file):
+            raise ValueError(f"Failed to read PDB file: {pdb_file}")
+
+        if not obConversion.WriteFile(mol, xyz_file):
+            raise ValueError(f"Failed to write XYZ file: {xyz_file}")
+
+        print(f"Conversion successful: {pdb_file} → {xyz_file}")
+        return(xyz_file)
+    
     def load_residue_codes(self, residue_code_csv):
         """
         Loads existing residue codes from a CSV file.
