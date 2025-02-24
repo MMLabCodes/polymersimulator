@@ -4,11 +4,12 @@ Errors
 Here some common errors that you may encounter are reported. Bear in mind that this seciton of the documentation will be updated over time
 and some errors may not be logged yet and some may not have answers.
 
+
 Periodic box size less than twice the nonbonded cutoff
 ------------------------------------------------------
 
-
-This error will throw an exception that will look like something below.
+This error relates the running of simulations using the **sw_openmm** module and this error will
+throw an exception that will look similar to the error shown below. It usually occurs during an NPT simulation.
 
 .. code-block:: bash
 
@@ -29,9 +30,13 @@ given to an individual molecule in this module are 20 angstroms in all direction
 Non parallel periodic box vectors
 ---------------------------------
 
-This error implies that the periodic box vectors are not parallel and have deviated from the desired cubic shape. This error has not been seen before
-and is being investigated.
+
+This error relates the running of simulations using the **sw_openmm** module and this error will
+throw an exception that will look similar to the error shown below.
 
 .. code-block:: bash
 
 	openmm.OpenMMException: First periodic box vector must be parallel to x.
+
+This error implies that the periodic box vectors are not parallel and have deviated from the desired cubic shape. This error has not been seen before
+and is being investigated.
