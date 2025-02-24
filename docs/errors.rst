@@ -25,3 +25,13 @@ can grow//shrink. In cases where it shrinks **and** it shrinks to less than twic
 the 3 directions {x,y,z}) the purple line will be outside of the box and an atom can potentially "see" itself in it periodic image. This only occurs 
 if your system is small and equilibration takes your system to a small box or if you try and run an NPT simulation of a single molecule (standard box sizes
 given to an individual molecule in this module are 20 angstroms in all directions).
+
+Non parallel periodic box vectors
+---------------------------------
+
+This error implies that the periodic box vectors are not parallel and have deviated from the desired cubic shape. This error has not been seen before
+and is being investigated.
+
+.. code-block:: bash
+
+	openmm.OpenMMException: First periodic box vector must be parallel to x.
