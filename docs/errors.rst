@@ -17,7 +17,7 @@ This error will throw an exception that will look like something below.
 This is a common and an expected error and is explained in the figure below.*(Note: of course a simulation takes place in 3D space, however this diagram
 uses a 2D representation to showcase the issue)"
 
-.. image:: images/PBC_error.PNG
+.. image:: images/PBC_error.png
 
 The purple line indicates the nonbonded cutoff distance (this is set at 10 angstroms by default). This is the maximum distance where an atom can "see"
 another atom in the simulation. During energy minimizations and NVT simulations the box will not change **but** during NPT simulations the box size
