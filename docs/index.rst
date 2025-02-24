@@ -19,6 +19,7 @@ Contents
    installation
    packagecontents
    modules
+   errors
    usage
    api
    contributing
