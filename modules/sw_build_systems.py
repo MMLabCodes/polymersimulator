@@ -1019,27 +1019,11 @@ class BuildAmberSystems(BuildSystems):
         prmtop_filepath = os.path.join(output_dir, filename + ".prmtop")
         rst_filepath = os.path.join(output_dir, filename + ".rst7")
         pdb_output = os.path.join(output_dir, filename + ".pdb")
-        '''OLD FILE CONTENT
-        file_content = f"""source leaprc.gaff
-            source leaprc.water.fb3
 
-            loadamberprep {molecule_prepi_filepath}
-            loadamberparams {molecule_frcmod_filepath}
-
-            {molecule_name} = loadpdb {molecule_pdb_filepath}
-
-            solvatebox {molecule_name} TIP3PBOX {box_dist_line}
-
-            saveamberparm {molecule_name} {prmtop_filepath} {rst_filepath}
-            savepdb {molecule_name} {pdb_output}
-            quit
-            """
-        '''
         frcmod_filepath = os.path.join(self.manager.molecules_dir, molecule_name, molecule_name + ".frcmod")
         lib_filepath = os.path.join(self.manager.molecules_dir, molecule_name, molecule_name + ".lib")
         box_dist_line = "solvatebox " + molecule_name + " TIP3PBOX {" + buffer + "}"
-        
-        
+               
         file_content = f"""source leaprc.gaff
             source leaprc.water.fb3
             loadamberparams {frcmod_filepath}
@@ -1071,6 +1055,73 @@ class BuildAmberSystems(BuildSystems):
         os.chdir(self.manager.main_dir)
         return(filename)
 
+    def gen_amber_params_poly_solvated(self, base_molecule_name, polymer_name, buffer=None, water_model=None):
+
+        pdb_file = self.manager.load_pdb_filepath(polymer_name)
+        base_pdb_file = self.manager.load_pdb_filepath(base_molecule_name)
+         
+        molecule_dir = os.path.join(self.manager.molecules_dir, base_molecule_name)
+
+        head_prepi_filepath = os.path.join(base_pdb_dir, "head_" + base_molecule_name + ".prepi")
+        mainchain_prepi_filepath = os.path.join(base_pdb_dir, "mainchain_" + base_molecule_name + ".prepi")
+        tail_prepi_filepath = os.path.join(base_pdb_dir, "tail_" + base_molecule_name + ".prepi")
+        frcmod_filepath = os.path.join(base_pdb_fur, base_molecule_name + ".frcmod")
+       
+        if buffer == None:
+            buffer = "10"
+        else:
+            buffer = str(buffer)
+
+        if water_model == None:
+            water_model = "TIP3PBOX"
+        else:
+            water_model = water_model
+        
+        output_dir = os.path.join(self.manager.systems_dir, (polymer_name + "_wat_solv"))
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
+        file_subtype = "_wat_solv"
+        filename = molecule_name + file_subtype + f"_{buffer}"
+        intleap_path = filename + ".intleap"
+
+        prmtop_filepath = os.path.join(output_dir, filename + ".prmtop")
+        rst_filepath = os.path.join(output_dir, filename + ".rst7")
+        pdb_output = os.path.join(output_dir, filename + ".pdb")
+        
+        file_content = f"""source leaprc.gaff
+            source leaprc.water.fb3
+            loadamberprep {head_prepi_filepath}
+            loadamberprep {mainchain_prepi_filepath}
+            loadamberprep {tail_prepi_filepath}
+            loadamberparams {frcmod_filepath}
+
+            polymer = loadpdb {pdb_file}
+            
+            solvatebox polymer {water_model} {buffer}
+
+            saveamberparm polymer {prmtop_filepath} {rst_filepath}
+            savepdb polymer {pdb_output}
+            quit
+            """  
+        with open(intleap_path, 'w') as file:
+            file.write(file_content)
+
+        leap_command = "tleap -f " + intleap_path
+
+        try:
+            result = subprocess.run(leap_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            if result.returncode == 0:
+                # Command executed successfully
+                print("Output:", result.stdout)
+            else:
+                # Command failed, print error message
+                print("Error:", result.stderr)
+        except Exception as e:
+            # Exception occurred during subprocess execution
+            print("Exception:", e)
+        return(filename)
+    
     def generate_3_3_polymer_array_crystal(self, base_molecule_name=None, molecule_name=None):
         # Thsis function builds arrays of polymers using the pre generated pdb files
         if molecule_name == None or base_molecule_name == None:
