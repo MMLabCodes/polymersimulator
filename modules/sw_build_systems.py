@@ -1060,12 +1060,12 @@ class BuildAmberSystems(BuildSystems):
         pdb_file = self.manager.load_pdb_filepath(polymer_name)
         base_pdb_file = self.manager.load_pdb_filepath(base_molecule_name)
          
-        molecule_dir = os.path.join(self.manager.molecules_dir, base_molecule_name)
+        base_pdb_dir = os.path.join(self.manager.molecules_dir, base_molecule_name)
 
         head_prepi_filepath = os.path.join(base_pdb_dir, "head_" + base_molecule_name + ".prepi")
         mainchain_prepi_filepath = os.path.join(base_pdb_dir, "mainchain_" + base_molecule_name + ".prepi")
         tail_prepi_filepath = os.path.join(base_pdb_dir, "tail_" + base_molecule_name + ".prepi")
-        frcmod_filepath = os.path.join(base_pdb_fur, base_molecule_name + ".frcmod")
+        frcmod_filepath = os.path.join(base_pdb_dir, base_molecule_name + ".frcmod")
        
         if buffer == None:
             buffer = "10"
@@ -1082,7 +1082,7 @@ class BuildAmberSystems(BuildSystems):
             os.makedirs(output_dir)
 
         file_subtype = "_wat_solv"
-        filename = molecule_name + file_subtype + f"_{buffer}"
+        filename = polymer_name + file_subtype + f"_{buffer}"
         intleap_path = filename + ".intleap"
 
         prmtop_filepath = os.path.join(output_dir, filename + ".prmtop")
