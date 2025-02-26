@@ -2160,7 +2160,7 @@ class BuildAmberSystems(BuildSystems):
         result = subprocess.run(cd_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         return(system_name)
     
-    def gen_amber_params_sing_mol(self, molecule_name):
+    def gen_amber_params_sing_mol(self, molecule_name, box_radius=None):
         """
         Generates a polymer PDB file using `tleap` based on the specified molecule and number of units.
 
@@ -2190,6 +2190,11 @@ class BuildAmberSystems(BuildSystems):
             dirs = DirectoryPaths('path/to/main/project/directory')
             gen_polymer_pdb(dirs, "3HB_trimer", 10)
         """
+        if box_radius==None:
+            box_radius = 10.0
+        else:
+            box_radius = box_radius
+        
         molecule_prepi_file = os.path.join(self.manager.molecules_dir, molecule_name, (molecule_name + ".prepi"))
         molecule_frcmod_file = os.path.join(self.manager.molecules_dir, molecule_name, (molecule_name + ".frcmod"))
 
@@ -2218,7 +2223,7 @@ class BuildAmberSystems(BuildSystems):
              list
 
              system = {rescode}
-             setBox system vdw 0.0
+             setBox system centers {box_radius}
              saveamberparm system {prmtop_filepath} {rst_filepath}
              savepdb system {pdb_filepath}
              quit

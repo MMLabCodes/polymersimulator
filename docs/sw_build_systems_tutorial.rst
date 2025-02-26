@@ -146,8 +146,8 @@ The first thing to do is initialise an instance of the class - this is the exact
    manager = SnippetSimManage(os.getcwd())
    builder = BuildAmberSystems(manager)
 
-Parameterizing a molecule
--------------------------
+Parameterizing a molecule and generating amber parameters
+---------------------------------------------------------
 
 The next stage is to parameterize a molecule for molecular dyanmics with amber. Before actually parameterizing it charges to need to be assigned to each atom
 in the molecule. This file with the charges is a '.ac' file and it is essentially a '.pdb' file with an extra notation for the charges of each atom.
@@ -177,6 +177,34 @@ If it has been succesfully parameterized **True** will be printed and **False** 
 and provide an instance to catch any errors in parameterization. You will only ever need to parameterize each molecule once and **warning** for larger molecules
 this process will take significantly longer.
 
+To run an amber simulation a topology and coordinate file is required and this needs to be built using the parameter files. A class method exists
+to carry out the generation of these files automatically.
+
+.. code-block:: python
+
+   system_name = builder.gen_amber_params_sing_mol("caffeine")
+   print(system_name)
+
+This will generate the topology and coordinate files for a single molecule of caffeine, this step may seem unnecessary as the parameters for caffine already exist
+but this stage is required to generate periodic boundary conditions for the molecule. 
+By default the box radius around the molecule will be 10 angstroms, but we can change this by adding another argument as shown below.
+
+.. code-block:: python
+
+   system_name = builder.gen_amber_params_sing_mol("caffeine", 20.0)
+   print(system_name)
+
+This will create a periodic box with a radius of 20 angstroms around the molecule. The system name will be printed and can be used to retrieve the files for molecular dyanmics simulation.
+The system name in this example is **caffeine_sing_mol** and other class methods that build systems will return appropriately named systems.
+
+.. code-block:: python
+
+   top, coord = manager.load_amber_filepaths(system_name)
+   print(f"The topology file for {system_name} is {top}")
+   print(f"The coordinate file for {system_name} is {coord}")
+
+The system will be a single caffeine molecule in a periodic box with a radius of 10 angstroms (if no box radius specified).
+
 *Note: you may be a bit confused at this point as to where the polymers are...! That will be the next, but first it is critical to understand the functionality of each module and build understanding in a useful way.*
 
 
@@ -205,31 +233,6 @@ forcefield. However, this is how you would run the parameterization for a molecu
 As the current time, there may be some inconsistencies with how you feel things later on this tutorial should be carried out. This is because this implementation of changing the forcefield
 is new and a retrosepctive update needs to be given to other functions in this module.
 
-
-Generating amber parameter files for a single molecule
-------------------------------------------------------
-
-To run an amber simulation a topology and coordinate is required and this needs to be built using the parameter files. A class method exists
-to carry out the generation of these files automatically.
-
-.. code-block:: python
-
-   system_name = builder.gen_amber_params_sing_mol("caffeine")
-   print(system_name)
-
-This will generate the topology and coordinate files for a single molecule of caffeine, this step may seem unnecessary as the parameters for caffine already exist
-but this stage is required to generate periodic boundary conditions for the molecule. The system name will be printed and can be used to retrieve the files for molecular dyanmics simulation.
-The system name in this example is **caffeine_sing_mol** and other class methods that build systems will return appropriately named systems.
-
-.. code-block:: python
-
-   top, coord = manager.load_amber_filepaths(system_name)
-   print(f"The topology file for {system_name} is {top}")
-   print(f"The coordinate file for {system_name} is {coord}")
-
-The system will be a single caffeine molecule.
-
-INSERT PIC
 
 Generating amber parameter files for a single molecule solvated in water
 ------------------------------------------------------------------------
@@ -269,14 +272,12 @@ This method has an advantage in the parameterization of a large polymer as we st
 
 The initial step to generating a parameterized polymer is the same as with a small molecule - we must generate the trimer with a unique rescode.
 
-
-.. code-block ::python
+.. code-block:: python
 
    pdb_file = builder.SmilesToPDB_GenResCode("OC(C)CC(=O)OC(C)CC(=O)OC(C)CC(=O)O", "3HB_trimer")
    print(pdb_file)
 
 Then we need to generate the .ac file and parameterize the mol in the same way as was done for caffeine.
-
 
 .. code-block:: python
 
