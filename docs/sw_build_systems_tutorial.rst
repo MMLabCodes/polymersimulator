@@ -244,13 +244,13 @@ The amber files can be found using the system name in the same way as before. Th
 This class method will create pariodic box where the molecule exactly fits and solvate the free space. However, you may want to add a buffer of water around your molecule.
 This is done by adding another argument to the class method above.
 
-..code-block:: python
+.. code-block:: python
 
    system_name = builder.gen_amber_params_sing_mol_solvated("caffeine", 10)
 
 This will add a buffer of water 10 angstroms around the caffeine molecule and this system will be called **caffeine_wat_solv_10** and, again, the amber files can be retrieved as so.
 
-..code-block:: python
+.. code-block:: python
 
    top, coord = manager.load_amber_filepaths(system_name)
    print(f"The topology file for {system_name} is {top}")
@@ -269,12 +269,14 @@ This method has an advantage in the parameterization of a large polymer as we st
 
 The initial step to generating a parameterized polymer is the same as with a small molecule - we must generate the trimer with a unique rescode.
 
+
 .. code-block ::python
 
    pdb_file = builder.SmilesToPDB_GenResCode("OC(C)CC(=O)OC(C)CC(=O)OC(C)CC(=O)O", "3HB_trimer")
    print(pdb_file)
 
 Then we need to generate the .ac file and parameterize the mol in the same way as was done for caffeine.
+
 
 .. code-block:: python
 
