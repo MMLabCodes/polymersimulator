@@ -741,7 +741,7 @@ class BuildAmberSystems(BuildSystems):
         with open(original_pdb_file, 'w') as outfile:
             outfile.writelines(updated_lines)
     
-    def gen_polymer_pdb(self, molecule_name, number_of_units, infinite=None):
+    def gen_polymer_pdb_and_params(self, molecule_name, number_of_units, box_radius=None, infinite=None):
         """
         Generates a polymer PDB file using `tleap` based on the specified molecule and number of units.
 
@@ -771,6 +771,17 @@ class BuildAmberSystems(BuildSystems):
             dirs = DirectoryPaths('path/to/main/project/directory')
             gen_polymer_pdb(dirs, "3HB_trimer", 10)
         """
+        if box_radius == None:
+            box_radius = 10.0
+        else:
+            box_radius = box_radius
+            if type(box_radius) is float:
+                pass
+            else:
+                print("Plase pass the box radius as a float")
+                print("Example: gen_amber_params_sing_poly('base_trimer_name', 'polymer_name', 20.0)")
+                return()
+                
         molecule_dir = os.path.join(self.manager.molecules_dir, molecule_name)
         try:
             os.chdir(molecule_dir)
@@ -804,18 +815,14 @@ class BuildAmberSystems(BuildSystems):
             polymer_code = " ".join([head_rescode] + [mainchain_rescode] * (number_of_units - 2) + [tail_rescode])
         polymer_command = "{" + polymer_code + "}"
 
-        file_content = f"""source leaprc.gaff
-             source leaprc.water.fb3
-             source leaprc.protein.ff14SB
-
-             loadamberprep {head_prepi_filepath}
+        file_content = f"""loadamberprep {head_prepi_filepath}
              loadamberprep {mainchain_prepi_filepath}
              loadamberprep {tail_prepi_filepath}
 
              list
 
              polymer = sequence {polymer_command}
-             setBox polymer vdw 0.0
+             setBox polymer centers {box_radius}
              saveamberparm polymer {prmtop_filepath} {rst_filepath}
              savepdb polymer {pdb_filepath}
              quit
@@ -842,7 +849,7 @@ class BuildAmberSystems(BuildSystems):
             print("Current directory:", os.getcwd())
         except Exception as e:
             print("Exception:", e)
-        return(pdb_filepath)
+        return(pdb_filepath, prmtop_filepath, rst_filepath)
         
     def gen_copolymer_pdb_and_params(self, pattern, base_trimers, number_of_units, box_radius=None):
         # Check base_trimers were passed as a list
@@ -2234,72 +2241,6 @@ class BuildAmberSystems(BuildSystems):
             print("Exception:", e)
         return(output_name)  
 
-    def gen_amber_params_sing_poly(self, base_molecule_name, polymer_name, box_radius=None):
-
-        head_prepi_file = os.path.join(self.manager.molecules_dir, base_molecule_name, ("head_" + base_molecule_name + ".prepi"))
-        mainchain_prepi_file = os.path.join(self.manager.molecules_dir, base_molecule_name, ("mainchain_" + base_molecule_name + ".prepi"))
-        tail_prepi_file = os.path.join(self.manager.molecules_dir, base_molecule_name, ("tail_" + base_molecule_name + ".prepi"))
-        base_molecule_frcmod_file = os.path.join(self.manager.molecules_dir, base_molecule_name, (base_molecule_name + ".frcmod"))
-        polymer_pdb_file = os.path.join(self.manager.systems_dir, polymer_name, (polymer_name + ".pdb"))
-
-        file_subtype = "_sing_poly"
-        output_name = polymer_name + file_subtype
-
-        output_dir = os.path.join(self.manager.systems_dir, output_name)
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
-
-
-        intleap_path = os.path.join(output_dir, output_name + ".intleap")
-        prmtop_filepath = os.path.join(output_dir, output_name + ".prmtop")
-        rst_filepath = os.path.join(output_dir, output_name + ".rst7")
-        pdb_filepath = os.path.join(output_dir, output_name + ".pdb")
-
-        if box_radius == None:
-            box_radius = 0.0
-        else:
-            box_radius = box_radius
-            if type(box_radius) is float:
-                pass
-            else:
-                print("Plase pass the box radius as a float")
-                print("Example: gen_amber_params_sing_poly('base_trimer_name', 'polymer_name', 20.0)")
-                return()
-        
-        file_content = f"""source leaprc.gaff
-             source leaprc.water.fb3
-             source leaprc.protein.ff14SB
-
-             loadamberprep {head_prepi_file}
-             loadamberprep {mainchain_prepi_file}
-             loadamberprep {tail_prepi_file}
-             loadamberparams {base_molecule_frcmod_file}
-
-             list
-
-             system = loadpdb {polymer_pdb_file}
-             setBox system centers {box_radius}
-             saveamberparm system {prmtop_filepath} {rst_filepath}
-             savepdb system {pdb_filepath}
-             quit
-             """
-        with open(intleap_path, 'w') as file:
-             file.write(file_content)
-
-        leap_command = "tleap -f " + intleap_path
-
-        try:
-            result = subprocess.run(leap_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-            if result.returncode == 0:
-               # Command executed successfully
-               print("Output:", result.stdout)
-            else:
-                # Command failed, print error message
-                print("Error:", result.stderr)
-        except Exception as e:
-            # Exception occurred during subprocess execution
-            print("Exception:", e)
-        return(output_name)  
         
 #class BuildBioOilSystems(BuildSystems):
 #    def __init__:

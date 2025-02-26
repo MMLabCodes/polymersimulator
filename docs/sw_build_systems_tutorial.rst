@@ -258,8 +258,8 @@ This will add a buffer of water 10 angstroms around the caffeine molecule and th
 
 INSERT PIC
 
-Building polymers
------------------
+Building polymers and generating amber parameters
+-------------------------------------------------
 
 The next stage is to build and parameterize some polymers. This is a bit more complicated that a single molecule as the approach here is a **building block** approach.
 The idea is to split a trimer of the polymer into a **head**, **mainchain** and **tail** unit and then concateneate these together into a larger polymer.
@@ -303,38 +303,38 @@ the arguments are the base_trimer followed by the number of units you desire you
 
 .. code-block:: python
 
-   pdb = builder.gen_polymer_pdb(base_trimer, number_of_units)
+   pdb = builder.gen_polymer_pdb_nd_params(base_trimer, number_of_units, box_radius=None, infinite=None)
+
+Passing the **base_trimer** as an argument allows the module to find the parameter files for the **head**, **mainchain** and **tail** units of the polymer.
+The **number_of_units** tells the code how long to make the polymer. The **box_radius** define the size of the periodic box vectors and the default is 10 angstroms.
+**infinite** tells the code if you require a finite or infinite polymer, by default this will make a finite polymer.
+
+The arguments must be passed as:
+
+- base_trimer: string
+- number_of_units: integer
+- box_radius: float
+- infinite: boolean
 
 For example if I wanted to build a 3HB decamer (10 units), I would run this:
 
 .. code-block:: python
 
-   pdb = builder.gen_polymer_pdb("3HB_trimer", 10)
-   print(pdb)
+   pdb, top, coord = builder.gen_polymer_pdb("3HB_trimer", 10)
+   print(f"The pdb file is: {pdb}")
+   print(f"The topology file is: {top}")
+   print(f"The amber coordinate file is: {coord}")
 
-This will also return the path to the pdb file. There is one thing to note here, whenever you generate a polymer from its base trimer, the files for the new polymer
-will be saved as in the systems directory and not the molecules directory. This polymer will be saved as **3HB_10_polymer**. 
+This function returns 3 things for the constructed polymer:
 
-Generaing amber parameters for a single polymer
------------------------------------------------
+- PDB file
+- Amber topology file
+- Amber coordinate file
 
-A similar method is used for generating amber parameters of a polymer to that of a single molecule. There is an extra argument here though, you will of course need
-to pass the name of your polymer (i.e. **3HB_10_polymer**) but you will also need to pass the name of the base trimer too (i.e. **3HB_trimer**) and this is needed
-to call the original parameters for the atoms in the polymer. The code to generate these amber parameters is below. The number (**which must be a float**) is the
-the distance assigned for the periodic box from the centre.
+*Note: The system is called **3HB_10_polymer** and the path to its directory is **~polymersimulator/pdb_files/systems/3HB_10_polymer** *
 
-.. code-block:: python
-
-   system_name = builder.gen_amber_params_sing_poly("3HB_trimer", "3HB_10_polymer", 20.0)
-   print(system_name)
-
-For running a simulation if is useful to return the topology and coordinates.
-
-.. code-block:: python
-
-   top, coord = manager.load_amber_filepaths(system_name)
-   print(f"The topology file for {system_name} is {top}")
-   print(f"The coordinate file for {system_name} is {coord}")
+These amber files can be used to run simulations of single polymer in a vacuum with fixed box vectors. However, altering these box vectors (i.e. with a NPT simulation)
+will cause the simulation to crash.
 
 
 Building polymer systems - arrays

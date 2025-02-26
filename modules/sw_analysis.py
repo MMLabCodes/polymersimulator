@@ -676,7 +676,7 @@ class Analysis:
         return pls, pbs
 
     @staticmethod
-    def plot_expansion_coeff(universe_object, bin_params=None, fit=True):
+    def plot_expansion_coeff(universe_object, bin_params=None, fit=True, plot=None):
         if bin_params is None:
             print("Please specify the bin parameters for your system: [start_temp, target_temp, temp_increments]")
             return None, None
@@ -702,13 +702,15 @@ class Analysis:
         T_bin = binned_data["Temp_Bin"].values
         V_bin = binned_data["Box Volume (nm^3)"].values
     
-        plt.figure(figsize=(8, 6))
-        plt.scatter(T_bin, V_bin, marker="o", color="b", label="V(T)")
+
     
         fit_equations = {}
         params = None
     
-        if fit:     
+        if fit:
+            if plot==True:
+                plt.figure(figsize=(8, 6))
+                plt.scatter(T_bin, V_bin, marker="o", color="b", label="V(T)")
             # Fit model to data
             params, _ = curve_fit(volume_model, T_bin, V_bin)
             a, b, c = params
@@ -728,26 +730,27 @@ class Analysis:
             # Store fit equations
             fit_equations["Volume Fit"] = f"V(T) = {a:.4f} + {b:.4f}T + {c:.4f}T²"
             fit_equations["Expansion Coefficient Fit"] = f"α(T) = ({b:.4f} + 2*{c:.4f}T) / V(T) * 10⁴"
+
+            if plot==True:
+                # Plot fitted volume curve
+                plt.plot(T_smooth, V_smooth, linestyle="--", color="r", label="Fitted V(T)")
+                plt.xlabel("Temperature (K)")
+                plt.ylabel("Average Box Volume (nm³)")
+                plt.title(graph_title)
+                plt.grid(True)
+                plt.legend()
+                plt.show()
         
-            # Plot fitted volume curve
-            plt.plot(T_smooth, V_smooth, linestyle="--", color="r", label="Fitted Volume Curve")
-            plt.xlabel("Temperature (K)")
-            plt.ylabel("Average Box Volume (nm³)")
-            plt.title(graph_title)
-            plt.grid(True)
-            plt.legend()
-            plt.show()
-        
-            # Plot thermal expansion coefficient
-            plt.figure(figsize=(8, 6))
-            plt.scatter(T_bin, alpha_bin, color="b", label="α(T)")
-            plt.plot(T_smooth, alpha_smooth, linestyle="--", color="g", label="Fitted α(T)")
-            plt.xlabel("Temperature (K)")
-            plt.ylabel(r"Thermal Expansion Coefficient α ($\times 10^{-4}$ K⁻¹)")
-            plt.title("Thermal Expansion Coefficient vs Temperature")
-            plt.grid(True)
-            plt.legend()
-            plt.show()
+                # Plot thermal expansion coefficient
+                plt.figure(figsize=(8, 6))
+                plt.scatter(T_bin, alpha_bin, color="b", label="α(T)")
+                plt.plot(T_smooth, alpha_smooth, linestyle="--", color="g", label="Fitted α(T)")
+                plt.xlabel("Temperature (K)")
+                plt.ylabel(r"Thermal Expansion Coefficient α ($\times 10^{-4}$ K⁻¹)")
+                plt.title("Thermal Expansion Coefficient vs Temperature")
+                plt.grid(True)
+                plt.legend()
+                plt.show()
     
         return fit_equations, params
 

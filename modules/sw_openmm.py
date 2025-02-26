@@ -383,6 +383,7 @@ class BuildSimulation():
     savepdb_traj = False
     pressure = 1
     temp = 300
+    min_temp = 0
     timestep = 2.0
     friction_coeff = 1.0
     total_steps = 1000
@@ -458,7 +459,7 @@ class BuildSimulation():
         """
         min_start_time = time.time()
         
-        integrator = LangevinIntegrator(self.temp*kelvin, self.friction_coeff/picoseconds, self.timestep*femtoseconds)
+        integrator = LangevinIntegrator(self.min_temp*kelvin, self.friction_coeff/picoseconds, self.timestep*femtoseconds)
         
         if BuildSimulation.type_of_simulation(self) == "AMB":
             system = self.amb_topology.createSystem(nonbondedMethod=app.PME, nonbondedCutoff=self.nonbondedcutoff*nanometers, constraints=HBonds)

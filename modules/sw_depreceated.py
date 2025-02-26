@@ -692,6 +692,73 @@ class SinglePolyAnalysis(Analysis):
             file.writelines(modified_lines)
         return(None)
 
+def gen_amber_params_sing_poly(self, base_molecule_name, polymer_name, box_radius=None):
+
+    head_prepi_file = os.path.join(self.manager.molecules_dir, base_molecule_name, ("head_" + base_molecule_name + ".prepi"))
+    mainchain_prepi_file = os.path.join(self.manager.molecules_dir, base_molecule_name, ("mainchain_" + base_molecule_name + ".prepi"))
+    tail_prepi_file = os.path.join(self.manager.molecules_dir, base_molecule_name, ("tail_" + base_molecule_name + ".prepi"))
+    base_molecule_frcmod_file = os.path.join(self.manager.molecules_dir, base_molecule_name, (base_molecule_name + ".frcmod"))
+    polymer_pdb_file = os.path.join(self.manager.systems_dir, polymer_name, (polymer_name + ".pdb"))
+
+    file_subtype = "_sing_poly"
+    output_name = polymer_name + file_subtype
+
+    output_dir = os.path.join(self.manager.systems_dir, output_name)
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
+
+    intleap_path = os.path.join(output_dir, output_name + ".intleap")
+    prmtop_filepath = os.path.join(output_dir, output_name + ".prmtop")
+    rst_filepath = os.path.join(output_dir, output_name + ".rst7")
+    pdb_filepath = os.path.join(output_dir, output_name + ".pdb")
+
+    if box_radius == None:
+        box_radius = 10.0
+    else:
+        box_radius = box_radius
+        if type(box_radius) is float:
+            pass
+        else:
+            print("Plase pass the box radius as a float")
+            print("Example: gen_amber_params_sing_poly('base_trimer_name', 'polymer_name', 20.0)")
+            return()
+        
+    file_content = f"""source leaprc.gaff
+             source leaprc.water.fb3
+             source leaprc.protein.ff14SB
+
+             loadamberprep {head_prepi_file}
+             loadamberprep {mainchain_prepi_file}
+             loadamberprep {tail_prepi_file}
+             loadamberparams {base_molecule_frcmod_file}
+
+             list
+
+             system = loadpdb {polymer_pdb_file}
+             setBox system centers {box_radius}
+             saveamberparm system {prmtop_filepath} {rst_filepath}
+             savepdb system {pdb_filepath}
+             quit
+             """
+    with open(intleap_path, 'w') as file:
+        file.write(file_content)
+
+    leap_command = "tleap -f " + intleap_path
+
+    try:
+        result = subprocess.run(leap_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        if result.returncode == 0:
+           # Command executed successfully
+           print("Output:", result.stdout)
+        else:
+           # Command failed, print error message
+           print("Error:", result.stderr)
+    except Exception as e:
+        # Exception occurred during subprocess execution
+        print("Exception:", e)
+    return(output_name)  
+
 
 
 
