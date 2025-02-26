@@ -160,7 +160,7 @@ in the molecule. This file with the charges is a '.ac' file and it is essentiall
 The only argument for this class method is the name of the molecule being parameterized - due to the manager object (an instance of **SnippetSimManage**) being
 passed to **BuildAmberSystems** it can find the directory easily. The filepath of the .ac file is also returned, but it is not required for anything other than ensuring the file exists and has actually been generated.
 
-The next step is to parameterize caffeine.
+The next step is to parameterize caffeine - this function uses the generalized amber forcefield (**GAFF**) forcefield by default.
 
 .. code-block:: python
 
@@ -178,6 +178,33 @@ and provide an instance to catch any errors in parameterization. You will only e
 this process will take significantly longer.
 
 *Note: you may be a bit confused at this point as to where the polymers are...! That will be the next, but first it is critical to understand the functionality of each module and build understanding in a useful way.*
+
+
+Parameterizing a molecule - changing the forcefield
+---------------------------------------------------
+
+We can change the forcefield from the default (**GAFF**) and the list of supported forcefields is:
+
+- **GAFF**
+- **GLYCAM_06j-1**
+
+More forcefields will be added to this list in due time and the possible selection will be expanded upon greatly. It is important to remember that whatever forcefield
+you use, that is is appropriate for your molecule//system.
+
+To change the forcefield when parameterizing a molecule call the **parametize_mol** class method and pass your molecule name as before, but you must additionally
+state the forcefield you want to use (unless you want to use the default which is **GAFF**).
+
+.. code-block:: python
+
+   param = builder.is_mol_parameterized("caffeine", "GLYCAM_06j-1")
+   print(param)
+
+Obviously this example with caffeine is not super useful as it contains nitrogen and GLYCAM forcefields are for carbohydrates and is a case of when you should use a different 
+forcefield. However, this is how you would run the parameterization for a molecule using a forcefielf other than **GAFF**.
+
+As the current time, there may be some inconsistencies with how you feel things later on this tutorial should be carried out. This is because this implementation of changing the forcefield
+is new and a retrosepctive update needs to be given to other functions in this module.
+
 
 Generating amber parameter files for a single molecule
 ------------------------------------------------------
