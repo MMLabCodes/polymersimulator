@@ -362,7 +362,7 @@ of the polymer we want to solvate (*i.e. "3HB_10_polymer"*) which should have be
 The generated system will be called **3HB_10_polymer_wat_solv_10**. 
 This class method will create periodic box where a polymer is solvated in a TIP3P water box with a buffer of 10 angstroms. 
 
-..code-block:: python
+.. code-block:: python
 
    system_name = builder.gen_amber_params_poly_solvated("3HB_trimer", "3HB_10_polymer")
 
@@ -372,7 +372,7 @@ The system will look something like this:
 
 It is worth showing the base format of the function:
 
-..code-block:: python
+.. code-block:: python
 
    system_name = builder.gen_amber_params_poly_solvated(base_trimer_name, polymer_name, buffer, water_model)
 
@@ -382,7 +382,7 @@ as TIP3P should be adaquete for many applications. However, lets see an example 
 
 *Note: the new system will be called **3HB_10_polymer_wat_solv_20** *
 
-..code-block:: python
+.. code-block:: python
 
    system_name = builder.gen_amber_params_poly_solvated("3HB_trimer", "3HB_10_polymer", 20)
 
@@ -392,7 +392,7 @@ This system will look something like this:
 
 Of course we can do the same method as seen many times before to pull the topology and coordinate files of this system for a MD simulation.
 
-..code-block:: python
+.. code-block:: python
 
    top, coord = manager.load_amber_filepaths(system_name)
    print(f"The topology file for {system_name} is {top}")
