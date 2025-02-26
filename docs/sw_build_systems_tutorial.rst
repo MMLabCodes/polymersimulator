@@ -265,6 +265,8 @@ The next stage is to build and parameterize some polymers. This is a bit more co
 The idea is to split a trimer of the polymer into a **head**, **mainchain** and **tail** unit and then concateneate these together into a larger polymer.
 This method has an advantage in the parameterization of a large polymer as we start with a parameterized trimer - meaning all 3 units of the polymer are parameterized.
 
+.. image:: images/poly_build.PNG
+
 The initial step to generating a parameterized polymer is the same as with a small molecule - we must generate the trimer with a unique rescode.
 
 .. code-block ::python
@@ -306,15 +308,15 @@ the arguments are the base_trimer followed by the number of units you desire you
    pdb = builder.gen_polymer_pdb_nd_params(base_trimer, number_of_units, box_radius=None, infinite=None)
 
 Passing the **base_trimer** as an argument allows the module to find the parameter files for the **head**, **mainchain** and **tail** units of the polymer.
-The **number_of_units** tells the code how long to make the polymer. The **box_radius** define the size of the periodic box vectors and the default is 10 angstroms.
+The **number_of_units** tells the code how long to make the polymer. The **box_radius** defines the size of the periodic box vectors and the default is 10 angstroms.
 **infinite** tells the code if you require a finite or infinite polymer, by default this will make a finite polymer.
 
 The arguments must be passed as:
 
-- base_trimer: string
-- number_of_units: integer
-- box_radius: float
-- infinite: boolean
+- **base_trimer**: string
+- **number_of_units**: integer
+- **box_radius**: float
+- **infinite**: boolean
 
 For example if I wanted to build a 3HB decamer (10 units), I would run this:
 
@@ -334,7 +336,7 @@ This function returns 3 things for the constructed polymer:
 *Note: The system is called **3HB_10_polymer** and the path to its directory is **~polymersimulator/pdb_files/systems/3HB_10_polymer** *
 
 These amber files can be used to run simulations of single polymer in a vacuum with fixed box vectors. However, altering these box vectors (i.e. with a NPT simulation)
-will cause the simulation to crash.
+will cause the simulation to crash due to the system being extremely small.
 
 
 Building polymer systems - arrays
