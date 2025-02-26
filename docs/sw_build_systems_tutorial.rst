@@ -348,7 +348,55 @@ The system names for 3HB decamer systems will be **3HB_10_polymer_5_5_array_crys
    print(f"The topology file for {system_name} is {top}")
    print(f"The coordinate file for {system_name} is {coord}")    
 
+Generating amber parameter files for a single polymer solvated in water
+-----------------------------------------------------------------------
 
+To generate amber parameters for a single molecule solvated in water, there is a one line command implemented.
+
+.. code-block:: python
+
+   system_name = builder.gen_amber_params_poly_solvated("3HB_trimer", "3HB_10_polymer")
+
+We pass the trimer of the polymer as this will point to the directory where files containing the parameters of the trimer are stored. We also pass the name
+of the polymer we want to solvate (*i.e. "3HB_10_polymer"*) which should have been generated as shown previously in this tutorial.
+The generated system will be called **3HB_10_polymer_wat_solv_10**. 
+This class method will create periodic box where a polymer is solvated in a TIP3P water box with a buffer of 10 angstroms. 
+
+..code-block:: python
+
+   system_name = builder.gen_amber_params_poly_solvated("3HB_trimer", "3HB_10_polymer")
+
+The system will look something like this:
+
+.. image:: images/default_solvated_poly.PNG
+
+It is worth showing the base format of the function:
+
+..code-block:: python
+
+   system_name = builder.gen_amber_params_poly_solvated(base_trimer_name, polymer_name, buffer, water_model)
+
+You will notice two more arguments than existed in the original example of the function **buffer** and **water_model**. These both do what you would expect
+and either change the buffer distance from the default of 10 or the water model from the default of TIP3P. I won't cover the types of water models you can use
+as TIP3P should be adaquete for many applications. However, lets see an example of increasing the the buffer of the solvated 3HB_10_polymer to 20 angstroms.
+
+*Note: the new system will be called **3HB_10_polymer_wat_solv_20** *
+
+..code-block:: python
+
+   system_name = builder.gen_amber_params_poly_solvated("3HB_trimer", "3HB_10_polymer", 20)
+
+This system will look something like this:
+
+.. image:: images/20_solvated_poly.PNG
+
+Of course we can do the same method as seen many times before to pull the topology and coordinate files of this system for a MD simulation.
+
+..code-block:: python
+
+   top, coord = manager.load_amber_filepaths(system_name)
+   print(f"The topology file for {system_name} is {top}")
+   print(f"The coordinate file for {system_name} is {coord}")
 
 
 Building copolymers - repeating pattern
