@@ -466,12 +466,17 @@ class BuildAmberSystems(BuildSystems):
         with open(file_path, 'w') as file:
             file.writelines(modified_lines)
     
-    def parameterize_mol(self, molecule_name=None):
+    def parameterize_mol(self, molecule_name=None, forcefield=None):
         if  molecule_name == None:
             print("Please provide 1 argument as follows: parametrize_mol(molecule_name)")
             print("Directories: A python object generated with the PolymerSimulatorDirs(filepath) method imported from sw_directories")
             print("Molecule name: A string of the molecule name, i.e. 'Ethane'")
             return(None)
+
+        if forcefield == None:
+            forcefield = "GAFF"
+        else:
+            forcefield = forcefield
         # Create a new directory for param files for the molecule and copy pdb there
         pdb_filepath = os.path.join(self.manager.pdb_file_dir, (molecule_name + ".pdb"))
         self.mod_pdb_file(pdb_filepath)
@@ -495,7 +500,7 @@ class BuildAmberSystems(BuildSystems):
         intleap_filepath = os.path.join(param_mol_dir, (molecule_name + ".intleap"))
         
         file_content = f"""source leaprc.protein.ff14SB
-        source leaprc.gaff
+        source leaprc.{forcefield}
         source leaprc.water.fb3
         {molecule_name} = loadmol2 {mol2_filepath}
         saveoff {molecule_name} {lib_filepath}
