@@ -220,7 +220,7 @@ More forcefields will be added to this list in due time and the possible selecti
 you use, that is is appropriate for your molecule//system.
 
 To change the forcefield when parameterizing a molecule call the **parametize_mol** class method and pass your molecule name as before, but you must additionally
-state the forcefield you want to use (unless you want to use the default which is **GAFF**).
+state the forcefield you want to use (unless you want to use the default which is **GAFF**). The rest of the code for generating the parameters will remain the same.
 
 .. code-block:: python
 
@@ -447,10 +447,17 @@ from 3 different units. This would be a good time to show a general form of the 
 
 .. code-block:: python
 	
-   system_name = builder.gen_copolymer_pdb_and_params(pattern, [A,B,C], polymer_length)
+   system_name = builder.gen_copolymer_pdb_and_params(pattern, [A,B,C], polymer_length, forcefield=None, box_radius=None)
 
+Where the arguments are:
 
-Where; pattern = "AB" (or something simular), [A,B,C] = Names of base trimers and polymer_length is the length of the constructed polymer chain.
+- **pattern**: string (i.e. "AB", "ABC", "AABB", ect..)
+- **[A,B,C]**: string (base trimers, i.e. ["3HB_trimer", "3HV_trimer"] or ["3HB_trimer", "3HV_trimer", "4HV_trimer"])
+- **polymer_length**: integer
+
+Optional arguments:
+- **forcefield**: string ("gaff" by default)
+- **box_radius**: float (10.0 by default)
 
 The only thing to note here is that the pattern must either contain the same number of characters as the indicated polymer length (i.e. "ABABABABAB" and polymer_length = 10)
 **or** be a factor of the polymer length (i.e. "AB" and polymer_length = 10).
@@ -461,9 +468,8 @@ So translating this information to building a copolymer with **ABC** pattern, we
 	
    system_name = builder.gen_copolymer_pdb_and_params("ABC", ["3HB_trimer", "3HV_trimer", "5HV_trimer"], 15)
 
-These polymers are also parameterized and given a periodic box when they are built (it would be too complicated to do this at a later stage as was done for single molecules and homopolymers) so a simulation
+These polymers are also parameterized and given a periodic box (defaults to a radius of 10 angstroms) when they are built so a simulation
 can be run straight from their topologies and coordinates. The topology and coordinate file can be returned as shown many times before:
-
 
 .. code-block:: python
 

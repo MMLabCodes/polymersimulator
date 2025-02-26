@@ -851,7 +851,7 @@ class BuildAmberSystems(BuildSystems):
             print("Exception:", e)
         return(pdb_filepath, prmtop_filepath, rst_filepath)
         
-    def gen_copolymer_pdb_and_params(self, pattern, base_trimers, number_of_units, box_radius=None):
+    def gen_copolymer_pdb_and_params(self, pattern, base_trimers, number_of_units, forcefield=None, box_radius=None):
         # Check base_trimers were passed as a list
         if isinstance(base_trimers, list):
             pass
@@ -863,7 +863,7 @@ class BuildAmberSystems(BuildSystems):
             return
 
         if box_radius == None:
-            box_radius = 0.0
+            box_radius = 10.0
         else:
             box_radius = box_radius
             if type(box_radius) is float:
@@ -873,7 +873,12 @@ class BuildAmberSystems(BuildSystems):
                 print("Example: gen_copolymer_pdb_and_params('AB', ['base_trimer_1', 'base_trimer_2'], 10, 20.0)")
                 return()
             
-
+        if forcefield == None:
+            forcefield = "gaff"
+        else:
+            forcefield = forcefield
+            
+        
         # Create the output dircotry and name the system
         file_subtype = "_copolymer_" + pattern
         copolymer_name = "_".join([item.split("_")[0] for item in base_trimers]) + "_" + str(number_of_units) + file_subtype 
@@ -953,9 +958,7 @@ class BuildAmberSystems(BuildSystems):
         copolymer_command = "{" + copolymer_pattern + "}"
         print(copolymer_command)
 
-        file_content = f"""source leaprc.gaff
-            source leaprc.water.fb3
-            source leaprc.protein.ff14SB
+        file_content = f"""source leaprc.{forcefield}
 
             loadamberprep {head_prepi_filepaths[0]}
             loadamberprep {head_prepi_filepaths[1]}
@@ -2213,11 +2216,7 @@ class BuildAmberSystems(BuildSystems):
 
         rescode = self.manager.retrieve_rescode(molecule_name)
 
-        file_content = f"""source leaprc.gaff
-             source leaprc.water.fb3
-             source leaprc.protein.ff14SB
-
-             loadamberprep {molecule_prepi_file}
+        file_content = f"""loadamberprep {molecule_prepi_file}
              loadamberparams {molecule_frcmod_file}
 
              list
