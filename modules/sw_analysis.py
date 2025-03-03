@@ -830,12 +830,13 @@ class Analysis:
         # Labels and formatting
         plt.xlabel('Temperature (K)')
         plt.ylabel('Average Density (g/mL)')
-        plt.title('Average Density vs Temperature with Piecewise Linear Fit')
+        plt.title(f'Density vs temperature for {universe.masterclass.system_name}')
         plt.legend()
         plt.grid(True)
     
         # Show the plot
         plt.show()
+        return(best_breaks[1:-1])
         
 
 class universe_coord_extraction():
