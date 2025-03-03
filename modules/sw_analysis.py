@@ -26,6 +26,7 @@ from MDAnalysis.analysis.polymer import PersistenceLength
 from MDAnalysis.analysis import polymer
 
 import pandas as pd
+import pwlf
 
 import warnings
 warnings.filterwarnings("ignore", message="DCDReader currently makes independent timesteps")
@@ -773,6 +774,69 @@ class Analysis:
         delta_V = V1 * integral_alpha  # Integrated expansion effect
     
         return delta_V
+
+    @staticmethod
+    def plot_tg(universe):
+        df = universe.data
+    
+        # Create bins for temperature with 20 K intervals
+        bins = pd.cut(df['Temperature (K)'], bins=range(300, 720, 20))
+    
+        # Compute the average density per bin
+        average_density = df.groupby(bins)['Density (g/mL)'].mean()
+        temp_midpoints = average_density.index.categories.mid
+    
+        # Use pwlf for piecewise linear fitting with automatic segment selection
+        pwlf_model = pwlf.PiecewiseLinFit(temp_midpoints, average_density)
+    
+        # Determine the optimal number of segments using AIC (Akaike Information Criterion)
+        max_segments = 5  # Limit to prevent overfitting
+        best_segments = 1
+        best_aic = float('inf')
+        best_breaks = None
+    
+        for n in range(2, max_segments + 1):
+            breaks = pwlf_model.fit(n)
+            aic = pwlf_model.ssr + 2 * n  # AIC approximation
+            if aic < best_aic:
+                best_aic = aic
+                best_segments = n
+                best_breaks = breaks
+    
+        # Fit using the optimal number of segments
+        pwlf_model.fit(best_segments)
+    
+        # Get the equations of the linear segments
+        equations = []
+        for i in range(best_segments):
+            slope, intercept = pwlf_model.slopes[i], pwlf_model.intercepts[i]
+            equations.append(f'y = {slope:.3f}x + {intercept:.3f}')
+    
+        # Print segment equations and breakpoints
+        for i, eq in enumerate(equations):
+            print(f'Segment {i + 1}: {eq}')
+        print(f'Breakpoints at: {best_breaks[1:-1]} K')
+    
+        # Plot the data
+        plt.plot(temp_midpoints, average_density, 'o', label='Average Density')
+        predicted_density = pwlf_model.predict(temp_midpoints)
+        plt.plot(temp_midpoints, predicted_density, 'r-', label=f'Piecewise Fit')
+    
+        # Plot the breakpoints
+        for bp in best_breaks[1:-1]:  # Ignore first and last since they are dataset bounds
+            plt.axvline(bp, linestyle='--', color='black', alpha=0.6)
+            plt.text(bp, min(average_density), f'{bp:.2f} K', rotation=90, verticalalignment='bottom')
+    
+        # Labels and formatting
+        plt.xlabel('Temperature (K)')
+        plt.ylabel('Average Density (g/mL)')
+        plt.title('Average Density vs Temperature with Piecewise Linear Fit')
+        plt.legend()
+        plt.grid(True)
+    
+        # Show the plot
+        plt.show()
+        
 
 class universe_coord_extraction():
     # This class can extract coordinates and atom types of from mdanalysis universes and can write them to xyz files
