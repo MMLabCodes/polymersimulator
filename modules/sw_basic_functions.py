@@ -204,3 +204,50 @@ def remove_conect_master_lines(file_path):
 def volume_model(T, a, b, c):
     # used for predicting expansion of a material
     return a + b*T + c*T**2
+
+# Define atomic weights for common elements in PDB files
+ATOMIC_WEIGHTS = {
+    "H": 1.008, "C": 12.011, "N": 14.007, "O": 15.999, "P": 30.974, "S": 32.06,
+    "Cl": 35.45, "Na": 22.99, "K": 39.10, "Ca": 40.08, "Mg": 24.305, "Fe": 55.845, "F":19
+}
+
+# Extracts element symbol from a PDB line intelligently
+def get_element_from_pdb_line(line):
+    """ Extracts atomic element from a PDB line using multiple methods. """
+    element = line[76:78].strip()  # Try the standard element column first
+
+    if not element or element not in ATOMIC_WEIGHTS:
+        atom_name = line[12:16].strip()  # Extract atomic name (cols 13-16)
+        
+        # Infer element from atomic name (handling multi-character elements like 'CL', 'CA')
+        possible_element = atom_name[:2].capitalize() if atom_name[:2].capitalize() in ATOMIC_WEIGHTS else atom_name[0]
+        
+        if possible_element in ATOMIC_WEIGHTS:
+            element = possible_element
+
+    return element if element in ATOMIC_WEIGHTS else None  # Ensure it's valid
+
+def count_elements_in_pdb(pdb_filepath):
+    element_counts = {}
+
+    with open(pdb_filepath, "r") as pdb_file:
+        for line in pdb_file:
+            if line.startswith(("ATOM", "HETATM")):  # Look for atomic records
+                element = get_element_from_pdb_line(line)
+                if element:
+                    element_counts[element] = element_counts.get(element, 0) + 1
+
+    return element_counts
+
+def calculate_molecular_weight(pdb_filepath):
+    if not os.path.exists(pdb_filepath):
+        raise FileNotFoundError(f"File '{pdb_filepath}' not found!")
+
+    element_counts = count_elements_in_pdb(pdb_filepath)
+    
+    if not element_counts:
+        print("Warning: No valid elements found in the PDB file!")
+    
+    molecular_weight = sum(ATOMIC_WEIGHTS[el] * count for el, count in element_counts.items())
+
+    return molecular_weight, element_counts
