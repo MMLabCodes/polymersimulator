@@ -1,6 +1,7 @@
 from rdkit import Chem
 from rdkit.Chem import Draw, AllChem
 import math
+import os
 
 def vol_from_smiles(smiles):
     mol = Chem.AddHs(Chem.MolFromSmiles(smiles))
