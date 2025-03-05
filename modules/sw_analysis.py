@@ -504,7 +504,7 @@ class Analysis:
     def plot_end_to_end_dists_5_5_array(universe_object, plot=False):
         dists = []
         for i in range(len(universe_object.masterclass.poly_sel_dict)):
-            poly = universe_object.select_polymer("Polymer_" + str(i+1))
+            poly = poly_universe_object.select_polymer("Polymer_" + str(i+1))
             dist = Analysis.calc_end_to_end_dist(poly)
             dists.append(dist)
         if plot == False:
@@ -836,7 +836,8 @@ class Analysis:
     
         # Show the plot
         plt.show()
-        return(best_breaks[1:-1])
+        return(float(f'{best_breaks[1:-1][0]:.2f}'))
+
         
 
 class universe_coord_extraction():
