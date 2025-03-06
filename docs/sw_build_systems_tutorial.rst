@@ -506,6 +506,28 @@ The parameter files of this system can be obtained for simulation using the same
    print(f"The topology file for {system_name} is {top}")
    print(f"The coordinate file for {system_name} is {coord}")
 
+
+
+Building copolymers - solvated systems
+--------------------------------------
+
+For building copolymers (where a single copolymer is solvated) the function is exaclty the same for building unique//repeating copolymer patterns. 
+However, we add an extra argument - **solvated=True or False**. The examples from above will be shown below with this new argument.
+
+.. code-block:: python
+	
+   system_name = builder.gen_copolymer_pdb_and_params("AB", ["3HB_trimer", "3HV_trimer"], 10, solvate=True)
+
+This will output a system of the solvated system with the same name but with the additionaly tag *_wat_solv_{box_radius}*. Of course the box radius acts the same
+as before, but instead of a polymer with an empty periodic box around the polymer the box will be full of TIP3P water.
+
+An example for a polymer with a unique pattern is also shown below.
+
+
+.. code-block:: python
+	
+   system_name = builder.gen_copolymer_pdb_and_params("ACCBACACBBACBAC", ["3HB_trimer", "3HV_trimer", "5HV_trimer"], 15, solvate=True)
+
 Other
 -----
 
