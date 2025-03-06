@@ -851,7 +851,7 @@ class BuildAmberSystems(BuildSystems):
             print("Exception:", e)
         return(pdb_filepath, prmtop_filepath, rst_filepath)
         
-    def gen_copolymer_pdb_and_params(self, pattern, base_trimers, number_of_units, forcefield=None, box_radius=None):
+    def gen_copolymer_pdb_and_params(self, pattern, base_trimers, number_of_units, forcefield=None, box_radius=None, solvate=False):
         # Check base_trimers were passed as a list
         if isinstance(base_trimers, list):
             pass
@@ -877,10 +877,13 @@ class BuildAmberSystems(BuildSystems):
             forcefield = "gaff"
         else:
             forcefield = forcefield
-            
-        
+                 
         # Create the output dircotry and name the system
-        file_subtype = "_copolymer_" + pattern
+        if solvate == False:
+            file_subtype = "_copolymer_" + pattern
+        if solvate == True:
+            file_subtype = "_copolymer_" + pattern + f"_wat_solv_{box_radius}"
+            
         copolymer_name = "_".join([item.split("_")[0] for item in base_trimers]) + "_" + str(number_of_units) + file_subtype 
         print(copolymer_name)  
     
@@ -958,30 +961,56 @@ class BuildAmberSystems(BuildSystems):
         copolymer_command = "{" + copolymer_pattern + "}"
         print(copolymer_command)
 
-        file_content = f"""source leaprc.{forcefield}
+        if solvate == False:
+            file_content = f"""source leaprc.{forcefield}
 
-            loadamberprep {head_prepi_filepaths[0]}
-            loadamberprep {head_prepi_filepaths[1]}
-            loadamberprep {head_prepi_filepaths[2]}
-            loadamberprep {main_prepi_filepaths[0]}
-            loadamberprep {main_prepi_filepaths[1]}
-            loadamberprep {main_prepi_filepaths[2]}
-            loadamberprep {tail_prepi_filepaths[0]}
-            loadamberprep {tail_prepi_filepaths[1]}
-            loadamberprep {tail_prepi_filepaths[2]}
+                loadamberprep {head_prepi_filepaths[0]}
+                loadamberprep {head_prepi_filepaths[1]}
+                loadamberprep {head_prepi_filepaths[2]}
+                loadamberprep {main_prepi_filepaths[0]}
+                loadamberprep {main_prepi_filepaths[1]}
+                loadamberprep {main_prepi_filepaths[2]}
+                loadamberprep {tail_prepi_filepaths[0]}
+                loadamberprep {tail_prepi_filepaths[1]}
+                loadamberprep {tail_prepi_filepaths[2]}
 
-            loadamberparams {base_trimer_frcmods[0]}
-            loadamberparams {base_trimer_frcmods[1]}
-            loadamberparams {base_trimer_frcmods[2]}
+                loadamberparams {base_trimer_frcmods[0]}
+                loadamberparams {base_trimer_frcmods[1]}
+                loadamberparams {base_trimer_frcmods[2]}
 
-            list
+                list
 
-            polymer = sequence {copolymer_command}
-            setBox polymer centers {box_radius}
-            saveamberparm polymer {prmtop_path} {rst_path}
-            savepdb polymer {pdb_path}
-            quit
-            """
+                polymer = sequence {copolymer_command}
+                setBox polymer centers {box_radius}
+                saveamberparm polymer {prmtop_path} {rst_path}
+                savepdb polymer {pdb_path}
+                quit
+                """
+        if solvate == True:
+            file_content = f"""source leaprc.{forcefield}
+
+                loadamberprep {head_prepi_filepaths[0]}
+                loadamberprep {head_prepi_filepaths[1]}
+                loadamberprep {head_prepi_filepaths[2]}
+                loadamberprep {main_prepi_filepaths[0]}
+                loadamberprep {main_prepi_filepaths[1]}
+                loadamberprep {main_prepi_filepaths[2]}
+                loadamberprep {tail_prepi_filepaths[0]}
+                loadamberprep {tail_prepi_filepaths[1]}
+                loadamberprep {tail_prepi_filepaths[2]}
+
+                loadamberparams {base_trimer_frcmods[0]}
+                loadamberparams {base_trimer_frcmods[1]}
+                loadamberparams {base_trimer_frcmods[2]}
+
+                list
+
+                polymer = sequence {copolymer_command}
+                solvatebox polymer TIP3PBOX {box_radius}
+                saveamberparm polymer {prmtop_path} {rst_path}
+                savepdb polymer {pdb_path}
+                quit
+                """            
 
         with open(intleap_path, 'w') as file:
             file.write(file_content)
@@ -1091,15 +1120,15 @@ class BuildAmberSystems(BuildSystems):
             water_model = "TIP3PBOX"
         else:
             water_model = water_model
-        
-        output_dir = os.path.join(self.manager.systems_dir, (polymer_name + "_wat_solv"))
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
 
         file_subtype = "_wat_solv"
         filename = polymer_name + file_subtype + f"_{buffer}"
         intleap_path = filename + ".intleap"
 
+        output_dir = os.path.join(self.manager.systems_dir, (filename))
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+        
         prmtop_filepath = os.path.join(output_dir, filename + ".prmtop")
         rst_filepath = os.path.join(output_dir, filename + ".rst7")
         pdb_output = os.path.join(output_dir, filename + ".pdb")
