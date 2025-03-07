@@ -524,7 +524,7 @@ class BuildAmberSystems(BuildSystems):
         subprocess.run(antechamber_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         return(ac_name)
 
-    def gen_prepin_files(self, molecule_name):
+    def gen_polymerprepin_files(self, molecule_name):
         # NOTE: this function is for generating prepin files of polymers, for single molecules, please use 'gen_prepin_files_single_mol'
         if molecule_name == None:
             print("Please provide 1 argument as follows: gen_prepin_files(molecule_name)")
