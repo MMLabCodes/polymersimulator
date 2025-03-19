@@ -667,12 +667,13 @@ class complex_fluid_model_builder:
         pass
 
     @staticmethod
-    def generate_packmol_bio_oil_cube(model_dirs, model, tolerance=None, filetype=None, volume_scalar=None): # csv_name (i.e. pine bark phenolic), molecules selected by model generation, model type
+    def generate_packmol_bio_oil_cube(model_dirs, model, tolerance=None, filetype=None, volume_scalar=None, molecule_scalar=None): # csv_name (i.e. pine bark phenolic), molecules selected by model generation, model type
         total_volume = model.min_vol_for_sim
-        if volume_scalar == None:
-            volume_scalar = 1.5
-        else:
-            volume_scalar = volume_scalar
+        
+        volume_scalar = 1.5 if volume_scalar is None else volume_scalar
+
+        molecule_scalar = 1 if molecule_scalar is None else molecule_scalar
+        
         size = int((math.pow(total_volume, (1/3))) * volume_scalar) # Note this is the side of one length of the box
 
         ## NEED A CLAUSE TO ENSURE BOX length is bigger than the longest molecule ##
@@ -699,9 +700,9 @@ class complex_fluid_model_builder:
          
             name = "structure " + model_dirs.molecules_dir + f"/{name}/{name}.pdb" 
             if ratio == False:
-                number = "	" + "number " + str(1)
+                number = "	" + "number " + str(1*molecule_scalar)
             else:
-                number = "	" + "number " + str(int(total_mols_in_model*ratio))     
+                number = "	" + "number " + str((int(total_mols_in_model*ratio))*molecule_scalar)    
             cube = "	inside cube 0. 0. 0. " + str(size+5) + "."
             end = "end structure"
             lines.extend([name, number, cube, end])
