@@ -667,9 +667,13 @@ class complex_fluid_model_builder:
         pass
 
     @staticmethod
-    def generate_packmol_bio_oil_cube(model_dirs, model, tolerance=None, filetype=None): # csv_name (i.e. pine bark phenolic), molecules selected by model generation, model type
+    def generate_packmol_bio_oil_cube(model_dirs, model, tolerance=None, filetype=None, volume_scalar=None): # csv_name (i.e. pine bark phenolic), molecules selected by model generation, model type
         total_volume = model.min_vol_for_sim
-        size = int((math.pow(total_volume, (1/3))) * 1.5) # Note this is the side of one length of the box
+        if volume_scalar == None:
+            volume_scalar = 1.5
+        else:
+            volume_scalar = volume_scalar
+        size = int((math.pow(total_volume, (1/3))) * volume_scalar) # Note this is the side of one length of the box
 
         ## NEED A CLAUSE TO ENSURE BOX length is bigger than the longest molecule ##
 
