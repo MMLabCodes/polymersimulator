@@ -37,7 +37,7 @@ def initialise_poly_analysis(manager, system_name, base_molecule_name, poly_len,
     '''
     sim_avail = manager.simulations_avail(system_name)
     masterclass = master_poly_anal(manager, system_name, base_molecule_name, sim_avail[sim_index], poly_len)
-    universe = Universe(masterclass, 'temp_ramp_cool', '.dcd')
+    universe = poly_Universe(masterclass, 'temp_ramp_cool', '.dcd')
     return(universe)
 
 def initialise_bio_oil_analysis(manager, system_name, sim_index=0):
@@ -47,7 +47,7 @@ def initialise_bio_oil_analysis(manager, system_name, sim_index=0):
     residue_codes = complex_fluid_model_builder.extract_unique_rescodes(masterclass.min_filepath)
     molecule_names = complex_fluid_model_builder.find_matching_molecules(residue_codes, complex_fluid_model_builder.load_molecule_list(manager))
     molecule_dictionary =  dict(zip(molecule_names, residue_codes))
-    universe = bio_oil_Universe(masterclass, 'prod', molecule_dictionary)
+    universe = bio_oil_Universe(masterclass, '1_atm', molecule_dictionary)
     return(universe)
 
 class initialise():
@@ -249,7 +249,7 @@ class poly_Universe(Universe):
 class bio_oil_Universe(Universe):
     def __init__(self, master_anal, sim_stage, molecule_dictionary, traj_format=None):
         if traj_format is None:
-            self.traj_format = ".pdb"
+            self.traj_format = ".dcd"
         else:
             if traj_format != ".pdb" and traj_format != ".dcd":
                 print(f"{traj_format} is not supported")
@@ -504,7 +504,7 @@ class Analysis:
     def plot_end_to_end_dists_5_5_array(universe_object, plot=False):
         dists = []
         for i in range(len(universe_object.masterclass.poly_sel_dict)):
-            poly = poly_universe_object.select_polymer("Polymer_" + str(i+1))
+            poly = universe_object.select_polymer("Polymer_" + str(i+1))
             dist = Analysis.calc_end_to_end_dist(poly)
             dists.append(dist)
         if plot == False:
