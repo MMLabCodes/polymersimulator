@@ -32,31 +32,67 @@ import warnings
 warnings.filterwarnings("ignore", message="DCDReader currently makes independent timesteps")
 
 def initialise_poly_analysis(manager, system_name, base_molecule_name, poly_len, sim_index=0):
-    '''
-    This function will require an update as it only parses one type of simulation stage at the minute
-    '''
+    """
+    Initializes polymer analysis by setting up a molecular dynamics universe.
+    
+    Parameters:
+    manager : object
+        Manages simulation files and data.
+    system_name : str
+        Name of the system being analyzed.
+    base_molecule_name : str
+        Name of the base polymer molecule.
+    poly_len : int
+        Length of the polymer chains.
+    sim_index : int, optional
+        Index of the simulation stage to use (default is 0).
+    
+    Returns:
+    poly_Universe
+        An initialized polymer universe for analysis.
+    """
     sim_avail = manager.simulations_avail(system_name)
     masterclass = master_poly_anal(manager, system_name, base_molecule_name, sim_avail[sim_index], poly_len)
-    universe = poly_Universe(masterclass, 'temp_ramp_cool', '.dcd')
-    return(universe)
+    return poly_Universe(masterclass, 'temp_ramp_cool', '.dcd')
 
 def initialise_bio_oil_analysis(manager, system_name, sim_index=0):
-
+    """
+    Initializes bio-oil analysis by setting up a molecular dynamics universe.
+    
+    Parameters:
+    manager : object
+        Manages simulation files and data.
+    system_name : str
+        Name of the system being analyzed.
+    sim_index : int, optional
+        Index of the simulation stage to use (default is 0).
+    
+    Returns:
+    bio_oil_Universe
+        An initialized bio-oil universe for analysis.
+    """
     sim_avail = manager.simulations_avail(system_name)
     masterclass = master_bio_oil_anal(manager, system_name, sim_avail[sim_index])
     residue_codes = complex_fluid_model_builder.extract_unique_rescodes(masterclass.min_filepath)
     molecule_names = complex_fluid_model_builder.find_matching_molecules(residue_codes, complex_fluid_model_builder.load_molecule_list(manager))
-    molecule_dictionary =  dict(zip(molecule_names, residue_codes))
-    universe = bio_oil_Universe(masterclass, '1_atm', molecule_dictionary)
-    return(universe)
+    molecule_dictionary = dict(zip(molecule_names, residue_codes))
+    return bio_oil_Universe(masterclass, 'prod', molecule_dictionary)
 
-class initialise():
-    def __init__():
+class initialise:
+    """Base class for initializing and grouping simulation files."""
+    
+    def __init__(self):
         pass
 
     def group_files(self):
+        """
+        Groups simulation files based on predefined simulation steps.
+        
+        Returns:
+        dict
+            Dictionary mapping simulation steps to lists of corresponding files.
+        """
         grouped_files = defaultdict(list)
-
         sim_step_strings = ["1_atm", "temp_ramp_heat", "temp_ramp_cool", "min", "prod"]
 
         for file in os.listdir(self.simulation_directory):
@@ -65,10 +101,22 @@ class initialise():
                 for string in sim_step_strings:
                     if string in base_name:
                         grouped_files[string].append(file)
-
-        return(grouped_files)
+        return grouped_files
 
 class master_bio_oil_anal(initialise):
+    """
+    Class for managing bio-oil molecular dynamics simulations.
+
+    Attributes:
+        manager: Object responsible for handling file operations.
+        system_name (str): Name of the system being analyzed.
+        topology_file (str): Path to the topology file.
+        simulation_directory (str): Directory where simulation files are stored.
+        simulation_files (dict): Grouped simulation files categorized by stage.
+        min_filepath (str): Filepath for the minimization stage.
+        simulation_stages (list): List of simulation stages.
+    """
+
     def __init__(self, manager, system_name, simulation_directory):
         self.manager = manager
         self.system_name = system_name
@@ -79,195 +127,319 @@ class master_bio_oil_anal(initialise):
         self.simulation_stages = list(self.simulation_files.keys())
 
 class master_poly_anal(initialise):
+    """
+    Class for analyzing polymer molecular dynamics simulations.
+
+    Attributes:
+        manager: Object responsible for handling file operations.
+        system_name (str): Name of the system being analyzed.
+        base_molecule_name (str): Base molecule identifier.
+        topology_file (str): Path to the topology file.
+        simulation_directory (str): Directory where simulation files are stored.
+        extracted_poly_coords_dir (str): Directory for extracted polymer coordinates.
+        poly_dft_input_dir (str): Directory for polymer DFT input files.
+        poly_dft_output_dir (str): Directory for polymer DFT output files.
+        simulation_files (dict): Grouped simulation files categorized by stage.
+        min_filepath (str): Filepath for the minimization stage.
+        base_pdb (str): Path to the base polymer structure file.
+        base_poly_vol (float): Estimated volume of the base polymer.
+        poly_length (int, optional): Length of polymer chains (if applicable).
+        residue_codes (set): Unique residue codes in the system.
+        system_vol (float, optional): Total system volume if polymer length is provided.
+        simulation_stages (list): List of simulation stages.
+    """
+
     def __init__(self, manager, system_name, base_molecule_name, simulation_directory, poly_length=None):
+        """
+        Initializes the master_poly_anal class.
+
+        Args:
+            manager: Object responsible for handling file operations.
+            system_name (str): Name of the system being analyzed.
+            base_molecule_name (str): Base molecule identifier.
+            simulation_directory (str): Path to the simulation directory.
+            poly_length (int, optional): Length of polymer chains (default: None).
+        """
         self.manager = manager
         self.polymer_code = base_molecule_name.split("_")[0]
         self.system_name = system_name
         self.base_molecule_name = base_molecule_name
         self.topology_file = self.manager.load_amber_filepaths(system_name)[0]
         self.simulation_directory = simulation_directory
-        self.extracted_poly_coords_dir = os.path.join(self.simulation_directory, "extracted_poly_coords")
-        if not os.path.exists(self.extracted_poly_coords_dir):
-            os.makedirs(self.extracted_poly_coords_dir)
-        self.poly_dft_input_dir = os.path.join(self.simulation_directory, "poly_DFT_inputs")
-        if not os.path.exists(self.poly_dft_input_dir):
-            os.makedirs(self.poly_dft_input_dir)
-        self.poly_dft_output_dir = os.path.join(self.simulation_directory, "poly_DFT_outputs")
-        if not os.path.exists(self.poly_dft_output_dir):
-            os.makedirs(self.poly_dft_output_dir)
+
+        # Create necessary directories if they don't exist
+        for dir_name in ["extracted_poly_coords", "poly_DFT_inputs", "poly_DFT_outputs"]:
+            dir_path = os.path.join(self.simulation_directory, dir_name)
+            os.makedirs(dir_path, exist_ok=True)
+
         self.simulation_files = self.group_files()
         self.min_filepath = os.path.join(self.simulation_directory, self.simulation_files["min"][0])
         self.base_pdb = self.manager.load_pdb_filepath(base_molecule_name)
         self.base_poly_vol = estimated_volume(self.base_pdb)
-        # It is important to note that passing a polymer length is only appropriate where the system contains polymers of the same length
+
+        # Handle polymer length-dependent attributes
         if poly_length is not None:
             self.poly_length = poly_length
-            self.residue_codes = self.calculate_polymers_and_assign_residue_codes(self.min_filepath, self.poly_length)[2]
-            self.poly_sel_dict = self.calculate_polymers_and_assign_residue_codes(self.min_filepath, self.poly_length)[1]
+            num_polymers, self.poly_sel_dict, self.residue_codes = self.calculate_polymers_and_assign_residue_codes(
+                self.min_filepath, self.poly_length
+            )
             self.number_of_polymers = len(self.poly_sel_dict)
-            self.system_vol = self.base_poly_vol*self.number_of_polymers
+            self.system_vol = self.base_poly_vol * self.number_of_polymers
         else:
-            self.poly_length = None 
-            self.residue_codes = self.extract_rescodes_and_resnums(self.min_filepath)[1]
+            self.poly_length = None
+            _, self.residue_codes = self.extract_rescodes_and_resnums(self.min_filepath)
             self.system_vol = None
+
         self.simulation_stages = list(self.simulation_files.keys())
 
     def extract_rescodes_and_resnums(self, pdb_file_path):
-        largest_residue_number = None  # Variable to track the largest residue number
-        unique_residue_codes = set()    # Set to hold unique residue codes
+        """
+        Extracts unique residue codes and finds the highest residue number from a PDB file.
+
+        Args:
+            pdb_file_path (str): Path to the PDB file.
+
+        Returns:
+            tuple: (largest_residue_number, unique_residue_codes)
+                - largest_residue_number (int): The highest residue number found.
+                - unique_residue_codes (set): Set of unique residue codes.
+        """
+        largest_residue_number = None
+        unique_residue_codes = set()
 
         with open(pdb_file_path, 'r') as pdb_file:
             for line in pdb_file:
-                # Parse only lines that start with "ATOM" or "HETATM"
-                if line.startswith("ATOM") or line.startswith("HETATM"):
-                    # Extract the residue number (position 22-26)
-                    residue_number = int(line[22:26].strip())
-                    # Extract the residue code (position 17-20)
-                    residue_code = line[17:20].strip()
+                if line.startswith(("ATOM", "HETATM")):
+                    residue_number = int(line[22:26].strip())  # Extract residue number
+                    residue_code = line[17:20].strip()  # Extract residue code
 
-                    # Update the largest residue number if this one is larger
+                    # Update the largest residue number
                     if largest_residue_number is None or residue_number > largest_residue_number:
                         largest_residue_number = residue_number
                 
-                    # Add the residue code to the set for unique codes
                     unique_residue_codes.add(residue_code)
 
         return largest_residue_number, unique_residue_codes
 
     def calculate_polymers_and_assign_residue_codes(self, pdb_file_path, poly_length):
-        # Find the largest residue number and unique residue codes
-        largest_residue_number, unique_residue_codes = self.extract_rescodes_and_resnums(pdb_file_path)
+        """
+        Assigns residue codes to polymers and determines polymer count.
 
-        # Calculate the number of polymers
+        Args:
+            pdb_file_path (str): Path to the PDB file.
+            poly_length (int): Length of polymer chains.
+
+        Returns:
+            tuple: (num_polymers, polymers_dict, unique_residue_codes)
+                - num_polymers (int): Number of polymers in the system.
+                - polymers_dict (dict): Dictionary mapping polymer names to residue indices.
+                - unique_residue_codes (set): Set of unique residue codes.
+        """
+        largest_residue_number, unique_residue_codes = self.extract_rescodes_and_resnums(pdb_file_path)
         num_polymers = largest_residue_number // poly_length
 
-        # Create a dictionary to hold the polymer residue codes
-        polymers_dict = {}
-
-        # Assign residue codes based on the number of residues per polymer
-        for i in range(num_polymers):
-            # Calculate the start and end residue codes for this polymer
-            start_code = i * poly_length + 1
-            end_code = start_code + poly_length - 1
-            polymers_dict[f'Polymer_{i + 1}'] = list(range(start_code, end_code + 1))
+        # Assign residue indices to polymers
+        polymers_dict = {
+            f'Polymer_{i + 1}': list(range(i * poly_length + 1, (i + 1) * poly_length + 1))
+            for i in range(num_polymers)
+        }
 
         return num_polymers, polymers_dict, unique_residue_codes   
 
-class Universe():
+class Universe:
+    """
+    A class to represent a molecular dynamics universe, handling trajectories, topologies, and data files.
+
+    Attributes:
+        masterclass: An instance of the master analysis class containing simulation details.
+        sim_stage (str): The stage of the simulation (e.g., 'prod', 'min', etc.).
+        traj_format (str): The format of the trajectory file ('.pdb' or '.dcd').
+        topology (str): Path to the topology file.
+        trajectory (str): Path to the trajectory file.
+        universe (MDAnalysis.Universe): MDAnalysis Universe object containing topology and trajectory data.
+        output_filename (str): Output file path for storing results.
+        data_file (str): Path to the associated data file.
+        data (pd.DataFrame): Loaded simulation data.
+    """
+
     def __init__(self, master_anal, sim_stage, traj_format=None):
-        if traj_format is None:
-            self.traj_format = ".pdb"
-        else:
-            if traj_format != ".pdb" and traj_format != ".dcd":
-                print(f"{traj_format} is not supported")
-                print("please enter '.pdb' or '.dcd' format.")
-            else:
-                self.traj_format = traj_format
+        """
+        Initializes the Universe object.
+
+        Args:
+            master_anal: An instance of the master analysis class.
+            sim_stage (str): The stage of the simulation.
+            traj_format (str, optional): The trajectory file format (default is '.pdb').
+        """
+        self.traj_format = traj_format if traj_format in [".pdb", ".dcd"] else ".pdb"
+
+        if traj_format not in [None, ".pdb", ".dcd"]:
+            print(f"Warning: {traj_format} is not supported. Using default format '.pdb'.")
+
         self.sim_stage = sim_stage
         self.masterclass = master_anal
         self.topology = self.masterclass.topology_file
-        # True tells 'select_file' we are searching for the traj
-        self.trajectory = os.path.join(self.masterclass.simulation_directory, self.select_file(True))
+
+        # Load trajectory and data files
+        self.trajectory = os.path.join(self.masterclass.simulation_directory, self.select_file(traj=True))
         self.universe = mda.Universe(self.topology, self.trajectory)
-        self.output_filename = os.path.join(self.masterclass.simulation_directory, self.masterclass.system_name + f"_{self.sim_stage}")
-        # False tells 'select_file' we are searching for the data file
-        self.data_file = os.path.join(self.masterclass.simulation_directory, self.select_file(False))
+        self.output_filename = os.path.join(self.masterclass.simulation_directory, f"{self.masterclass.system_name}_{self.sim_stage}")
+
+        self.data_file = os.path.join(self.masterclass.simulation_directory, self.select_file(traj=False))
         self.data = pd.read_csv(self.data_file)
 
     def select_file(self, traj):
-        if self.sim_stage in self.masterclass.simulation_files:
-            # Filter the files based on the specified extension
-            if traj == True:
-                matching_files = [filename for filename in self.masterclass.simulation_files[self.sim_stage] if filename.endswith(self.traj_format)]
-            if traj == False:
-                matching_files = [filename for filename in self.masterclass.simulation_files[self.sim_stage] if filename.endswith(".txt")]            
-            
-            if matching_files:
-                return matching_files[0]  # Return the first matching file
-            else:
-                return f"No files with extension '{extension}' found for key '{self.sim_key}'."
-        else:
-            return f"Key '{self.sim_stage}' not found in the dictionary."
+        """
+        Selects the appropriate trajectory or data file based on the simulation stage.
+
+        Args:
+            traj (bool): If True, selects a trajectory file; if False, selects a data file.
+
+        Returns:
+            str: The selected filename if found, otherwise an error message.
+        """
+        if self.sim_stage not in self.masterclass.simulation_files:
+            return f"Error: Key '{self.sim_stage}' not found in the simulation files dictionary."
+
+        # Determine the file extension based on the file type
+        ext = self.traj_format if traj else ".txt"
+        matching_files = [f for f in self.masterclass.simulation_files[self.sim_stage] if f.endswith(ext)]
+
+        return matching_files[0] if matching_files else f"Error: No files with extension '{ext}' found for key '{self.sim_stage}'."
 
 class poly_Universe(Universe):
+    """
+    A subclass of Universe specifically designed for handling polymer simulations.
+
+    Attributes:
+        masterclass: An instance of the master analysis class containing polymer simulation details.
+        sim_stage (str): The stage of the simulation (e.g., 'prod', 'min', etc.).
+        traj_format (str): The format of the trajectory file ('.pdb' or '.dcd').
+        topology (str): Path to the topology file.
+        trajectory (str): Path to the trajectory file.
+        universe (MDAnalysis.Universe): MDAnalysis Universe object containing topology and trajectory data.
+        output_filename (str): Output file path for storing results.
+        data_file (str): Path to the associated data file.
+        data (pd.DataFrame): Loaded simulation data.
+    """
+
     def __init__(self, master_anal, sim_stage, traj_format=None):
-        if traj_format is None:
-            self.traj_format = ".pdb"
-        else:
-            if traj_format != ".pdb" and traj_format != ".dcd":
-                print(f"{traj_format} is not supported")
-                print("please enter '.pdb' or '.dcd' format.")
-            else:
-                self.traj_format = traj_format
+        """
+        Initializes the poly_Universe object.
+
+        Args:
+            master_anal: An instance of the master analysis class.
+            sim_stage (str): The stage of the simulation.
+            traj_format (str, optional): The trajectory file format (default is '.pdb').
+        """
+        self.traj_format = traj_format if traj_format in [".pdb", ".dcd"] else ".pdb"
+
+        if traj_format not in [None, ".pdb", ".dcd"]:
+            print(f"Warning: {traj_format} is not supported. Using default format '.pdb'.")
+
         self.sim_stage = sim_stage
         self.masterclass = master_anal
         self.topology = self.masterclass.topology_file
-        # True tells 'select_file' we are searching for the traj
-        self.trajectory = os.path.join(self.masterclass.simulation_directory, self.select_file(True))
+
+        # Load trajectory and data files
+        self.trajectory = os.path.join(self.masterclass.simulation_directory, self.select_file(traj=True))
         self.universe = mda.Universe(self.topology, self.trajectory)
-        self.output_filename = os.path.join(self.masterclass.simulation_directory, self.masterclass.system_name + f"_{self.sim_stage}")
-        # False tells 'select_file' we are searching for the data file
-        self.data_file = os.path.join(self.masterclass.simulation_directory, self.select_file(False))
+        self.output_filename = os.path.join(self.masterclass.simulation_directory, f"{self.masterclass.system_name}_{self.sim_stage}")
+
+        self.data_file = os.path.join(self.masterclass.simulation_directory, self.select_file(traj=False))
         self.data = pd.read_csv(self.data_file)
 
-        
     def select_polymer(self, polymer_name, select_rest=False):
-        # Select the first polymer (Polymer_1)
+        """
+        Selects atoms corresponding to a specified polymer.
+
+        Args:
+            polymer_name (str): The name of the polymer to select.
+            select_rest (bool, optional): If True, selects all atoms *except* the specified polymer (default: False).
+
+        Returns:
+            MDAnalysis.AtomGroup: Selected atoms based on polymer selection criteria.
+        """
         first_polymer_indices = self.masterclass.poly_sel_dict[polymer_name]
 
-        # Convert the list of indices into a selection string
-        if select_rest == False:
-            selection_string = "resid " + " ".join(map(str, first_polymer_indices))
-        if select_rest == True:
-            selection_string = "not resid " + " ".join(map(str, first_polymer_indices))          
-        selected_atoms = self.universe.select_atoms(selection_string)
-
-        return(selected_atoms)
+        # Construct the selection string
+        selection_string = ("not " if select_rest else "") + "resid " + " ".join(map(str, first_polymer_indices))
+        return self.universe.select_atoms(selection_string)
 
     def select_backbone(self, polymer_name):
-        backbone_smarts = ["[O][C][C][O]", "[O][C][C][C][O]", "[O][C][C][C][C][O]", "[O][C][C][C][C][C][O]", "[O][C][C][C][C][C][C][O]",  "[O][C][C][C][C][C][C][C][O]"]
-        
-        # Select the first polymer (Polymer_1)
+        """
+        Selects the polymer backbone based on predefined SMARTS patterns.
+
+        Args:
+            polymer_name (str): The name of the polymer to select.
+
+        Returns:
+            MDAnalysis.AtomGroup or None: The identified backbone atoms, or None if no match is found.
+        """
+        backbone_smarts = [
+            "[O][C][C][O]", "[O][C][C][C][O]", "[O][C][C][C][C][O]",
+            "[O][C][C][C][C][C][O]", "[O][C][C][C][C][C][C][O]", "[O][C][C][C][C][C][C][C][O]"
+        ]
+
         first_polymer_indices = self.masterclass.poly_sel_dict[polymer_name]
         selection_string = "resid " + " ".join(map(str, first_polymer_indices))
         selected_atoms = self.universe.select_atoms(selection_string)
 
-        backbone_results = []
+        # Attempt to match the backbone using predefined SMARTS patterns
         for smarts in backbone_smarts:
-            backbone = selected_atoms.select_atoms("smarts {}".format(smarts))
-            backbone_results.append(backbone)
+            backbone = selected_atoms.select_atoms(f"smarts {smarts}")
+            if backbone.n_atoms > 0:
+                return backbone
 
-        for result in backbone_results:
-            if result.n_atoms == 0:
-                pass
-            else:
-                return(result)
-
-        print("No backbone identified, consider adding a backbone pattern to this functions source code")
-        return(None)
+        print("No backbone identified. Consider adding a new SMARTS pattern to this function.")
+        return None
 
 class bio_oil_Universe(Universe):
+    """
+    A subclass of Universe specifically designed for handling bio-oil molecular dynamics simulations.
+
+    Attributes:
+        masterclass: An instance of the master analysis class containing bio-oil simulation details.
+        sim_stage (str): The stage of the simulation (e.g., 'prod', 'min', etc.).
+        traj_format (str): The format of the trajectory file ('.pdb' or '.dcd').
+        topology (str): Path to the topology file.
+        trajectory (str): Path to the trajectory file.
+        universe (MDAnalysis.Universe): MDAnalysis Universe object containing topology and trajectory data.
+        output_filename (str): Output file path for storing results.
+        data_file (str): Path to the associated data file.
+        data (pd.DataFrame): Loaded simulation data.
+        molecule_dictionary (dict): Dictionary mapping molecule names to their residue codes.
+    """
+
     def __init__(self, master_anal, sim_stage, molecule_dictionary, traj_format=None):
-        if traj_format is None:
-            self.traj_format = ".dcd"
-        else:
-            if traj_format != ".pdb" and traj_format != ".dcd":
-                print(f"{traj_format} is not supported")
-                print("please enter '.pdb' or '.dcd' format.")
-            else:
-                self.traj_format = traj_format
+        """
+        Initializes the bio_oil_Universe object.
+
+        Args:
+            master_anal: An instance of the master analysis class.
+            sim_stage (str): The stage of the simulation.
+            molecule_dictionary (dict): Dictionary of molecule names and corresponding residue codes.
+            traj_format (str, optional): The trajectory file format (default is '.dcd').
+        """
+        self.traj_format = traj_format if traj_format in [".pdb", ".dcd"] else ".dcd"
+
+        if traj_format not in [None, ".pdb", ".dcd"]:
+            print(f"Warning: {traj_format} is not supported. Using default format '.dcd'.")
+
         self.sim_stage = sim_stage
         self.masterclass = master_anal
         self.topology = self.masterclass.topology_file
-        # True tells 'select_file' we are searching for the traj
-        self.trajectory = os.path.join(self.masterclass.simulation_directory, self.select_file(True))
+
+        # Load trajectory and data files
+        self.trajectory = os.path.join(self.masterclass.simulation_directory, self.select_file(traj=True))
         self.universe = mda.Universe(self.topology, self.trajectory)
-        self.output_filename = os.path.join(self.masterclass.simulation_directory, self.masterclass.system_name + f"_{self.sim_stage}")
-        # False tells 'select_file' we are searching for the data file
-        self.data_file = os.path.join(self.masterclass.simulation_directory, self.select_file(False))
+        self.output_filename = os.path.join(self.masterclass.simulation_directory, f"{self.masterclass.system_name}_{self.sim_stage}")
+
+        self.data_file = os.path.join(self.masterclass.simulation_directory, self.select_file(traj=False))
         self.data = pd.read_csv(self.data_file)
+
+        # Store molecule dictionary for reference
         self.molecule_dictionary = molecule_dictionary
-       
         
         
 
