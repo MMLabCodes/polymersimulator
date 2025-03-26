@@ -55,7 +55,7 @@ def initialise_poly_analysis(manager, system_name, base_molecule_name, poly_len,
     masterclass = master_poly_anal(manager, system_name, base_molecule_name, sim_avail[sim_index], poly_len)
     return poly_Universe(masterclass, 'temp_ramp_cool', '.dcd')
 
-def initialise_bio_oil_analysis(manager, system_name, sim_index=0):
+def initialise_bio_oil_analysis(manager, system_name, sim_index=0, sim_step=None):
     """
     Initializes bio-oil analysis by setting up a molecular dynamics universe.
     
@@ -76,7 +76,9 @@ def initialise_bio_oil_analysis(manager, system_name, sim_index=0):
     residue_codes = complex_fluid_model_builder.extract_unique_rescodes(masterclass.min_filepath)
     molecule_names = complex_fluid_model_builder.find_matching_molecules(residue_codes, complex_fluid_model_builder.load_molecule_list(manager))
     molecule_dictionary = dict(zip(molecule_names, residue_codes))
-    return bio_oil_Universe(masterclass, 'prod', molecule_dictionary)
+    if sim_step == None:
+        sim_step = 'prod'
+    return bio_oil_Universe(masterclass, sim_step, molecule_dictionary)
 
 class initialise:
     """Base class for initializing and grouping simulation files."""
