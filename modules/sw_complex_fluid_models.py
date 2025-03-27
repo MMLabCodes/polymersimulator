@@ -454,6 +454,7 @@ class complex_fluid_models:
                 avg_norm_oxy = (oxygen_content - min_oxy) / (max_oxy - min_oxy)
         
             for j in range(len(model.molecules)):
+                # This key on;y exists to to create an alternative calcualtion for those molecules that do not have oxygens
                 if key == "oxy_present":
                     score_value = 1/(1+(math.sqrt((normalized_mws[j]-float(avg_norm_mw))**2 + (normalized_tot_ens[j]-float(avg_norm_tot_en))**2 +(normalized_polars[j]-float(avg_norm_polar))**2 + (normalized_dipoles[j]-float(avg_norm_dipole))**2 +(normalized_chem_hards[j]-float(avg_norm_chem_hard))**2 +(normalized_oxys[j]-float(avg_norm_oxy))**2)))
                 else:
