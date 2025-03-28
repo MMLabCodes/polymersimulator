@@ -73,20 +73,20 @@ To carry out a basic NVT//NPT using the initial minimized system is simple:
 
 .. code-block:: python
 
-   NPT_sim, NPT_sim_data = simulation.basic_NPT(minimized_sim, 1000000, 1.0, 300)
+   NPT_sim, NPT_sim_data = simulation.basic_NPT(minimized_sim, total_steps=1000000, temp=300, pressure=1.0, filename="NPT")
 
 Or for an **NVT_simulation**:
 
 .. code-block:: python
 
-   NVT_sim, NVT_sim_data = simulation.basic_NVT(minimized_sim, 10000000, 300)
+   NVT_sim, NVT_sim_data = simulation.basic_NVT(minimized_sim, total_steps=10000000, temp=300, filename="NVT")
 
 The arguments for the **basic NVT//NPT** simulations are as follows:
 
 .. code-block:: python
 
-   NPT_sim, NPT_sim_data = simulation.basic_NPT(openmm_simulation_object, total_steps, pressure, temperature)
-   NVT_sim, NVT_sim_data = simulation.basic_NVT(openmm_simulation_object, total_steps, temperature)
+   NPT_sim, NPT_sim_data = simulation.basic_NPT(openmm_simulation_object, total_steps, temperature, pressure, filename)
+   NVT_sim, NVT_sim_data = simulation.basic_NVT(openmm_simulation_object, total_steps, temperature, filename)
 
 It is important to note that 2 variable are returned by **basic_NPT//NVT**:
 
@@ -108,8 +108,8 @@ The power of these methods comes from the output being able to be passed straigh
 .. code-block:: python
 
    minimized_sim = simulation.minimize_energy()
-   NPT_sim, NPT_sim_data = simulation.basic_NPT(minimized_sim, 10000, 1.0, 300)
-   NVT_sim, NVT_sim_data = simulation.basic_NVT(NPT_sim, 10000, 300)
+   NPT_sim, NPT_sim_data = simulation.basic_NPT(minimized_sim, total_steps=1000000, temp=300, pressure=1.0, filename="NPT"
+   NVT_sim, NVT_sim_data = simulation.basic_NVT(minimized_sim, total_steps=10000000, temp=300, filename="NVT")
 
 *Note: there are a couple of ways to set the parameters for each step of the simulation. The basic way is where you pass the parameters to each specific function but there are also a set of default parameters that can be changed. Please refer to the section explaining this.*
 
@@ -132,13 +132,13 @@ An example of using this function with the previous example of an NPT_simulation
 
 .. code-block:: python
 
-    heated_sim, heated_sim_data = simulation.thermal_ramp(NPT_sim, True, 20, "NPT", 300, 700, 10000, 1.0)
+    heated_sim, heated_sim_data = simulation.thermal_ramp(NPT_sim, heating=True, quench_rate=20, ensemble="NPT", start_temp=300, max_temp=700, total_steps=10000, pressure=1.0, filename="heating_300_to_700")
 
 There are a lot of numbers in this class method, so lets break down each argument.
 
 .. code-block:: python
 
-    heated_sim, heated_sim_data = simulation.thermal_ramp(openmm_simulation_object, heating, quench_rate, ensemble, low_temp, high_temp, steps, pressure)
+    heated_sim, heated_sim_data = simulation.thermal_ramp(openmm_simulation_object, heating=None, quench_rate=None, ensemble=None, start_temp=None, max_temp=None, total_steps=None, pressure=None, filename=None):
 
 The arguments are:
 
@@ -160,13 +160,13 @@ An example of this function using the previously described **minimized_sim**:
 
 .. code-block:: python
 
-    annealed_sim, annealed_sim_data = simulation.anneal(minimized_sim, 300, 700, 5, 1000, 1000)
+    annealed_sim, annealed_sim_data = simulation.anneal(minimized_sim, start_temp=300, max_temp=700, cycles=5, quench_rate=20, steps_per_cycle=1000, filename="anneal")
 
 The arguments in this simulation are:
 
 .. code-block:: python
 
-   annealed_sim, annealed_sim_data = simulation.anneal(openmm_simulation_object, start_temp, max_temp, cycles, holding_steps, steps_at_temp)
+   annealed_sim, annealed_sim_data = simulation.anneal(openmm_simulation_object, start_temp=None, max_temp=None, cycles=None, quench_rate=None, steps_per_cycle=None, filename=None)
 
 - openmm_simulation_object: an output from another simulation method (i.e. 'minimized_sim', 'NPT_sim' or 'NVT_sim
 - start_temp: the temperature the annealing will start at in kelvin (i.e. 300)
