@@ -492,7 +492,7 @@ class BuildSimulation():
         """Display help information for the minimize_energy method."""
         print(cls.minimize_energy.__doc__)    
      
-    def anneal_NVT(self, simulation, start_temp=None, max_temp=None, cycles=None, quench_rate=None, steps_per_cycle=None):
+    def anneal_NVT(self, simulation, start_temp=None, max_temp=None, cycles=None, quench_rate=None, steps_per_cycle=None, filename=None):
         """
         Function to perform simulated annealing on the provided simulation system.
         
@@ -537,7 +537,10 @@ class BuildSimulation():
         simulation data.
         """
         anneal_start_time = time.time()
-        
+        if filename is None:
+            filename = "_anneal_"
+        if filename is not None:
+            filename = f"_{filename}_"
         if start_temp is None:
             start_temp = self.anneal_parameters[0]
         if max_temp is None:
@@ -576,18 +579,18 @@ class BuildSimulation():
         # Set up reporters
         # PDB trajectory - this is slighlty redundant with the addition of the DCD trajectory, but it is still useful for 
         if self.savepdb_traj == True:
-            output_pdbname = os.path.join(self.output_dir, (self.filename + "_anneal_" + str(self.timestamp) + ".pdb" ))
+            output_pdbname = os.path.join(self.output_dir, (self.filename + filename + str(self.timestamp) + ".pdb" ))
             simulation.reporters.append(app.PDBReporter(output_pdbname, self.reporter_freq))
         
         # DCD trajectory
         #output_dcdname = os.path.join(directories.systems_dir, self.filename, (self.filename + "_anneal"))
-        output_dcdname = os.path.join(self.output_dir, (self.filename + "_anneal_" + str(self.timestamp)))
+        output_dcdname = os.path.join(self.output_dir, (self.filename + filename + str(self.timestamp)))
         dcdWriter = DcdWriter(output_dcdname, self.reporter_freq)
         simulation.reporters.append(dcdWriter.dcdReporter)
     
         # Datawriter - This is a more complete data writer than previously used, the file generated is a comma delimited text file
         #output_dataname = os.path.join(directories.systems_dir, self.filename, (self.filename + "_anneal_data"))
-        output_dataname = os.path.join(self.output_dir, (self.filename + "_anneal_" + str(self.timestamp)))
+        output_dataname = os.path.join(self.output_dir, (self.filename + filename + str(self.timestamp)))
         dataWriter = DataWriter(output_dataname, self.reporter_freq, total_steps)
         simulation.reporters.append(dataWriter.stateDataReporter)
         
@@ -630,7 +633,7 @@ class BuildSimulation():
         self.log_info['Annealing_NVT']['Timestep'] = self.timestep
 
         # Write the final structure to pdb
-        self.final_pdbname = os.path.join(self.output_dir, ("final_anneal_" + self.filename + ".pdb"))
+        self.final_pdbname = os.path.join(self.output_dir, ("final" + filename + self.filename + ".pdb"))
         with open(self.final_pdbname, 'w') as output:
             PDBFile.writeFile(simulation.topology, state.getPositions(), output)
         
@@ -640,7 +643,7 @@ class BuildSimulation():
     def anneal_help(cls):
         """Display help information for the anneal method."""
         print(cls.anneal.__doc__)    
-    def basic_NPT(self, simulation, total_steps=None, temp=None, pressure=None):
+    def basic_NPT(self, simulation, total_steps=None, temp=None, pressure=None, filename=None):
         """
         Function to equilibrate the provided simulation to reach a specified temperature and pressure.
         
@@ -680,8 +683,11 @@ class BuildSimulation():
             of steps. The system's state is updated throughout the equilibration process, and reporters are set up to record 
             trajectory and simulation data.
         """
-        equili_start_time = time.time()
-        
+        equili_start_time = time.time()       
+        if filename is None:
+            filename = "_basic_NPT_"
+        if filename is not None:
+            filename = f"_{filename}_"
         if total_steps is None:
             total_steps = self.total_steps
         if temp is None:
@@ -721,18 +727,18 @@ class BuildSimulation():
         
         # Set up reporters
         if self.savepdb_traj == True:
-            output_pdbname = os.path.join(self.output_dir, (self.filename +  "_" + str(pressure) + "_atm_" + str(self.timestamp) + ".pdb"))
+            output_pdbname = os.path.join(self.output_dir, (self.filename +  "_" + str(pressure) + filename + str(self.timestamp) + ".pdb"))
             simulation.reporters.append(app.PDBReporter(output_pdbname, self.reporter_freq))
     
         # DCD trajectory
         #output_dcdname = os.path.join(directories.systems_dir, self.filename, (self.filename +  "_" + str(pressure) + "_atm_traj.dcd"))
-        output_dcdname = os.path.join(self.output_dir, (self.filename +  "_" + str(pressure) + "_atm_" + str(self.timestamp)))
+        output_dcdname = os.path.join(self.output_dir, (self.filename +  "_" + str(pressure) + filename + str(self.timestamp)))
         dcdWriter = DcdWriter(output_dcdname, self.reporter_freq)
         simulation.reporters.append(dcdWriter.dcdReporter)
     
         # Datawriter - This is a more complete data writer than previously used, the file generated is a comma delimited text file
         #output_dataname = os.path.join(directories.systems_dir, self.filename, (self.filename +  "_" + str(pressure) + "_atm_data"))
-        output_dataname = os.path.join(self.output_dir, (self.filename +  "_" + str(pressure) + "_atm_" + str(self.timestamp)))
+        output_dataname = os.path.join(self.output_dir, (self.filename +  "_" + str(pressure) + filename + str(self.timestamp)))
         dataWriter = DataWriter(output_dataname, self.reporter_freq, total_steps)
         simulation.reporters.append(dataWriter.stateDataReporter)
         simulation.step(total_steps)       
@@ -747,7 +753,7 @@ class BuildSimulation():
         self.log_info['Basic_NPT']['Timestep'] = self.timestep
 
         # Write the final structure to pdb
-        self.final_pdbname = os.path.join(self.output_dir, ("final_" + self.filename + "_" + str(pressure) + "_atm.pdb"))
+        self.final_pdbname = os.path.join(self.output_dir, ("final_" + filename +  self.filename + "_" + str(pressure) + "_atm.pdb"))
         with open(self.final_pdbname, 'w') as output:
             PDBFile.writeFile(simulation.topology, state.getPositions(), output)
             
@@ -758,7 +764,7 @@ class BuildSimulation():
         """Display help information for the equilibrate method."""
         print(cls.equilibrate.__doc__) 
         
-    def basic_NVT(self, simulation, total_steps=None, temp=None):
+    def basic_NVT(self, simulation, total_steps=None, temp=None, filename=None):
         """
         Function to perform a production run simulation with the provided parameters.
         
@@ -795,6 +801,10 @@ class BuildSimulation():
             record trajectory and simulation data.
         """
         prod_start_time = time.time()
+        if filename is None:
+            filename = "_basic_NVT_"
+        if filename is not None:
+            filename = f"_{filename}_"
         if total_steps is None:
             total_steps = self.total_steps
         if temp is None:
@@ -824,18 +834,18 @@ class BuildSimulation():
         # Set up reporters
         # PDB trajectory - this is slighlty redundant with the addition of the DCD trajectory, but it is still useful for 
         if self.savepdb_traj == True:
-            output_pdbname = os.path.join(self.output_dir, (self.filename + "_prod_" + str(self.timestamp) + ".pdb"))
+            output_pdbname = os.path.join(self.output_dir, (self.filename + filename + str(self.timestamp) + ".pdb"))
             simulation.reporters.append(app.PDBReporter(output_pdbname, self.reporter_freq))
         
         # DCD trajectory
         #output_dcdname = os.path.join(directories.systems_dir, self.filename, (self.filename + "_prod_traj"))
-        output_dcdname = os.path.join(self.output_dir, (self.filename + "_prod_" + str(self.timestamp)))
+        output_dcdname = os.path.join(self.output_dir, (self.filename + filename + str(self.timestamp)))
         dcdWriter = DcdWriter(output_dcdname, self.reporter_freq)
         simulation.reporters.append(dcdWriter.dcdReporter)
     
         # Datawriter - This is a more complete data writer than previously used, the file generated is a comma delimited text file
         #output_dataname = os.path.join(directories.systems_dir, self.filename, (self.filename + "_prod_data"))
-        output_dataname = os.path.join(self.output_dir, (self.filename + "_prod_" + str(self.timestamp)))
+        output_dataname = os.path.join(self.output_dir, (self.filename + filename + str(self.timestamp)))
         dataWriter = DataWriter(output_dataname, self.reporter_freq, total_steps)
         simulation.reporters.append(dataWriter.stateDataReporter) 
         simulation.step(total_steps)
@@ -848,12 +858,12 @@ class BuildSimulation():
         self.log_info['Basic_NVT']['Timestep'] = self.timestep
 
         # Write the final structure to pdb
-        self.final_pdbname = os.path.join(self.output_dir, ("final_prod_" + self.filename + ".pdb"))
+        self.final_pdbname = os.path.join(self.output_dir, ("final_" + filename + self.filename + ".pdb"))
         with open(self.final_pdbname, 'w') as output:
             PDBFile.writeFile(simulation.topology, state.getPositions(), output)
         return(simulation, (output_dataname + ".txt"))
         
-    def thermal_ramp(self, simulation, heating, quench_rate, ensemble, start_temp=None, max_temp=None, total_steps=None, pressure=None):
+    def thermal_ramp(self, simulation, heating, quench_rate, ensemble, start_temp=None, max_temp=None, total_steps=None, pressure=None, filename=None):
         """
         Perform a thermal ramp (heating or cooling) on the simulation system.
 
@@ -895,7 +905,10 @@ class BuildSimulation():
             return()
             
         thermal_ramp_start_time = time.time()
-
+        if filename is None:
+            filename = "_thermal_ramp_"
+        if filename is not None:
+            filename = f"_{filename}_"
         if start_temp is None:
             start_temp = self.anneal_parameters[0]
         if max_temp is None:
@@ -931,7 +944,7 @@ class BuildSimulation():
         simulation.context.setPositions(xyz)
 
         method = "heat" if heating==True else "cool"
-        output_filename = self.filename + "_temp_ramp_" + method + f"_{str(start_temp)}_{str(max_temp)}_" + str(self.timestamp)
+        output_filename = self.filename + filename + method + str(self.timestamp)
         
         # Set up reporters
         # PDB trajectory - this is slighlty redundant with the addition of the DCD trajectory, but it is still useful for 
@@ -982,7 +995,7 @@ class BuildSimulation():
 
         return(simulation, (output_dataname + ".txt"))
         
-    def strain(self, simulation, total_steps=None, temp=None):
+    def strain(self, simulation, total_steps=None, temp=None, filename=None):
         """
         Function to perform a production run simulation with the provided parameters.
         
@@ -1019,6 +1032,10 @@ class BuildSimulation():
             record trajectory and simulation data.
         """
         prod_start_time = time.time()
+        if filename is None:
+            filename = "_strain_"
+        if filename is not None:
+            filename = f"_{filename}_"
         if total_steps is None:
             total_steps = self.total_steps
         if temp is None:
@@ -1050,18 +1067,18 @@ class BuildSimulation():
         # Set up reporters
         # PDB trajectory - this is slighlty redundant with the addition of the DCD trajectory, but it is still useful for 
         if self.savepdb_traj == True:
-            output_pdbname = os.path.join(self.output_dir, (self.filename + "_strain_" + str(self.timestamp) + ".pdb"))
+            output_pdbname = os.path.join(self.output_dir, (self.filename + filename + str(self.timestamp) + ".pdb"))
             simulation.reporters.append(app.PDBReporter(output_pdbname, self.reporter_freq))
         
         # DCD trajectory
         #output_dcdname = os.path.join(directories.systems_dir, self.filename, (self.filename + "_prod_traj"))
-        output_dcdname = os.path.join(self.output_dir, (self.filename + "_strain_" + str(self.timestamp)))
+        output_dcdname = os.path.join(self.output_dir, (self.filename + filename + str(self.timestamp)))
         dcdWriter = DcdWriter(output_dcdname, self.reporter_freq)
         simulation.reporters.append(dcdWriter.dcdReporter)
     
         # Datawriter - This is a more complete data writer than previously used, the file generated is a comma delimited text file
         #output_dataname = os.path.join(directories.systems_dir, self.filename, (self.filename + "_prod_data"))
-        output_dataname = os.path.join(self.output_dir, (self.filename + "_strain_" + str(self.timestamp)))
+        output_dataname = os.path.join(self.output_dir, (self.filename + filename + str(self.timestamp)))
         dataWriter = DataWriter(output_dataname, self.reporter_freq, total_steps)
         simulation.reporters.append(dataWriter.stateDataReporter) 
         
@@ -1430,6 +1447,7 @@ class BuildSimulation():
             writer.writeheader()
             for section, info in self.log_info.items():
                 writer.writerow({'Section': section, **info})
+                
 class AmberSimulation(BuildSimulation):
     """
     A class representing an AMBER molecular dynamics simulation.
