@@ -462,6 +462,48 @@ class Analysis:
 
     @staticmethod
     def calc_free_volume(universe, plot=None, bins=25, from_multiple=False):
+            """
+        Calculate the free volume of a system over a trajectory and optionally analyze its dependence on temperature.
+
+        Parameters:
+        -----------
+        universe : MDAnalysis.Universe
+            The MDAnalysis Universe object containing trajectory data and system parameters.
+        plot : {None, False, "multiple"}, optional
+            - If None or False (default), returns the average free volume over the trajectory.
+            - If "multiple", returns binned temperature and free volume data without plotting.
+            - Otherwise, generates and saves a scatter plot of binned free volume vs. temperature.
+        bins : int, optional
+            The number of bins for temperature-based data grouping (default: 25).
+        from_multiple : bool, optional
+            Reserved parameter, currently unused.
+
+        Returns:
+        --------
+        float
+            If `plot` is None or False, returns the average free volume over the trajectory.
+        tuple of (list, list)
+            If `plot` is "multiple" or plotting is enabled, returns two lists:
+            - `binned_temperatures`: The average temperature in each bin.
+            - `binned_volumes`: The corresponding average free volume in each bin.
+
+        Notes:
+        ------
+        - The free volume is computed as the difference between the total simulation box volume and 
+          the system's intrinsic volume (`universe.masterclass.system_vol`).
+        - If a thermal ramping protocol was used, reporting the average free volume may be misleading.
+        - When plotting is enabled, the function fits polynomial curves (degree 1 to 3) to the binned data 
+          and selects the best fit based on the R² score.
+        - The scatter plot and best-fit line are saved as `"Binned_Free_Vol_vs_Temp_BestFit.png"` 
+          in the simulation directory.
+
+        Example Usage:
+        --------------
+        >>> avg_volume = calc_free_volume(universe)
+        >>> temps, volumes = calc_free_volume(universe, plot="multiple")
+        >>> calc_free_volume(universe, plot=True)  # Generates and saves a plot
+
+        """
         u = universe.universe
         n_frames = len(u.trajectory)
         free_volumes = []
