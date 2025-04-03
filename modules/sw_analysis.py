@@ -462,7 +462,7 @@ class Analysis:
 
     @staticmethod
     def calc_free_volume(universe, plot=None, bins=25, from_multiple=False):
-            """
+        """
         Calculate the free volume of a system over a trajectory and optionally analyze its dependence on temperature.
 
         Parameters:
@@ -897,78 +897,81 @@ class Analysis:
         if bin_params is None:
             print("Please specify the bin parameters for your system: [start_temp, target_temp, temp_increments]")
             return None, None
-    
+
         # Set title
         graph_title = f"{universe_object.masterclass.system_name}_{universe_object.sim_stage} vol. vs temp."
-    
+
         # Define dataframe
         df = universe_object.data
-    
+
         # Define bin edges
         bin_width = bin_params[2]  # Temperature bin size
         bins = np.arange(bin_params[0], bin_params[1] + bin_width, bin_width)
-    
+
         # Assign temperature values to bins
         df["Temp_Bin"] = pd.cut(df["Temperature (K)"], bins, labels=(bins[:-1] + bin_width / 2))
-    
+
         # Group by bins and calculate average box volume
         binned_data = df.groupby("Temp_Bin")["Box Volume (nm^3)"].mean().reset_index()
         binned_data["Temp_Bin"] = binned_data["Temp_Bin"].astype(float)
-    
+
         # Extract binned temperature and volume data
         T_bin = binned_data["Temp_Bin"].values
         V_bin = binned_data["Box Volume (nm^3)"].values
-    
 
-    
         fit_equations = {}
         params = None
-    
+
         if fit:
-            if plot==True:
+            if plot == True:
                 plt.figure(figsize=(8, 6))
                 plt.scatter(T_bin, V_bin, marker="o", color="b", label="V(T)")
+        
             # Fit model to data
             params, _ = curve_fit(volume_model, T_bin, V_bin)
             a, b, c = params
-        
+
             # Generate smooth data for plotting
             T_smooth = np.linspace(min(T_bin), max(T_bin), 200)
             V_smooth = volume_model(T_smooth, *params)
-        
+
             # Compute smoothed dV/dT and thermal expansion coefficient α(T)
             dVdT_smooth = b + 2*c*T_smooth
             alpha_smooth = (dVdT_smooth / V_smooth) * 1e4  # Scale factor for visualization
-        
+
             # Compute α(T) at each temperature bin
             dVdT_bin = b + 2*c*T_bin
             alpha_bin = (dVdT_bin / V_bin) * 1e4
-        
+
             # Store fit equations
             fit_equations["Volume Fit"] = f"V(T) = {a:.4f} + {b:.4f}T + {c:.4f}T²"
             fit_equations["Expansion Coefficient Fit"] = f"α(T) = ({b:.4f} + 2*{c:.4f}T) / V(T) * 10⁴"
 
-            if plot==True:
+            if plot == True:
                 # Plot fitted volume curve
                 plt.plot(T_smooth, V_smooth, linestyle="--", color="r", label="Fitted V(T)")
-                plt.xlabel("Temperature (K)")
-                plt.ylabel("Average Box Volume (nm³)")
-                plt.title(graph_title)
+                plt.xlabel("Temperature (K)", fontsize=16)
+                plt.ylabel("Average Box Volume (nm³)", fontsize=16)
+                plt.title(graph_title, fontsize=18)
+                plt.xticks(fontsize=14)
+                plt.yticks(fontsize=14)
                 plt.grid(True)
-                plt.legend()
+                plt.legend(fontsize=14)
                 plt.show()
-        
+
                 # Plot thermal expansion coefficient
                 plt.figure(figsize=(8, 6))
                 plt.scatter(T_bin, alpha_bin, color="b", label="α(T)")
                 plt.plot(T_smooth, alpha_smooth, linestyle="--", color="g", label="Fitted α(T)")
-                plt.xlabel("Temperature (K)")
-                plt.ylabel(r"Thermal Expansion Coefficient α ($\times 10^{-4}$ K⁻¹)")
-                plt.title("Thermal Expansion Coefficient vs Temperature")
+                plt.xlabel("Temperature (K)", fontsize=16)
+                plt.ylabel(r"Thermal Expansion Coefficient α ($\times 10^{-4}$ K⁻¹)", fontsize=16)
+                plt.title("Thermal Expansion Coefficient vs Temperature", fontsize=18)
+                plt.xticks(fontsize=14)
+                plt.yticks(fontsize=14)
                 plt.grid(True)
-                plt.legend()
+                plt.legend(fontsize=14)
                 plt.show()
-    
+
         return fit_equations, params
 
     @staticmethod
