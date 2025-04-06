@@ -1044,12 +1044,14 @@ class Analysis:
         # Plot the breakpoints
         for bp in best_breaks[1:-1]:  # Ignore first and last since they are dataset bounds
             plt.axvline(bp, linestyle='--', color='black', alpha=0.6)
-            plt.text(bp, min(average_density), f'{bp:.2f} K', rotation=90, verticalalignment='bottom')
+            plt.text(bp, min(average_density), f'{bp:.2f} K', rotation=90, verticalalignment='bottom', fontsize=14)
     
         # Labels and formatting
-        plt.xlabel('Temperature (K)')
-        plt.ylabel('Average Density (g/mL)')
-        plt.title(f'Density vs temperature for {universe.masterclass.system_name}')
+        plt.xlabel('Temperature (K)', fontsize=14)
+        plt.ylabel('Average Density (g/mL)', fontsize=14)
+        plt.title(f'Density vs temperature for {universe.masterclass.system_name}', fontsize=16)
+        plt.xticks(fontsize=14)
+        plt.yticks(fontsize=14)
         plt.legend()
         plt.grid(True)
     
