@@ -760,9 +760,9 @@ class BuildSimulation():
         return(simulation, (output_dataname + ".txt"))
     
     @classmethod
-    def equilibrate_help(cls):
+    def basic_NPT_help(cls):
         """Display help information for the equilibrate method."""
-        print(cls.equilibrate.__doc__) 
+        print(cls.basic_NPT.__doc__) 
         
     def basic_NVT(self, simulation, total_steps=None, temp=None, filename=None):
         """
@@ -863,7 +863,7 @@ class BuildSimulation():
             PDBFile.writeFile(simulation.topology, state.getPositions(), output)
         return(simulation, (output_dataname + ".txt"))
         
-    def thermal_ramp(self, simulation, heating, quench_rate, ensemble, start_temp=None, max_temp=None, total_steps=None, pressure=None, filename=None):
+    def thermal_ramp(self, simulation, heating=None, quench_rate=None, ensemble=None, start_temp=None, max_temp=None, total_steps=None, pressure=None, filename=None):
         """
         Perform a thermal ramp (heating or cooling) on the simulation system.
 
@@ -903,7 +903,12 @@ class BuildSimulation():
         else:
             print("Please specify 'NVT' or 'NPT' ensemble for the thermal ramp")
             return()
-            
+        if heating == None:
+            print("Please specifiy 'True' for heating or 'False' for cooling")
+            return()
+        if quench_rate == None:
+            print("Please specify a quench rate as an integer")
+            return()
         thermal_ramp_start_time = time.time()
         if filename is None:
             filename = "_thermal_ramp_"
@@ -922,7 +927,7 @@ class BuildSimulation():
         state = simulation.context.getState(getPositions=True, getEnergy=True, enforcePeriodicBox=True) # Define state object 
         xyz = state.getPositions() # Obtain positions of the particles from previous step
         vx, vy, vz = state.getPeriodicBoxVectors() # Obtain periodc box vectors of the previous step
-        print("Periodic box vectors are: ", vx, vy, vz)
+        #print("Periodic box vectors are: ", vx, vy, vz)
         
         # Set up integrator
         integrator = LangevinIntegrator(start_temp*kelvin, self.friction_coeff/picoseconds, self.timestep*femtoseconds)
