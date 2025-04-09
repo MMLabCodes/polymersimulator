@@ -643,7 +643,7 @@ class BuildSimulation():
     def anneal_help(cls):
         """Display help information for the anneal method."""
         print(cls.anneal.__doc__)    
-    def basic_NPT(self, simulation, total_steps=None, temp=None, pressure=None, filename=None):
+    def basic_NPT(self, simulation, total_steps=None, temp=None, pressure=None, filename=None, save_restart=False):
         """
         Function to equilibrate the provided simulation to reach a specified temperature and pressure.
         
@@ -756,6 +756,9 @@ class BuildSimulation():
         self.final_pdbname = os.path.join(self.output_dir, ("final_" + filename +  self.filename + "_" + str(pressure) + "_atm.pdb"))
         with open(self.final_pdbname, 'w') as output:
             PDBFile.writeFile(simulation.topology, state.getPositions(), output)
+
+        if save_restart == True:
+            self.save_rst(simulation)
             
         return(simulation, (output_dataname + ".txt"))
     
@@ -1103,6 +1106,21 @@ class BuildSimulation():
         #self.log_info['Production']['Temperature'] = temp
         #self.log_info['Production']['Timestep'] = self.timestep
         return(simulation, (output_dataname + ".txt"))
+        
+    def save_rst(self, simulation):
+        import parmed as pmd
+        from simtk import unit
+        # Load original AMBER top and coord into parmed
+        parm = pmd.load_file(self.topology_file, self.coordinates_file)
+        # Final state
+        final_state = simulation.context.getState(getPositions=True, getVelocities=True)
+
+        parm.coordinates = final_state.getPositions(asNumpy=True).value_in_unit(unit.angstroms)
+        parm.velocities = final_state.getVelocities(asNumpy=True).value_in_unit(unit.angstroms/unit.picoseconds)
+    
+        # save rst7
+        rst_filename = os.path.join(self.output_dir, ("final_" + self.filename + ".rst7"))
+        parm.save(rst_filename, format='rst7')
 
     
     @classmethod
@@ -1504,7 +1522,8 @@ class AmberSimulation(BuildSimulation):
         
         # Inherit attributes defined in the parent class and pass directories to the BuildSimulation constructor
         super().__init__(manager, self.filename)
-        
+        self.coordinates_file = coordinates_file
+        self.topology_file = topology_file
         self.amb_coordinates = app.AmberInpcrdFile(coordinates_file)
         self.amb_topology = app.AmberPrmtopFile(topology_file, periodicBoxVectors=self.amb_coordinates.boxVectors)
 
