@@ -492,7 +492,7 @@ class BuildSimulation():
         """Display help information for the minimize_energy method."""
         print(cls.minimize_energy.__doc__)    
      
-    def anneal_NVT(self, simulation, start_temp=None, max_temp=None, cycles=None, quench_rate=None, steps_per_cycle=None, filename=None):
+    def anneal_NVT(self, simulation, start_temp=None, max_temp=None, cycles=None, quench_rate=None, steps_per_cycle=None, filename=None, save_restart=False, restart_name=None):
         """
         Function to perform simulated annealing on the provided simulation system.
         
@@ -636,7 +636,10 @@ class BuildSimulation():
         self.final_pdbname = os.path.join(self.output_dir, ("final" + filename + self.filename + ".pdb"))
         with open(self.final_pdbname, 'w') as output:
             PDBFile.writeFile(simulation.topology, state.getPositions(), output)
-        
+
+        if save_restart == True:
+            self.save_rst(simulation, restart_name=restart_name)
+            
         return(simulation, (output_dataname + ".txt"))
     
     @classmethod
@@ -767,7 +770,7 @@ class BuildSimulation():
         """Display help information for the equilibrate method."""
         print(cls.basic_NPT.__doc__) 
         
-    def basic_NVT(self, simulation, total_steps=None, temp=None, filename=None):
+    def basic_NVT(self, simulation, total_steps=None, temp=None, filename=None, save_restart=False, restart_name=None):
         """
         Function to perform a production run simulation with the provided parameters.
         
@@ -864,9 +867,13 @@ class BuildSimulation():
         self.final_pdbname = os.path.join(self.output_dir, ("final_" + filename + self.filename + ".pdb"))
         with open(self.final_pdbname, 'w') as output:
             PDBFile.writeFile(simulation.topology, state.getPositions(), output)
+
+        if save_restart == True:
+            self.save_rst(simulation, restart_name=restart_name)
+            
         return(simulation, (output_dataname + ".txt"))
         
-    def thermal_ramp(self, simulation, heating=None, quench_rate=None, ensemble=None, start_temp=None, max_temp=None, total_steps=None, pressure=None, filename=None):
+    def thermal_ramp(self, simulation, heating=None, quench_rate=None, ensemble=None, start_temp=None, max_temp=None, total_steps=None, pressure=None, filename=None, save_restart=False, restart_name=None):
         """
         Perform a thermal ramp (heating or cooling) on the simulation system.
 
@@ -1001,9 +1008,12 @@ class BuildSimulation():
         with open(self.final_pdbname, 'w') as output:
             PDBFile.writeFile(simulation.topology, state.getPositions(), output)
 
+        if save_restart == True:
+            self.save_rst(simulation, restart_name=restart_name)
+            
         return(simulation, (output_dataname + ".txt"))
         
-    def strain(self, simulation, total_steps=None, temp=None, filename=None):
+    def strain(self, simulation, total_steps=None, temp=None, filename=None, save_restart=False, restart_name=None):
         """
         Function to perform a production run simulation with the provided parameters.
         
@@ -1105,6 +1115,10 @@ class BuildSimulation():
         #self.log_info['Production']['Simulation time'] = total_steps * self.timestep
         #self.log_info['Production']['Temperature'] = temp
         #self.log_info['Production']['Timestep'] = self.timestep
+
+        if save_restart == True:
+            self.save_rst(simulation, restart_name=restart_name)
+            
         return(simulation, (output_dataname + ".txt"))
         
     def save_rst(self, simulation, restart_name=None):
