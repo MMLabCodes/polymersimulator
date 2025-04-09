@@ -643,7 +643,7 @@ class BuildSimulation():
     def anneal_help(cls):
         """Display help information for the anneal method."""
         print(cls.anneal.__doc__)    
-    def basic_NPT(self, simulation, total_steps=None, temp=None, pressure=None, filename=None, save_restart=False):
+    def basic_NPT(self, simulation, total_steps=None, temp=None, pressure=None, filename=None, save_restart=False, restart_name=None):
         """
         Function to equilibrate the provided simulation to reach a specified temperature and pressure.
         
@@ -758,7 +758,7 @@ class BuildSimulation():
             PDBFile.writeFile(simulation.topology, state.getPositions(), output)
 
         if save_restart == True:
-            self.save_rst(simulation)
+            self.save_rst(simulation, restart_name=restart_name)
             
         return(simulation, (output_dataname + ".txt"))
     
@@ -1107,7 +1107,11 @@ class BuildSimulation():
         #self.log_info['Production']['Timestep'] = self.timestep
         return(simulation, (output_dataname + ".txt"))
         
-    def save_rst(self, simulation):
+    def save_rst(self, simulation, restart_name=None):
+        if restart_name == None:
+            restart_name = f'final_{self.filename}'
+        else:
+            restart_name = f'{self.filename}_{restart_name.strip()}'
         import parmed as pmd
         from simtk import unit
         # Load original AMBER top and coord into parmed
@@ -1118,9 +1122,16 @@ class BuildSimulation():
         parm.coordinates = final_state.getPositions(asNumpy=True).value_in_unit(unit.angstroms)
         parm.velocities = final_state.getVelocities(asNumpy=True).value_in_unit(unit.angstroms/unit.picoseconds)
     
-        # save rst7
-        rst_filename = os.path.join(self.output_dir, ("final_" + self.filename + ".rst7"))
-        parm.save(rst_filename, format='rst7')
+        # save rst7 to a new folder
+        restart_folder = os.path.join(self.manager.systems_dir, restart_name)
+        if not os.path.exists(restart_folder):
+            os.makedirs(restart_folder)
+        rst_filename = os.path.join(restart_folder, restart_name)
+        parm.save(f"{rst_filename}.rst7", format='rst7')
+
+        # Finally copy the topology
+        new_top_name = os.path.join(restart_folder, f"{restart_name}.prmtop")
+        shutil.copy(self.topology_file, new_top_name)
 
     
     @classmethod
