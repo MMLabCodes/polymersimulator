@@ -7,7 +7,39 @@ import math
 import pandas as pd
 
 class complex_fluid_model:
-    # This class is the output from the functions that make models and allows for a standardised version of them
+    """
+    A standardized representation of a complex fluid model composed of multiple molecules.
+
+    This class aggregates molecular data into a unified model format, computing weighted 
+    averages of several properties and estimating the minimum requirements for simulation.
+
+    This class is the output of a staticmethod in the 'complex_fluid_models' class.
+
+    Attributes:
+        molecules (list): A list of individual molecule objects.
+        group_molecules (list): Grouped molecules, if applicable.
+        molecule_ratios (list): Relative ratios of each molecule in the model.
+        model_type (str): A string identifier for the type of model (e.g., "FT_model").
+        model_name (str): A unique name for the model. Final name includes model_type as a suffix.
+        wa_mw (float): Weighted average molecular weight.
+        wa_chemical_hardness (float): Weighted average chemical hardness.
+        wa_polarizability (float): Weighted average polarizability.
+        wa_dipole_moment (float): Weighted average dipole moment.
+        wa_total_energy (float): Weighted average total energy.
+        wa_oxygen_content (float): Percentage of oxygen atoms across molecules.
+        wa_nitrogen_content (float): Percentage of nitrogen atoms across molecules.
+        wa_sulfur_content (float): Percentage of sulfur atoms across molecules.
+        min_mols_for_sim (int): Minimum number of molecules required for a simulation.
+        min_atoms_for_sim (int): Minimum number of atoms required for a simulation.
+        min_vol_for_sim (float): Minimum volume required for a simulation.
+
+    Args:
+        molecules (list): List of molecule objects to include in the model.
+        group_molecules (list): Grouped molecule objects (optional).
+        molecule_ratios (list): List of floats indicating the contribution of each molecule.
+        model_type (str): Type of the model used (e.g., "FT_model", "Cluster_model").
+        model_name (str): Descriptive name for the model, will be suffixed with model_type.
+    """
     def __init__(self, molecules, group_molecules, molecule_ratios, model_type, model_name):
         self.molecules = molecules
         self.group_molecules = group_molecules
@@ -29,52 +61,123 @@ class complex_fluid_model:
         self.min_vol_for_sim = complex_fluid_models.min_vol_4_simulation(self)
         
 class complex_fluid_models:
-    # This  class contains all the functions to generate complex_fluid_models as described in the paper
-    # The inputs are orca molecules
-    # The outputs are instances of the 'complex_fluid_model' class - all standardised so it is easier to work with
-    
-    def __init__(self):
+        """
+        A class for generating and manipulating complex fluid models for chemical systems, as described in the referenced paper.
+
+        This class contains a suite of functions designed to process and model complex fluid systems based on input 
+        data from Orca molecules. The primary purpose of the class is to facilitate the generation of various 
+        types of fluid models, each of which is standardized and ready for further analysis. The models generated 
+        by this class are instances of the 'complex_fluid_model' class and represent different types of fluid systems 
+        based on molecular properties, ratios, and interactions.
+
+        The models include (but are not limited to):
+        - Abundancy Grouped Model (AG_model)
+        - Proportional Threshold Model (PT_model)
+        - Scored Grouped Model (SG_model)
+        - Others based on varying levels of molecular interactions and properties
+
+        Key operations and features include:
+        - Handling and processing Orca molecule data (e.g., peak areas, molecular weights, chemical hardness, etc.)
+        - Grouping molecules based on various criteria (e.g., molecular similarity, peak area)
+        - Calculating and normalizing molecular properties such as dipole moments, polarizability, and total energy
+        - Generating various models based on these properties (e.g., AG_model, SG_model)
+        - Providing a standardized output for further analysis or visualization
+
+        The class is built to interface with the Orca molecular data and simplifies the process of modeling complex fluid systems.
+
+        Methods include:
+        - Generating different fluid models (e.g., AG_model, SG_model)
+        - Performing calculations on molecular properties (e.g., weighted averages)
+        - Grouping molecules and assigning ratios based on properties
+        - Evaluating and comparing models using benchmark values
+        - Generating dataframes with model results and rankings
+
+        Attributes:
+        -----------
+        None (This class serves as a container for various static methods and does not store state itself)
+        """
         pass
 
     @staticmethod
-    def get_weighted_average(complex_fluid_model, class_attribute): # class attribute and model type must be passed as a "string"
-        peak_area = []
-        weighted_average = 0
+    def get_weighted_average(model, class_attribute):
+        """
+        Calculate the weighted average of a specified molecular attribute across all molecules in the model.
 
-        # Not sure what this function is, there is already a function developed to calculat eheteroatom content of things    
-        if "Heteroatom_content" in class_attribute:
-            # Everything after the else for working with floats or integers that are attributes of the molecule class
-            # Below we work out the weighted average of the heteroatoms content
-            def get_heteroatom_content(smiles):
-                heteroatom_wt = 0
-                if class_attribute == "Heteroatom_content_O":
-                    het = smiles.count("O")
-                    het = het + smiles.count("o")
-                    heteroatom_wt = het * 16
-                    return(heteroatom_wt)
-                if class_attribute == "Heteroatom_content_N":
-                    het = smiles.count("N")
-                    het = het + smiles.count("n")
-                    heteroatom_wt = het * 14
-                    return(heteroatom_wt)
-                if class_attribute == "Heteroatom_content_S":
-                    het = smiles.count("S")
-                    het = het + smiles.count("s")
-                    heteroatom_wt = het * 32
-                    return(heteroatom_wt)
-             
-                return(return_list)
-        
-            weighted_het_weight = 0
-            weighted_het_weight = sum(ratio * get_heteroatom_content(molecule.smiles) for ratio, molecule in zip(complex_fluid_model.molecule_ratios, complex_fluid_model.molecules))
-            return(weighted_het_weight)    
+        This function handles both:
+        - Numerical attributes directly available on the molecule objects (e.g., "mw", "dipole_moment").
+        - Heteroatom content (e.g., "Heteroatom_content_O") computed from SMILES strings.
+
+        Args:
+            model (complex_fluid_model): The complex fluid model instance containing molecules and their ratios.
+            class_attribute (str): The name of the attribute to average.
+                Use exact attribute name for molecule properties (e.g., "mw", "dipole_moment"),
+                or one of the following for heteroatom content:
+                - "Heteroatom_content_O"
+                - "Heteroatom_content_N"
+                - "Heteroatom_content_S"
+
+        Returns:
+            float: The weighted average value of the given attribute across all molecules.
+
+        Raises:
+            AttributeError: If the attribute doesn't exist on the molecule and isn't a supported heteroatom type.
+        """
+        if class_attribute.startswith("Heteroatom_content_"):
+            atom_type = class_attribute.split("_")[-1].upper()
+            atomic_weights = {"O": 16, "N": 14, "S": 32}
+
+            if atom_type not in atomic_weights:
+                raise ValueError(f"Unsupported heteroatom type: {atom_type}")
+
+            def get_heteroatom_weight(smiles):
+                return smiles.lower().count(atom_type.lower()) * atomic_weights[atom_type]
+
+            weighted_sum = sum(
+                ratio * get_heteroatom_weight(molecule.smiles)
+                for ratio, molecule in zip(model.molecule_ratios, model.molecules)
+            )
+            return weighted_sum
+
         else:
-            weighted_average = sum(ratio * float(getattr(molecule, class_attribute)) for ratio, molecule in zip(complex_fluid_model.molecule_ratios, complex_fluid_model.molecules))
-                                         
-            return(weighted_average)
+            try:
+                weighted_average = sum(
+                    ratio * float(getattr(molecule, class_attribute))
+                    for ratio, molecule in zip(model.molecule_ratios, model.molecules)
+                )
+                return weighted_average
+            except AttributeError as e:
+                raise AttributeError(
+                    f"Attribute '{class_attribute}' not found in molecule objects."
+                ) from e
             
     @staticmethod
     def calculate_heteroatom_percentages_sing_mol(molecule):
+        """
+        Calculate the percentage by weight of oxygen (O), nitrogen (N), and sulfur (S)
+        atoms across a list of molecules, based on their SMILES strings.
+
+        Args:
+            molecule_list (list): List of molecule objects. Each must have a `.smiles` attribute.
+
+        Returns:
+            dict: A dictionary with keys 'O', 'N', and 'S' representing the total
+                  mass percentage of each heteroatom across all molecules.
+
+                  Example:
+                  {
+                      'O': 8.2,
+                      'N': 5.1,
+                      'S': 3.7
+                  }
+
+        Notes:
+            - Uses atomic weights: O = 16, N = 14, S = 32.
+            - SMILES strings are parsed naively (by counting letters).
+            - This is an approximate method and does not handle full parsing of molecules.
+
+        Raises:
+            AttributeError: If a molecule in the list does not have a 'smiles' attribute.
+        """
         smiles = molecule.smiles
         weight = molecule.mw
         atomic_weights = {'B': 10.81, 'C': 12.01, 'N': 14.01, 'O': 16.00, 'P': 30.97, 'S': 32.07, 'F': 18.99, 'Cl': 35.45, 'Br': 79.90, 'I': 126.90}
@@ -106,11 +209,44 @@ class complex_fluid_models:
         
     @staticmethod
     def calculate_heteroatom_percentages(molecules):
-        def get_mixture(molecules): # model is a a list of python objects   
-            mixture = {obj.smiles: float(obj.peak_area) for obj in molecules}
-            return(mixture)
+        """
+        Calculate the mass percentage of selected heteroatoms (including hydrogen) 
+        in a mixture of molecules based on their SMILES strings and peak areas.
+
+        This function:
+        - Computes weighted contributions of each heteroatom by atomic mass and SMILES frequency.
+        - Uses RDKit to explicitly count hydrogen atoms.
+        - Normalizes all heteroatom weights to return percentage contributions.
+
+        Args:
+            molecules (list): A list of molecule objects.
+                              Each must have `.smiles` (str) and `.peak_area` (float) attributes.
+
+        Returns:
+            dict: A dictionary mapping each atom ('C', 'H', 'O', etc.) to its
+                  percentage contribution by mass in the total mixture.
+
+                  Example:
+                  {
+                      'C': 68.2,
+                      'H': 10.3,
+                      'O': 15.0,
+                      'N': 6.5,
+                      ...
+                  }
+
+        Requires:
+            - RDKit must be installed and imported as `from rdkit import Chem`.
+
+        Raises:
+            AttributeError: If molecule objects do not have 'smiles' or 'peak_area' attributes.
+        """
+        # Extract SMILES and peak area for each molecule
+        try:
+            mixture = {mol.smiles: float(mol.peak_area) for mol in molecules}
+        except AttributeError as e:
+            raise AttributeError("Each molecule must have 'smiles' and 'peak_area' attributes.") from e
             
-        mixture = get_mixture(molecules) 
         total_peak_area = complex_fluid_models.get_group_area(molecules)
     
         atomic_weights = {'B': 10.81, 'C': 12.01, 'N': 14.01, 'O': 16.00, 'P': 30.97, 'S': 32.07, 'F': 18.99, 'Cl': 35.45, 'Br': 79.90, 'I': 126.90}
@@ -148,6 +284,36 @@ class complex_fluid_models:
     
     @staticmethod
     def group_molecules(molecule_class_list):
+        """
+        Groups molecules into categories based on the presence of nitrogen and/or oxygen 
+        heteroatoms and the types of rings (5-membered, 6-membered, mixed, or no ring) 
+        present in their structures.
+
+        Molecules are categorized into 4 main groups:
+        1. Contains both nitrogen and oxygen
+        2. Contains only nitrogen
+        3. Contains only oxygen
+        4. Contains neither nitrogen nor oxygen
+
+        Within each group, molecules are further divided into:
+        - [0] 5-membered ring only
+        - [1] 6-membered ring only
+        - [2] mixed or other rings
+        - [3] no rings
+
+        Args:
+            molecule_class_list (list): List of molecule objects with a `.smiles` attribute.
+
+        Returns:
+            list: A nested list structure:
+                  [mols_with_n_and_o, mols_with_n, mols_with_o, no_hetero]
+                  where each sublist contains 4 subcategories as described above.
+
+        Requires:
+            - `has_heteroatoms(mol)` to return a list of heteroatoms present.
+            - `has_rings(mol)` to return a list of detected ring types.
+            - RDKit to be installed for SMILES parsing via `Chem.MolFromSmiles`.
+        """
         smiles_list = [molecule.smiles for molecule in molecule_class_list]
         
         mols_with_n_and_o = [[], [], [], []]       
@@ -218,22 +384,46 @@ class complex_fluid_models:
     @staticmethod
     def is_orca_molecule(molecule):
         """
-        Check if the given molecule is an instance of the orca_molecule class.
+        Determines whether the provided object is an instance of the `orca_molecule` class.
 
-        Parameters:
-        -----------
-        molecule : object
-        The object to check.
+        This utility method helps validate that a given molecule belongs to the expected 
+        class used for ORCA-related molecular data.
+
+        Args:
+            molecule (object): The object to check.
 
         Returns:
-        --------
-        bool
-        True if the object is an instance of orca_molecule, False otherwise.
+            bool: True if the object is an instance of `orca_molecule`, False otherwise.
         """
         return isinstance(molecule, orca_molecule)
 
     @staticmethod
     def all_model(model_name, orca_molecules):
+        """
+        Creates a `complex_fluid_model` using all provided `orca_molecule` instances with 
+        their peak areas used to determine composition ratios.
+
+        This model includes all molecules regardless of thresholds or grouping, and assumes
+        that the `peak_area` values are percentages that sum to ~100.
+
+        Args:
+            model_name (str): A name for the model being generated.
+            orca_molecules (list): A list of `orca_molecule` instances to include in the model.
+
+        Returns:
+            complex_fluid_model or None: Returns a `complex_fluid_model` instance if all inputs 
+            are valid `orca_molecule` objects. If validation fails, prints an error and returns `None`.
+        """
+
+    # Validate input: all items must be instances of orca_molecule
+    if not all(isinstance(molecule, orca_molecule) for molecule in orca_molecules):
+        print("Please use orca_molecule class instances for each molecule in the list passed to this function.")
+        print("Refer to the sw_orca module for more information on setting this up.")
+        return None
+
+    # Calculate ratios from peak areas assuming they are given as percentages
+    ratios = [float(mol.peak_area) / 100 for mol in orca_molecules]
+
         orca_mol_bool = [isinstance(molecule, orca_molecule) for molecule in orca_molecules]
         if "False" in orca_mol_bool:
             print("Please use orca molecule class instances for each molecule in list passed to this function.")
@@ -247,16 +437,33 @@ class complex_fluid_models:
 
     @staticmethod
     def fixed_threshold_model(model_name=None, orca_molecules=None, selection_threshold=None):
+        """
+        Creates a `complex_fluid_model` by filtering `orca_molecule` instances based on a peak area threshold.
+
+        This method filters out any molecules whose `peak_area` is below the specified threshold and 
+        constructs a model only from those that meet or exceed it.
+
+        Args:
+            model_name (str): A name for the resulting model.
+            orca_molecules (list): A list of `orca_molecule` instances.
+            selection_threshold (float): The minimum peak area required for a molecule to be included.
+
+        Returns:
+            complex_fluid_model or None: A `complex_fluid_model` instance created from filtered molecules. 
+            Returns `None` if input validation fails.
+        """
+        # Input validation
         if None in (model_name, orca_molecules, selection_threshold):
-            print("Error: please ensure all arguments are passed")
-            print("EXAMPLE: ft_model = complex_fluid_models.fixed_threshold_model(model_name='model_name', orca_molecules=list_of_molecule_objects, selection_threshold=int)")
-            return(None)
-        
-        orca_mol_bool = [isinstance(molecule, orca_molecule) for molecule in orca_molecules]
-        if "False" in orca_mol_bool:
-            print("Please use orca molecule class instances for each molecule in list passed to this function.")
+            print("Error: Please ensure all arguments are provided.")
+            print("EXAMPLE: ft_model = complex_fluid_models.fixed_threshold_model("
+              "model_name='model_name', orca_molecules=list_of_molecule_objects, selection_threshold=10)")
+            return None
+
+        # Check all objects are instances of orca_molecule
+        if not all(isinstance(molecule, orca_molecule) for molecule in orca_molecules):
+            print("Please use orca_molecule class instances for each molecule in the list passed to this function.")
             print("Refer to the sw_orca module for more information on setting this up.")
-            return(None)
+            return None
 
         fixed_threshold_model = [] 
 
@@ -264,6 +471,10 @@ class complex_fluid_models:
             if float(molecule.peak_area) >= selection_threshold:
                 fixed_threshold_model.append(molecule)
 
+        if not fixed_threshold_model:
+            print("No molecules met the peak area threshold. Model not generated.")
+            return(None)
+        
         tot_peak_area = sum([float(mol.peak_area) for mol in fixed_threshold_model])
         ratios = [(float(mol.peak_area)/tot_peak_area) for mol in fixed_threshold_model]
         
@@ -273,16 +484,34 @@ class complex_fluid_models:
 
     @staticmethod
     def proportional_threshold_model(model_name=None, orca_molecules=None):
+        """
+        Constructs a `complex_fluid_model` by selecting a proportionally normalized set of molecules.
+
+        This method ensures that the number of selected molecules does not exceed the original number
+        of molecules provided, using a normalization strategy based on the ratio of each molecule's 
+        peak area to the minimum peak area in the list.
+
+        Args:
+            model_name (str): Name to assign to the resulting model.
+            orca_molecules (list): A list of `orca_molecule` instances.
+
+        Returns:
+            complex_fluid_model or None: A `complex_fluid_model` instance composed of proportionally
+            selected molecules, or `None` if validation fails.
+        """
+
+        # Input validation
         if None in (model_name, orca_molecules):
             print("Error: please ensure all arguments are passed")
-            print("EXAMPLE: pt_model = complex_fluid_models.proportional_threshold_model(model_name='model_name', orca_molecules=list_of_molecule_objects)")
-            return(None)          
-            
-        orca_mol_bool = [isinstance(molecule, orca_molecule) for molecule in orca_molecules]
-        if "False" in orca_mol_bool:
-            print("Please use orca molecule class instances for each molecule in list passed to this function.")
+            print("EXAMPLE: pt_model = complex_fluid_models.proportional_threshold_model("
+                  "model_name='model_name', orca_molecules=list_of_molecule_objects)")
+            return None
+
+        # Type validation
+        if not all(isinstance(molecule, orca_molecule) for molecule in orca_molecules):
+            print("Please use orca_molecule class instances for each molecule in list passed to this function.")
             print("Refer to the sw_orca module for more information on setting this up.")
-            return(None)
+            return None
 
         def calculate_normalised_total(all_info):
             normalised_values = []
@@ -311,9 +540,7 @@ class complex_fluid_models:
 
             for j in range(len(all_info)):
                 all_info[j][3] = float(all_info[j][2])/min(peak_areas)
-
-    
-        
+  
         selected_mols = []
         
         for i in range(len(all_info)):
@@ -328,24 +555,60 @@ class complex_fluid_models:
 
     @staticmethod
     def get_group_area(orca_molecules):
-        # used in both AG and SG models
-        tot_peak_area = 0
-        for molecule in orca_molecules:
-            tot_peak_area = tot_peak_area + float(molecule.peak_area)
-        return(tot_peak_area)
+        """
+        Calculates the total peak area for a list of `orca_molecule` instances.
+
+        This method sums the `peak_area` attribute of each molecule in the provided list
+        and returns the total peak area, which can be used for further calculations in
+        models like AG and SG.
+
+        Args:
+            orca_molecules (list): A list of `orca_molecule` instances. Each molecule
+            is expected to have a `peak_area` attribute.
+
+        Returns:
+            float: The total peak area computed as the sum of the `peak_area` attributes
+            of all molecules in the input list.
+        """
+        total_peak_area = sum(float(molecule.peak_area) for molecule in orca_molecules)
+        return total_peak_area
         
     @staticmethod
     def abundancy_grouped_model(model_name=None, orca_molecules=None):
+        """
+        Generates an abundance-based grouped model from a list of `orca_molecule` instances.
+
+        This method groups molecules based on their structural features, selects the
+        molecule with the largest peak area from each group, and generates a model using 
+        these representative molecules. The relative abundance of each group is computed 
+        based on the total peak area of molecules in that group.
+
+        Args:
+            model_name (str, optional): The name of the model to be created. If not provided, 
+            the model will not be named.
+            orca_molecules (list): A list of `orca_molecule` instances. Each molecule is
+            expected to have a `peak_area` attribute.
+
+        Returns:
+            complex_fluid_model: A `complex_fluid_model` instance created using the selected
+            representative molecules, their ratios, and other related data.
+
+        Raises:
+            ValueError: If any of the arguments are `None` or if invalid `orca_molecule` 
+            instances are provided.
+        """
+        # Check if model_name and orca_molecules are provided
         if None in (model_name, orca_molecules):
             print("Error: please ensure all arguments are passed")
             print("EXAMPLE: ag_model = complex_fluid_models.abundancy_grouped_model(model_name='model_name', orca_molecules=list_of_molecule_objects)")
-            return(None)  
-        
+            return None  
+
+        # Validate that each molecule in the list is an instance of orca_molecule
         orca_mol_bool = [isinstance(molecule, orca_molecule) for molecule in orca_molecules]
         if "False" in orca_mol_bool:
             print("Please use orca molecule class instances for each molecule in list passed to this function.")
             print("Refer to the sw_orca module for more information on setting this up.")
-            return(None)
+            return None
 
         grouped_molecules = complex_fluid_models.group_molecules(orca_molecules)
 
@@ -394,10 +657,38 @@ class complex_fluid_models:
         
     @staticmethod
     def scored_grouped_model(model_name=None, orca_molecules=None):
+        """
+        Generates a scored grouped model based on the selection of the best molecules
+        from grouped molecule categories, with scores calculated based on a variety of
+        molecular properties.
+
+        This method uses the concept of an 'abundance-grouped model' (AG model) as a base,
+        and then applies scoring to each molecule in each group. The molecule with the best
+        score is selected from each group, where the score is determined by the weighted
+        differences between normalized molecular properties like molecular weight, total
+        energy, polarizability, dipole moment, chemical hardness, and oxygen content.
+
+        Args:
+            model_name (str, optional): The name of the model to be created. If not provided, 
+            the model will not be named.
+            orca_molecules (list): A list of `orca_molecule` instances. Each molecule is
+            expected to have the required attributes such as `peak_area`, `mw`, `total_energy`,
+            `polarizability`, `dipole_moment`, `chemical_hardness`, and methods to calculate 
+            heteroatom percentages.
+
+        Returns:
+            complex_fluid_model: A `complex_fluid_model` instance created using the selected
+            representative molecules, their ratios, and other related data.
+
+        Raises:
+            ValueError: If any of the arguments are `None` or if invalid `orca_molecule` 
+            instances are provided.
+        """
+        # Check if model_name and orca_molecules are provided
         if None in (model_name, orca_molecules):
             print("Error: please ensure all arguments are passed")
             print("EXAMPLE: sg_model = complex_fluid_models.scored_grouped_model(model_name='model_name', orca_molecules=list_of_molecule_objects)")
-            return(None)  
+            return None  
 
         
         all_model = complex_fluid_models.all_model(model_name, orca_molecules)
@@ -495,6 +786,35 @@ class complex_fluid_models:
 
     @staticmethod
     def generate_model_df(models): # molecules is all set, models are subsets of molecules
+        """
+        Generates a DataFrame containing various properties for a list of molecular models.
+
+        This method extracts key properties such as molecular weight (Mw), chemical hardness,
+        polarizability, dipole moment, total energy, and oxygen content for each model in the 
+        provided list. These properties are calculated as weighted averages over the molecules 
+        within each model. The resulting DataFrame organizes these properties along with the 
+        model type for each model.
+
+        Args:
+            models (list): A list of `complex_fluid_model` instances, where each model contains
+                           a set of molecules and is associated with a particular model type. 
+                           Each model should have molecules and associated properties 
+                           (like `model_type` and `molecules`).
+
+        Returns:
+            pd.DataFrame: A pandas DataFrame containing the following columns:
+                - "Model Type": The type of each model.
+                - "Mw": The weighted average molecular weight for each model.
+                - "Chem_hard": The weighted average chemical hardness for each model.
+                - "polarizability": The weighted average polarizability for each model.
+                - "Dipole": The weighted average dipole moment for each model.
+                - "total_energy": The weighted average total energy for each model.
+                - "oxygen_content": The weighted average oxygen content for each model.
+    
+        Raises:
+            ValueError: If any of the models in the list do not have the required attributes 
+                            or are not valid `complex_fluid_model` instances.
+        """
         mws = []
         chem_hards = []
         polars = []
@@ -565,9 +885,62 @@ class complex_fluid_models:
         ranks_df["Final_Rank"] = ranks_df[[prop + "_Rank" for prop in properties]].sum(axis=1)
 
         return ranks_df
+
+    @staticmethod
+    def rank_models_new(model_df, benchmark_model_idx=0, features=None):
+        """
+        Calculates the Euclidean distance of each model from the benchmark model
+        based on multiple features and ranks the models accordingly.
+    
+        Args:
+            model_df (pd.DataFrame): The DataFrame containing model properties.
+            benchmark_model_idx (int): The index of the benchmark model in the DataFrame.
+            features (list): List of feature columns to compare (e.g., ['Mw', 'Chem_hard', 'polarizability']).
+
+        Returns:
+            pd.DataFrame: DataFrame with the models ranked based on their distance to the benchmark model.
+        """
+        if features is None:
+            features = ["Mw", "Chem_hard", "polarizability", "Dipole", "total_energy", "oxygen_content"]
+    
+        # Get the feature values of the benchmark model
+        benchmark_model = model_df.iloc[benchmark_model_idx][features]
+    
+        # Function to calculate Euclidean distance between model and benchmark model
+        def euclidean_distance(model, benchmark):
+            return math.sqrt(sum([(model[feature] - benchmark[feature])**2 for feature in features]))
+    
+        # Apply the distance calculation to each model in the DataFrame
+        model_df['Distance_to_Benchmark'] = model_df.apply(lambda row: euclidean_distance(row, benchmark_model), axis=1)
+    
+        # Rank the models based on their distance (smallest distance is best match)
+        model_df['Rank'] = model_df['Distance_to_Benchmark'].rank(ascending=True, method='min')
+    
+        # Sort by rank (best match first)
+        ranked_df = model_df.sort_values(by='Rank', ascending=True)
+    
+        return ranked_df
         
     @staticmethod
     def min_mols_4_simulation(model):
+        """
+        Calculate the minimum number of molecules required for the simulation based on the 
+        molecule ratios in the model.
+
+        This method computes the minimum number of molecules (min_mols) required for a simulation 
+        by evaluating the relative molecule ratios and adjusting them based on the total number of 
+        molecules in the model. The number of molecules is scaled by the ratio of the molecule's 
+        ratio to the minimum ratio in the model.
+
+        Args:
+            model (complex_fluid_model): The model object containing the list of molecules and their respective ratios.
+
+        Returns:
+            int: The minimum number of molecules (rounded down) required for the simulation.
+
+        Example:
+            min_mols = complex_fluid_models.min_mols_4_simulation(model)
+        """
         num_compounds = len(model.molecules)
         min_peak = min(model.molecule_ratios)
         min_mols = 0
@@ -578,6 +951,24 @@ class complex_fluid_models:
 
     @staticmethod
     def min_atoms_4_simulation(model):
+        """
+        Calculate the minimum number of atoms required for the simulation based on the molecule ratios 
+        and the molecular structure in the model.
+
+        This method computes the minimum number of atoms required for the simulation by iterating 
+        through each molecule in the model, retrieving its atomic structure, and adjusting the 
+        number of atoms based on the ratio of the molecule's ratio to the minimum ratio in the model. 
+        The number of atoms is then scaled by the total number of molecules in the model.
+
+        Args:
+            model (complex_fluid_model): The model object containing the list of molecules and their respective ratios.
+
+        Returns:
+            int: The minimum number of atoms (rounded down) required for the simulation.
+
+        Example:
+            min_atoms = complex_fluid_models.min_atoms_4_simulation(model)
+        """
         min_peak = min(model.molecule_ratios)
         num_atoms = 0
         for i in range(len(model.molecules)):
@@ -589,6 +980,27 @@ class complex_fluid_models:
         
     @staticmethod
     def min_vol_4_simulation(model):
+        """
+        Calculate the minimum total volume required for the simulation based on the molecule ratios and 
+        the minimum number of molecules for the simulation.
+
+        This method computes the total volume by multiplying each molecule's volume by its corresponding 
+        ratio and the minimum number of molecules required for the simulation, and then summing these values 
+        across all molecules in the model.
+
+        Parameters:
+        -----------
+        model : object
+            An instance of a model class containing the following attributes:
+                - `molecules` (list): A list of molecule objects, each having a `volume` attribute.
+                - `molecule_ratios` (list): A list of ratios corresponding to each molecule.
+                - `min_mols_for_sim` (float): The minimum number of molecules required for the simulation.
+
+        Returns:
+        --------
+        float
+            The total minimum volume (in the same units as the molecule volumes) required for the simulation.
+        """
         tot_volume = 0      
         for i in range(len(model.molecules)):
             volume_of_mol = model.molecules[i].volume*(model.molecule_ratios[i]*model.min_mols_for_sim)
@@ -598,6 +1010,37 @@ class complex_fluid_models:
 
     @staticmethod
     def model_output_block(all_model, model, ranked_data):
+        """
+        Generates a detailed output block for a given model, comparing it with the benchmark model (ALL_model).
+        The output includes key weighted values, heteroatom content, minimum molecule/atom requirements, and a
+        representation of the molecules in the model.
+
+        This function evaluates how well a specific model (e.g., FT_model, AG_model, PT_model) aligns with the 
+        benchmark model (ALL_model). It calculates various properties (e.g., molecular weight, chemical hardness, 
+        polarizability) for both the model and the benchmark, and includes additional details such as molecule 
+        ratios, heteroatom content, and the minimum number of molecules and atoms required for unbiased simulation.
+
+        Parameters:
+        -----------
+        all_model : object
+            An instance of the "ALL_model", serving as the benchmark for comparison. The benchmark model's weighted 
+            averages (e.g., molecular weight, chemical hardness) are used for scoring the provided model.
+        
+        model : object
+            An instance of a model (e.g., FT_model, AG_model, PT_model) to be compared to the benchmark (ALL_model).
+            This model contains various molecular properties and ratios for which comparison and evaluation are made.
+
+        ranked_data : pandas.DataFrame
+            A DataFrame containing the rankings of various models. This is used to get the score of the given model 
+            against the benchmark for performance evaluation.
+
+        Returns:
+        --------
+        list
+            A list of strings representing a formatted output block detailing the model properties, including the 
+            model's weighted values, heteroatom content, minimum number of molecules and atoms required for simulation,
+            and the list of molecules in the model along with their SMILES notation.
+        """
         if all_model.model_type != "ALL_model":
             print("Please provide the ALL_model to serve as a benchmark")
             return(None)
