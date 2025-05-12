@@ -1122,15 +1122,71 @@ class complex_fluid_models:
         return(model_lines) 
 
 class complex_fluid_model_builder:
-    # This  class contains all the functions to generate complex_fluid_models as described in the paper
-    # The inputs are orca molecules
-    # The outputs are instances of the 'complex_fluid_model' class - all standardised so it is easier to work with
-    
+    """
+    A class responsible for generating, manipulating, and preparing complex fluid models for simulations.
+    This class utilizes ORCA molecules and provides functionalities to create bio-oil systems, 
+    perform molecular packing, and prepare Amber parameter files from the resulting bio-oil system.
+
+    The inputs are primarily ORCA molecule instances, and the outputs are standardized complex fluid models 
+    that can be used for further computational analysis, simulation preparation, or parameterization.
+
+    Key Functions:
+        - `generate_packmol_bio_oil_cube`: Generates a Packmol input file to pack molecules into a 3D cube for simulations.
+        - `extract_unique_rescodes`: Extracts unique residue codes from a PDB file.
+        - `load_molecule_list`: Loads a list of molecules from a CSV file and stores it in a dictionary.
+        - `find_matching_molecules`: Finds molecules in the list that match specified residue codes.
+        - `generate_amber_params_from_packmol_bio_oil`: Generates Amber parameters for the bio-oil system from Packmol output.
+
+    Attributes:
+        None. This class is used for procedural methods related to the generation and manipulation of fluid models.
+
+    Usage:
+        This class provides various methods to facilitate the construction of bio-oil models, from molecular packing 
+        to generating system parameters. The output from these methods can be used in molecular dynamics simulations 
+        or other analyses where molecular packing and parameterization are essential.
+
+    Methods:
+        - `generate_packmol_bio_oil_cube`: Creates a packed bio-oil cube for simulation.
+        - `extract_unique_rescodes`: Extracts residue codes from a PDB file.
+        - `load_molecule_list`: Loads molecule data from a CSV file into a dictionary.
+        - `find_matching_molecules`: Finds matching molecules from a list based on residue codes.
+        - `generate_amber_params_from_packmol_bio_oil`: Generates Amber system parameters from a Packmol-generated bio-oil system.
+    """
+
     def __init__(self):
         pass
 
     @staticmethod
-    def generate_packmol_bio_oil_cube(model_dirs, model, tolerance=None, filetype=None, volume_scalar=None, molecule_scalar=None): # csv_name (i.e. pine bark phenolic), molecules selected by model generation, model type
+    def generate_packmol_bio_oil_cube(model_dirs, model, tolerance=None, filetype=None, volume_scalar=None, molecule_scalar=None):
+        """
+        Generates a Packmol input file to pack molecules into a 3D cube for bio-oil simulation.
+
+        This function takes a model and its associated molecules, and generates an input file for Packmol,
+        which is used to generate a packed bio-oil cube. The function computes the box size based on the model's 
+        total volume and then creates the necessary structures within the box. It also provides the option to 
+        adjust the number of molecules and the box size through scalars.
+
+        Parameters:
+            model_dirs (object): An object containing directory paths for Packmol inputs, systems, and molecules.
+            model (object): A complex fluid model containing the molecules and their respective ratios.
+            tolerance (float, optional): The tolerance level for molecule packing (default is 2.0).
+            filetype (str, optional): The file type for the output (default is "pdb").
+            volume_scalar (float, optional): Scalar factor to adjust the size of the packing box (default is 1.5).
+            molecule_scalar (float, optional): Scalar factor to adjust the number of molecules in the system (default is 1).
+
+        Returns:
+            None: This function generates the Packmol input file and runs the Packmol command to pack the molecules.
+        
+        Notes:
+            - The box size is calculated by taking the cube root of the total volume and adjusting it by the volume_scalar.
+            - The function assumes that molecule ratios in the model sum to 1.0, and the number of molecules is scaled accordingly.
+            - The Packmol input file is written to the `packmol_inputs` directory, and the packed system is output to the `packmol_systems` directory.
+
+        Example:
+            model_dirs = ModelDirs()  # Hypothetical object containing directories
+            model = ComplexFluidModel()  # Hypothetical object representing a complex fluid model
+            generate_packmol_bio_oil_cube(model_dirs, model, tolerance=1.5, filetype="pdb")
+        """
         total_volume = model.min_vol_for_sim
         
         volume_scalar = 1.5 if volume_scalar is None else volume_scalar
@@ -1200,6 +1256,24 @@ class complex_fluid_model_builder:
 
     @staticmethod
     def extract_unique_rescodes(pdb_file):
+        """
+        Extracts unique residue codes from a PDB (Protein Data Bank) file.
+
+        This function reads a PDB file line by line and extracts the residue codes 
+        from the "ATOM" and "HETATM" records, which represent atoms in a protein or 
+        heteroatom (non-standard atoms). The residue codes are stored in a set to 
+        ensure uniqueness and returned as a result.
+
+        Parameters:
+            pdb_file (str): Path to the PDB file from which residue codes will be extracted.
+
+        Returns:
+            set: A set containing unique residue codes found in the PDB file.
+
+        Example:
+            unique_residues = extract_unique_rescodes("example.pdb")
+            print(unique_residues)
+        """
         unique_residues = set()
         with open(pdb_file, 'r') as file:
             for line in file:
@@ -1210,6 +1284,26 @@ class complex_fluid_model_builder:
 
     @staticmethod
     def load_molecule_list(manager):
+        """
+        Loads a dictionary of molecules from a CSV file containing residue codes.
+
+        This function reads a CSV file (specified by `manager.residue_code_csv`) where each line 
+        contains three comma-separated values. It extracts the relevant data and stores it in a 
+        dictionary where the keys are the third column values (residue codes) and the values 
+        are the first column values (molecule names).
+
+        Parameters:
+            manager (object): An instance of the manager class that contains the `residue_code_csv` 
+                               attribute, which is the path to the CSV file.
+
+        Returns:
+            dict: A dictionary where keys are residue codes (from the third column of the CSV), 
+                  and values are corresponding molecule names (from the first column of the CSV).
+
+        Example:
+            molecule_list = load_molecule_list(manager)
+            print(molecule_list)
+        """
         molecule_dict = {}
         with open(manager.residue_code_csv, 'r') as file:
             for line in file:
@@ -1220,6 +1314,27 @@ class complex_fluid_model_builder:
 
     @staticmethod
     def find_matching_molecules(residue_codes, molecule_dict):
+        """
+        Finds and returns the molecules that correspond to a given set of residue codes.
+
+        This function takes a list of residue codes and a dictionary mapping residue codes 
+        to molecule names. It checks which residue codes from the list are present in the 
+        dictionary and returns the corresponding molecule names.
+
+        Parameters:
+            residue_codes (list): A list of residue codes to search for in the `molecule_dict`.
+            molecule_dict (dict): A dictionary where the keys are residue codes and the values 
+                                   are corresponding molecule names.
+
+        Returns:
+            list: A list of molecule names that correspond to the residue codes in the input list.
+
+        Example:
+            residue_codes = ['ALA', 'CYS', 'GLY']
+            molecule_dict = {'ALA': 'Alanine', 'CYS': 'Cysteine', 'GLY': 'Glycine'}
+            matching_molecules = find_matching_molecules(residue_codes, molecule_dict)
+            print(matching_molecules)  # Output: ['Alanine', 'Cysteine', 'Glycine']
+        """
         matching_molecules = []
         for code in residue_codes:
             if code in molecule_dict:
@@ -1228,6 +1343,37 @@ class complex_fluid_model_builder:
 
     @staticmethod
     def generate_amber_params_from_packmol_bio_oil(manager, molecule_list, system_pdb_path):
+        """
+        Generates Amber parameter files for a system described by a Packmol-generated PDB file.
+
+        This function creates an Amber input file for tleap to generate parameter files for the 
+        bio-oil system. The input system is described by a PDB file generated using Packmol, 
+        and the function processes the molecules in the system, loading their associated 
+        Amber parameter files. The output consists of Amber topology and coordinate files (.prmtop 
+        and .rst7, respectively).
+
+        Parameters:
+            manager (object): An instance of the manager class that provides the directories 
+                               for the molecule data and system output.
+            molecule_list (list): A list of molecule names (as strings) to be used for 
+                                  generating Amber parameters.
+            system_pdb_path (str): The path to the PDB file of the system generated by Packmol.
+
+        Returns:
+            None: The function does not return any value but writes the Amber parameter files 
+                  and a tleap input file to the specified output directory.
+
+        Example:
+            manager = SomeManager()  # Assumes manager class is defined
+            molecule_list = ["molecule1", "molecule2"]
+            system_pdb_path = "path/to/packmol_system.pdb"
+            generate_amber_params_from_packmol_bio_oil(manager, molecule_list, system_pdb_path)
+            
+        Note:
+            The function assumes that the PDB file provided is correctly formatted and contains 
+            all the required atoms for the system. It will also create a new directory for the 
+            system parameters if it doesn't already exist.
+        """
         system_name = (system_pdb_path.split("/")[-1]).split(".")[0]
 
          #Write and exectute the intleap file. PROBLEMS LOADING SYSTEM PDB -not sure why though
@@ -1249,11 +1395,6 @@ class complex_fluid_model_builder:
         prmtop_file = os.path.join(output_dir, (system_name + ".prmtop"))
         rst7_file = os.path.join(output_dir, (system_name + ".rst7"))
 
-
-        #x, y, z = build.get_xyz_dists(system_pdb) # get x,y,z for periodic dists
-        #x, y, z = x+2, y+2, z+2 # Add a buffer into it
-        #file_content += f"setBox system vdw {x} {y} {z}\n" 
-
         file_content += f"setBox system centers\n" # this method of setting pbc didnt work. ACTUALLY DID WORK, just in the wrong place
         file_content += f"saveamberparm system {prmtop_file} {rst7_file}\n"
 
@@ -1266,8 +1407,6 @@ class complex_fluid_model_builder:
             file.write(file_content)
             
         leap_command = "tleap -f " + intleap_path
-        #print("The command that would be run in the shell is: ")
-        #print(leap_command)
         print(intleap_path)
         try:
             result = subprocess.run(leap_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
