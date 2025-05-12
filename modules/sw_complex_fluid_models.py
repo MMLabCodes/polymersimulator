@@ -846,7 +846,7 @@ class complex_fluid_models:
         return df
 
     @staticmethod
-    def rank_models(df):
+    def rank_models_dep(df):
         # Ensure the column names are correct and in proper case
         df.columns = df.columns.str.strip()
     
@@ -885,7 +885,7 @@ class complex_fluid_models:
         return ranks_df
 
     @staticmethod
-    def rank_models_new(model_df, benchmark_model_idx=0, features=None):
+    def rank_models(model_df, benchmark_model_idx=0, features=None):
         """
         Calculates the Euclidean distance of each model from the benchmark model
         based on multiple features and ranks the models accordingly.
