@@ -246,7 +246,12 @@ class complex_fluid_models:
         return(all_model)
 
     @staticmethod
-    def fixed_threshold_model(model_name, orca_molecules, selection_threshold):
+    def fixed_threshold_model(model_name=None, orca_molecules=None, selection_threshold=None):
+        if None in (model_name, orca_molecules, selection_threshold):
+            print("Error: please ensure all arguments are passed")
+            print("EXAMPLE: ft_model = complex_fluid_models.fixed_threshold_model(model_name='model_name', orca_molecules=list_of_molecule_objects, selection_threshold=int)")
+            return(None)
+        
         orca_mol_bool = [isinstance(molecule, orca_molecule) for molecule in orca_molecules]
         if "False" in orca_mol_bool:
             print("Please use orca molecule class instances for each molecule in list passed to this function.")
@@ -267,7 +272,12 @@ class complex_fluid_models:
         return(fixed_threshold_model)
 
     @staticmethod
-    def proportional_threshold_model(model_name, orca_molecules):
+    def proportional_threshold_model(model_name=None, orca_molecules=None):
+        if None in (model_name, orca_molecules):
+            print("Error: please ensure all arguments are passed")
+            print("EXAMPLE: pt_model = complex_fluid_models.proportional_threshold_model(model_name='model_name', orca_molecules=list_of_molecule_objects)")
+            return(None)          
+            
         orca_mol_bool = [isinstance(molecule, orca_molecule) for molecule in orca_molecules]
         if "False" in orca_mol_bool:
             print("Please use orca molecule class instances for each molecule in list passed to this function.")
@@ -325,7 +335,12 @@ class complex_fluid_models:
         return(tot_peak_area)
         
     @staticmethod
-    def abundancy_grouped_model(model_name, orca_molecules):
+    def abundancy_grouped_model(model_name=None, orca_molecules=None):
+        if None in (model_name, orca_molecules):
+            print("Error: please ensure all arguments are passed")
+            print("EXAMPLE: ag_model = complex_fluid_models.abundancy_grouped_model(model_name='model_name', orca_molecules=list_of_molecule_objects)")
+            return(None)  
+        
         orca_mol_bool = [isinstance(molecule, orca_molecule) for molecule in orca_molecules]
         if "False" in orca_mol_bool:
             print("Please use orca molecule class instances for each molecule in list passed to this function.")
@@ -378,7 +393,13 @@ class complex_fluid_models:
         return(abundancy_grouped_model)
         
     @staticmethod
-    def scored_grouped_model(model_name, orca_molecules):
+    def scored_grouped_model(model_name=None, orca_molecules=None):
+        if None in (model_name, orca_molecules):
+            print("Error: please ensure all arguments are passed")
+            print("EXAMPLE: sg_model = complex_fluid_models.scored_grouped_model(model_name='model_name', orca_molecules=list_of_molecule_objects)")
+            return(None)  
+
+        
         all_model = complex_fluid_models.all_model(model_name, orca_molecules)
         # this is a variant of the ag_model
         ag_model = complex_fluid_models.abundancy_grouped_model(model_name, orca_molecules)
