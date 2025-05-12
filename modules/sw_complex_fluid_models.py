@@ -61,41 +61,42 @@ class complex_fluid_model:
         self.min_vol_for_sim = complex_fluid_models.min_vol_4_simulation(self)
         
 class complex_fluid_models:
-        """
-        A class for generating and manipulating complex fluid models for chemical systems, as described in the referenced paper.
+    """
+    A class for generating and manipulating complex fluid models for chemical systems, as described in the referenced paper.
 
-        This class contains a suite of functions designed to process and model complex fluid systems based on input 
-        data from Orca molecules. The primary purpose of the class is to facilitate the generation of various 
-        types of fluid models, each of which is standardized and ready for further analysis. The models generated 
-        by this class are instances of the 'complex_fluid_model' class and represent different types of fluid systems 
-        based on molecular properties, ratios, and interactions.
+    This class contains a suite of functions designed to process and model complex fluid systems based on input 
+    data from Orca molecules. The primary purpose of the class is to facilitate the generation of various 
+    types of fluid models, each of which is standardized and ready for further analysis. The models generated 
+    by this class are instances of the 'complex_fluid_model' class and represent different types of fluid systems 
+    based on molecular properties, ratios, and interactions.
 
-        The models include (but are not limited to):
-        - Abundancy Grouped Model (AG_model)
-        - Proportional Threshold Model (PT_model)
-        - Scored Grouped Model (SG_model)
-        - Others based on varying levels of molecular interactions and properties
+    The models include (but are not limited to):
+    - Abundancy Grouped Model (AG_model)
+    - Proportional Threshold Model (PT_model)
+    - Scored Grouped Model (SG_model)
+    - Others based on varying levels of molecular interactions and properties
 
-        Key operations and features include:
-        - Handling and processing Orca molecule data (e.g., peak areas, molecular weights, chemical hardness, etc.)
-        - Grouping molecules based on various criteria (e.g., molecular similarity, peak area)
-        - Calculating and normalizing molecular properties such as dipole moments, polarizability, and total energy
-        - Generating various models based on these properties (e.g., AG_model, SG_model)
-        - Providing a standardized output for further analysis or visualization
+    Key operations and features include:
+    - Handling and processing Orca molecule data (e.g., peak areas, molecular weights, chemical hardness, etc.)
+    - Grouping molecules based on various criteria (e.g., molecular similarity, peak area)
+    - Calculating and normalizing molecular properties such as dipole moments, polarizability, and total energy
+    - Generating various models based on these properties (e.g., AG_model, SG_model)
+    - Providing a standardized output for further analysis or visualization
 
-        The class is built to interface with the Orca molecular data and simplifies the process of modeling complex fluid systems.
+    The class is built to interface with the Orca molecular data and simplifies the process of modeling complex fluid systems.
 
-        Methods include:
-        - Generating different fluid models (e.g., AG_model, SG_model)
-        - Performing calculations on molecular properties (e.g., weighted averages)
-        - Grouping molecules and assigning ratios based on properties
-        - Evaluating and comparing models using benchmark values
-        - Generating dataframes with model results and rankings
+    Methods include:
+    - Generating different fluid models (e.g., AG_model, SG_model)
+    - Performing calculations on molecular properties (e.g., weighted averages)
+    - Grouping molecules and assigning ratios based on properties
+    - Evaluating and comparing models using benchmark values
+    - Generating dataframes with model results and rankings
 
-        Attributes:
-        -----------
-        None (This class serves as a container for various static methods and does not store state itself)
-        """
+    Attributes:
+    -----------
+    None (This class serves as a container for various static methods and does not store state itself)
+    """
+    def __init__(self):
         pass
 
     @staticmethod
@@ -415,22 +416,19 @@ class complex_fluid_models:
             are valid `orca_molecule` objects. If validation fails, prints an error and returns `None`.
         """
 
-    # Validate input: all items must be instances of orca_molecule
-    if not all(isinstance(molecule, orca_molecule) for molecule in orca_molecules):
-        print("Please use orca_molecule class instances for each molecule in the list passed to this function.")
-        print("Refer to the sw_orca module for more information on setting this up.")
-        return None
+        # Validate input: all items must be instances of orca_molecule
+        if not all(isinstance(molecule, orca_molecule) for molecule in orca_molecules):
+            print("Please use orca_molecule class instances for each molecule in the list passed to this function.")
+            print("Refer to the sw_orca module for more information on setting this up.")
+            return None
 
-    # Calculate ratios from peak areas assuming they are given as percentages
-    ratios = [float(mol.peak_area) / 100 for mol in orca_molecules]
+        # Calculate ratios from peak areas assuming they are given as percentages
+        ratios = [float(mol.peak_area) / 100 for mol in orca_molecules]
 
         orca_mol_bool = [isinstance(molecule, orca_molecule) for molecule in orca_molecules]
-        if "False" in orca_mol_bool:
-            print("Please use orca molecule class instances for each molecule in list passed to this function.")
-            print("Refer to the sw_orca module for more information on setting this up.")
-            return(None)
-
-        ratios = [float(mol.peak_area)/100 for mol in orca_molecules]
+      
+        # Calculate ratios from peak areas assuming they are given as percentages
+        ratios = [float(mol.peak_area) / 100 for mol in orca_molecules]
         all_model = complex_fluid_model(orca_molecules, None, ratios, "ALL_model", model_name)
         
         return(all_model)
