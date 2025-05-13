@@ -1121,6 +1121,53 @@ class complex_fluid_models:
        
         return(model_lines) 
 
+    @staticmethod
+    def write_output_file(manager, list_of_models, output_filename, ranked_df):
+        """
+        Writes a summary output file for a list of generated models, including their comparison
+        to a benchmark model ("ALL_model").
+
+        This function loops through a list of models, compares each one against the reference 
+        model of type "ALL_model", and generates output blocks using `complex_fluid_models.model_output_block`.
+        The results are written line by line into a specified output file.
+
+        Args:
+            manager: An object that contains project directory paths, including `bio_oil_models_dir`,
+                 where the output file will be saved.
+            list_of_models (list): A list of model objects, one of which must have `model_type == "ALL_model"` 
+                               to serve as the reference for comparison.
+            output_filename (str): The name of the output file to be generated (relative to `manager.bio_oil_models_dir`).
+
+        Returns:
+            str: The full path to the written output file.
+
+        Raises:
+            NameError: If `ranked_df` is not defined in the scope where this function is called.
+            AttributeError: If any object in `list_of_models` does not have the expected attributes
+                        (e.g., `model_type`, etc.).
+        """
+        for model in list_of_models:
+            if model.model_type == "ALL_model":
+                all_model = model
+            
+        # Create empty list to store "model_output_blocks"
+        lines = []
+
+        # Loop through models and append info the list
+        for model in list_of_models:
+            # Need to pass all_model each time for comparison with the generated model
+            lines_to_write = complex_fluid_models.model_output_block(all_model, model, ranked_df)
+            # This loop is requried because "lines_to_write" is a list and we would end up with "lines" being a list of lists
+            for line in lines_to_write:
+                lines.append(line)
+
+        # Name output file
+        output_file = os.path.join(manager.bio_oil_models_dir, output_filename)
+
+        # Write the output file
+        write_output(output_file, lines)
+        return(output_file)
+
 class complex_fluid_model_builder:
     """
     A class responsible for generating, manipulating, and preparing complex fluid models for simulations.
