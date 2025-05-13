@@ -915,7 +915,7 @@ class complex_fluid_models:
         model_df['Final_Rank'] = model_df['Distance_to_Benchmark'].rank(ascending=True, method='min')
     
         # Sort by rank (best match first)
-        ranked_df = model_df.sort_values(by='Rank', ascending=True)
+        ranked_df = model_df.sort_values(by='Final_Rank', ascending=True)
     
         return ranked_df
         
