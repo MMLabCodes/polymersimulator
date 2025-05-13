@@ -912,7 +912,7 @@ class complex_fluid_models:
         model_df['Distance_to_Benchmark'] = model_df.apply(lambda row: euclidean_distance(row, benchmark_model), axis=1)
     
         # Rank the models based on their distance (smallest distance is best match)
-        model_df['Rank'] = model_df['Distance_to_Benchmark'].rank(ascending=True, method='min')
+        model_df['Final_Rank'] = model_df['Distance_to_Benchmark'].rank(ascending=True, method='min')
     
         # Sort by rank (best match first)
         ranked_df = model_df.sort_values(by='Rank', ascending=True)
