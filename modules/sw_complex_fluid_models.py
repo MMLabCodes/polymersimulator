@@ -1092,7 +1092,7 @@ class complex_fluid_models:
     
         # Functions to calculate how good a model is versus the benchmark  
         model_score = ranked_data.loc[ranked_data["Model Type"] == model.model_type, "Final_Rank"].values[0]
-        score_line = "This model has a score of: " + str(model_score/6) + " versus the benchmark"
+        score_line = "This model has rank of: " + str(model_score) + " versus the benchmark"
         hetero_content_line = "The heteroatom content of this model is:"
         model_lines.extend([model_line, representation_line, score_line, spacer, weighted_line, mw, chem_hard, polar, dipole, tot_energy, spacer, hetero_content_line])
      
