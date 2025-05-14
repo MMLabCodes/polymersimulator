@@ -1204,7 +1204,7 @@ class complex_fluid_model_builder:
         pass
 
     @staticmethod
-    def generate_packmol_bio_oil_cube(model_dirs, model, tolerance=None, filetype=None, volume_scalar=None, molecule_scalar=None):
+    def generate_packmol_bio_oil_cube(model_dirs=None, model=None, tolerance=None, filetype=None, volume_scalar=None, molecule_scalar=None):
         """
         Generates a Packmol input file to pack molecules into a 3D cube for bio-oil simulation.
 
@@ -1234,6 +1234,11 @@ class complex_fluid_model_builder:
             model = ComplexFluidModel()  # Hypothetical object representing a complex fluid model
             generate_packmol_bio_oil_cube(model_dirs, model, tolerance=1.5, filetype="pdb")
         """
+        if None in (model_dirs, dirs):
+            print("Error: please ensure all arguments are passed")
+            print("EXAMPLE: generate_packmol_bio_oil_cube(model_dirs=manager, model=model)")
+            return None  
+            
         total_volume = model.min_vol_for_sim
         
         volume_scalar = 1.5 if volume_scalar is None else volume_scalar
@@ -1243,11 +1248,19 @@ class complex_fluid_model_builder:
         size = int((math.pow(total_volume, (1/3))) * volume_scalar) # Note this is the side of one length of the box
 
         ## NEED A CLAUSE TO ENSURE BOX length is bigger than the longest molecule ##
-
-        packmol_input_filename = model.model_name + ".inp"
+        if None in (volume_scalar, molecule_scalar):
+            model_name = model.model_name
+        elif None in (volume_scalar):
+            model_name = f"{model.model_name}_vol_x{volume_scalar}"
+        elif None in (molecule_scalar):
+            model_name = f"{model.model_name}_mol_x{molecule_scalar}"
+        else:
+            model_name = f"{model.model_name}_mol_x{molecule_scalar}_vol_x{volume_scalar}"
+        
+        packmol_input_filename = model_name + ".inp"
         packmol_input_filepath = os.path.join(model_dirs.packmol_inputs, packmol_input_filename)
 
-        packmol_output_filename = model.model_name + ".pdb"
+        packmol_output_filename = model_name + ".pdb"
         packmol_output_filepath = os.path.join(model_dirs.packmol_systems, packmol_output_filename)
       
         lines = []
