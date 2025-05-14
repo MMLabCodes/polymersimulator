@@ -1373,8 +1373,6 @@ class BuildAmberSystems(BuildSystems):
         head_prepi_filepath = os.path.join(self.manager.molecules_dir, base_molecule_name, ("head_" + base_molecule_name + ".prepi"))
         mainchain_prepi_filepath = os.path.join(self.manager.molecules_dir, base_molecule_name, ("mainchain_" + base_molecule_name + ".prepi"))
         tail_prepi_filepath = os.path.join(self.manager.molecules_dir, base_molecule_name, ("tail_" + base_molecule_name + ".prepi"))
-
-        file_subtype = "_3_3_array_random"
         
         output_dir = os.path.join(self.manager.systems_dir, system_name)
         if not os.path.exists(output_dir):
