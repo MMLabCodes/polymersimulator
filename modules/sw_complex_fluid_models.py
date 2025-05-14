@@ -1204,7 +1204,7 @@ class complex_fluid_model_builder:
         pass
 
     @staticmethod
-    def generate_packmol_bio_oil_cube(model_dirs=None, model=None, tolerance=None, filetype=None, volume_scalar=None, molecule_scalar=None):
+    def generate_packmol_bio_oil_cube(manager=None, model=None, tolerance=None, filetype=None, volume_scalar=None, molecule_scalar=None):
         """
         Generates a Packmol input file to pack molecules into a 3D cube for bio-oil simulation.
 
@@ -1234,34 +1234,40 @@ class complex_fluid_model_builder:
             model = ComplexFluidModel()  # Hypothetical object representing a complex fluid model
             generate_packmol_bio_oil_cube(model_dirs, model, tolerance=1.5, filetype="pdb")
         """
-        if None in (model_dirs, dirs):
+        if None in (manager, model):
             print("Error: please ensure all arguments are passed")
-            print("EXAMPLE: generate_packmol_bio_oil_cube(model_dirs=manager, model=model)")
+            print("EXAMPLE: generate_packmol_bio_oil_cube(manager=manager, model=model)")
             return None  
-            
-        total_volume = model.min_vol_for_sim
-        
-        volume_scalar = 1.5 if volume_scalar is None else volume_scalar
 
-        molecule_scalar = 1 if molecule_scalar is None else molecule_scalar
-        
-        size = int((math.pow(total_volume, (1/3))) * volume_scalar) # Note this is the side of one length of the box
+        if molecule_scalar is not None:
+            if isinstance(molecule_scalar, int):
+                pass
+            else:
+                print("Please pass the molecule scalar as an integer")
+                return None
 
         ## NEED A CLAUSE TO ENSURE BOX length is bigger than the longest molecule ##
-        if None in (volume_scalar, molecule_scalar):
+        if volume_scalar is None and molecule_scalar is None:
             model_name = model.model_name
-        elif None in (volume_scalar):
-            model_name = f"{model.model_name}_vol_x{volume_scalar}"
-        elif None in (molecule_scalar):
-            model_name = f"{model.model_name}_mol_x{molecule_scalar}"
+        elif volume_scalar is not None and molecule_scalar is None:
+            model_name = f"{model.model_name}_vol_x{str(volume_scalar)}"
+        elif volume_scalar is None and molecule_scalar is not None:
+            model_name = f"{model.model_name}_mol_x{str(molecule_scalar)}"
         else:
-            model_name = f"{model.model_name}_mol_x{molecule_scalar}_vol_x{volume_scalar}"
+            model_name = f"{model.model_name}_mol_x{str(molecule_scalar)}_vol_x{str(volume_scalar)}"
+
+        volume_scalar = 1.5 if volume_scalar is None else volume_scalar
+        total_volume = model.min_vol_for_sim * volume_scalar
+
+        molecule_scalar = 1 if molecule_scalar is None else molecule_scalar
+
+        size = int((math.pow(total_volume, (1/3)))) # Note this is the side of one length of the box
         
         packmol_input_filename = model_name + ".inp"
-        packmol_input_filepath = os.path.join(model_dirs.packmol_inputs, packmol_input_filename)
+        packmol_input_filepath = os.path.join(manager.packmol_inputs, packmol_input_filename)
 
         packmol_output_filename = model_name + ".pdb"
-        packmol_output_filepath = os.path.join(model_dirs.packmol_systems, packmol_output_filename)
+        packmol_output_filepath = os.path.join(manager.packmol_systems, packmol_output_filename)
       
         lines = []
     
@@ -1275,9 +1281,9 @@ class complex_fluid_model_builder:
         filetype = "filetype " + filetype
         lines.extend([tolerance, ter, output, filetype])
 
-        def write_packmol_struct_block(model_dirs, lines, name, ratio, total_mols_in_model, size):#
+        def write_packmol_struct_block(manager, lines, name, ratio, total_mols_in_model, size):#
          
-            name = "structure " + model_dirs.molecules_dir + f"/{name}/{name}.pdb" 
+            name = "structure " + manager.molecules_dir + f"/{name}/{name}.pdb" 
             if ratio == False:
                 number = "	" + "number " + str(1*molecule_scalar)
             else:
@@ -1289,7 +1295,7 @@ class complex_fluid_model_builder:
 
         # NOTE ALL RATIOS ARE NOW CALCULATED CORRECTLY and sum to 1.0 in the model object!! ##
         for i in range(len(model.molecules)):
-            lines = write_packmol_struct_block(model_dirs, lines, model.molecules[i].name, model.molecule_ratios[i], model.min_mols_for_sim, size)
+            lines = write_packmol_struct_block(manager, lines, model.molecules[i].name, model.molecule_ratios[i], model.min_mols_for_sim, size)
          
         #print(input_filepath)
         f = open(packmol_input_filepath, "w")
@@ -1298,7 +1304,7 @@ class complex_fluid_model_builder:
             f.write('\n')
         f.close()   
 
-        packmol_command = str(model_dirs.packmol_path) + " < " + packmol_input_filepath
+        packmol_command = str(manager.packmol_path) + " < " + packmol_input_filepath
         print(packmol_command)
         try:
             result = subprocess.run(packmol_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
