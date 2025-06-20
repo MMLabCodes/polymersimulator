@@ -31,7 +31,7 @@ import pwlf
 import warnings
 warnings.filterwarnings("ignore", message="DCDReader currently makes independent timesteps")
 
-def initialise_poly_analysis(manager, system_name, base_molecule_name, poly_len, sim_index=0):
+def initialise_poly_analysis(manager, system_name, base_molecule_name, poly_len=10, sim_stage_name=None, sim_index=0):
     """
     Initializes polymer analysis by setting up a molecular dynamics universe.
     
@@ -51,9 +51,12 @@ def initialise_poly_analysis(manager, system_name, base_molecule_name, poly_len,
     poly_Universe
         An initialized polymer universe for analysis.
     """
+    if sim_stage_name == None:
+        print("Please provide a simulation stage name - will be output filename tag assigned to specific stage of simulation.")
+        return()
     sim_avail = manager.simulations_avail(system_name)
     masterclass = master_poly_anal(manager, system_name, base_molecule_name, sim_avail[sim_index], poly_len)
-    return poly_Universe(masterclass, 'temp_ramp_cool', '.dcd')
+    return poly_Universe(masterclass, sim_stage_name, '.dcd')
 
 def initialise_bio_oil_analysis(manager, system_name, sim_index=0, sim_step=None):
     """
@@ -95,7 +98,7 @@ class initialise:
             Dictionary mapping simulation steps to lists of corresponding files.
         """
         grouped_files = defaultdict(list)
-        sim_step_strings = ["1_atm", "temp_ramp_heat", "temp_ramp_cool", "min", "prod"]
+        sim_step_strings = ["1_atm", "temp_ramp_heat", "temp_ramp_cool", "min", "prod", "cooling_NPT_cool"]
 
         for file in os.listdir(self.simulation_directory):
             if file.endswith(('.txt', '.dcd', '.pdb')):
@@ -995,11 +998,11 @@ class Analysis:
         return delta_V
 
     @staticmethod
-    def plot_tg(universe):
+    def plot_tg(universe, min_temp=None, max_temp=None, quench=None):
         df = universe.data
     
         # Create bins for temperature with 20 K intervals
-        bins = pd.cut(df['Temperature (K)'], bins=range(300, 720, 20))
+        bins = pd.cut(df['Temperature (K)'], bins=range(min_temp, max_temp+quench, quench))
     
         # Compute the average density per bin
         average_density = df.groupby(bins)['Density (g/mL)'].mean()
@@ -1059,6 +1062,26 @@ class Analysis:
         plt.show()
         return(float(f'{best_breaks[1:-1][0]:.2f}'))
 
+    def plot_columns(df, x_col, y_col, title=None, xlabel=None, ylabel=None):
+        """
+        Plots two columns from a DataFrame against each other.
+
+        Parameters:
+            df (pd.DataFrame): The input DataFrame.
+            x_col (str): The name of the column to use as the x-axis.
+            y_col (str): The name of the column to use as the y-axis.
+            title (str, optional): Title of the plot.
+            xlabel (str, optional): Label for the x-axis. Defaults to x_col.
+            ylabel (str, optional): Label for the y-axis. Defaults to y_col.
+        """
+        plt.figure(figsize=(10, 6))
+        plt.plot(df[x_col], df[y_col], marker='o', linestyle='-', markersize=2)
+        plt.title(title if title else f"{y_col} vs {x_col}")
+        plt.xlabel(xlabel if xlabel else x_col)
+        plt.ylabel(ylabel if ylabel else y_col)
+        plt.grid(True)
+        plt.tight_layout()
+        plt.show()
         
 
 class universe_coord_extraction():
