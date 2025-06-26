@@ -818,6 +818,7 @@ class BuildAmberSystems(BuildSystems):
         file_content = f"""loadamberprep {head_prepi_filepath}
              loadamberprep {mainchain_prepi_filepath}
              loadamberprep {tail_prepi_filepath}
+             source leaprc.gaff
 
              list
 
@@ -2273,8 +2274,174 @@ class BuildAmberSystems(BuildSystems):
         return(output_name)  
 
         
-#class BuildBioOilSystems(BuildSystems):
-#    def __init__:
- #       pass
+class PrepPackmolForAmber():
+    
+    def __init__(self):
+        self.manager
+        pass
 
+    @staticmethod
+    def extract_unique_rescodes(pdb_file):
+        """
+        Extracts unique residue codes from a PDB (Protein Data Bank) file.
+
+        This function reads a PDB file line by line and extracts the residue codes 
+        from the "ATOM" and "HETATM" records, which represent atoms in a protein or 
+        heteroatom (non-standard atoms). The residue codes are stored in a set to 
+        ensure uniqueness and returned as a result.
+
+        Parameters:
+            pdb_file (str): Path to the PDB file from which residue codes will be extracted.
+
+        Returns:
+            set: A set containing unique residue codes found in the PDB file.
+
+        Example:
+            unique_residues = extract_unique_rescodes("example.pdb")
+            print(unique_residues)
+        """
+        unique_residues = set()
+        with open(pdb_file, 'r') as file:
+            for line in file:
+                if line.startswith("ATOM") or line.startswith("HETATM"):
+                    residue_code = line[17:20].strip()
+                    unique_residues.add(residue_code)
+        return unique_residues
+
+    @staticmethod
+    def load_molecule_list(manager):
+        """
+        Loads a dictionary of molecules from a CSV file containing residue codes.
+
+        This function reads a CSV file (specified by `manager.residue_code_csv`) where each line 
+        contains three comma-separated values. It extracts the relevant data and stores it in a 
+        dictionary where the keys are the third column values (residue codes) and the values 
+        are the first column values (molecule names).
+
+        Parameters:
+            manager (object): An instance of the manager class that contains the `residue_code_csv` 
+                               attribute, which is the path to the CSV file.
+
+        Returns:
+            dict: A dictionary where keys are residue codes (from the third column of the CSV), 
+                  and values are corresponding molecule names (from the first column of the CSV).
+
+        Example:
+            molecule_list = load_molecule_list(manager)
+            print(molecule_list)
+        """
+        molecule_dict = {}
+        with open(manager.residue_code_csv, 'r') as file:
+            for line in file:
+                parts = line.strip().split(',')
+                if len(parts) == 3:
+                    molecule_dict[parts[2]] = parts[0]
+        return molecule_dict    
+
+    @staticmethod
+    def find_matching_molecules(residue_codes, molecule_dict):
+        """
+        Finds and returns the molecules that correspond to a given set of residue codes.
+
+        This function takes a list of residue codes and a dictionary mapping residue codes 
+        to molecule names. It checks which residue codes from the list are present in the 
+        dictionary and returns the corresponding molecule names.
+
+        Parameters:
+            residue_codes (list): A list of residue codes to search for in the `molecule_dict`.
+            molecule_dict (dict): A dictionary where the keys are residue codes and the values 
+                                   are corresponding molecule names.
+
+        Returns:
+            list: A list of molecule names that correspond to the residue codes in the input list.
+
+        Example:
+            residue_codes = ['ALA', 'CYS', 'GLY']
+            molecule_dict = {'ALA': 'Alanine', 'CYS': 'Cysteine', 'GLY': 'Glycine'}
+            matching_molecules = find_matching_molecules(residue_codes, molecule_dict)
+            print(matching_molecules)  # Output: ['Alanine', 'Cysteine', 'Glycine']
+        """
+        matching_molecules = []
+        for code in residue_codes:
+            if code in molecule_dict:
+                matching_molecules.append(molecule_dict[code])
+        return matching_molecules 
+
+    @staticmethod
+    def generate_amber_params_from_packmol(manager, molecule_list, system_name):
+        """
+        Generates Amber parameter files for a system described by a Packmol-generated PDB file.
+
+        This function creates an Amber input file for tleap to generate parameter files for the 
+        bio-oil system. The input system is described by a PDB file generated using Packmol, 
+        and the function processes the molecules in the system, loading their associated 
+        Amber parameter files. The output consists of Amber topology and coordinate files (.prmtop 
+        and .rst7, respectively).
+
+        Parameters:
+            manager (object): An instance of the manager class that provides the directories 
+                               for the molecule data and system output.
+            molecule_list (list): A list of molecule names (as strings) to be used for 
+                                  generating Amber parameters.
+            system_pdb_path (str): The path to the PDB file of the system generated by Packmol.
+
+        Returns:
+            None: The function does not return any value but writes the Amber parameter files 
+                  and a tleap input file to the specified output directory.
+
+        Example:
+            manager = SomeManager()  # Assumes manager class is defined
+            molecule_list = ["molecule1", "molecule2"]
+            system_pdb_path = "path/to/packmol_system.pdb"
+            generate_amber_params_from_packmol_bio_oil(manager, molecule_list, system_pdb_path)
+            
+        Note:
+            The function assumes that the PDB file provided is correctly formatted and contains 
+            all the required atoms for the system. It will also create a new directory for the 
+            system parameters if it doesn't already exist.
+        """
+        system_pdb_path = manager.load_pdb_filepath(system_name)
+        #Write and exectute the intleap file. PROBLEMS LOADING SYSTEM PDB -not sure why though
+        file_content = ""
+        file_content = "source leaprc.gaff\n"
+
+        for molecule in molecule_list:
+            prepi_path = os.path.join(manager.molecules_dir, molecule, (molecule + ".prepi"))
+            file_content += f"loadamberprep {prepi_path}\n"
+            frcmod_path = os.path.join(manager.molecules_dir, molecule, (molecule + ".frcmod"))
+            file_content += f"loadamberparams {frcmod_path}\n"
+
+        file_content += f"system = loadpdb {system_pdb_path}\n"
+
+        output_dir = os.path.join(manager.systems_dir, system_name)
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+    
+        prmtop_file = os.path.join(output_dir, (system_name + ".prmtop"))
+        rst7_file = os.path.join(output_dir, (system_name + ".rst7"))
+
+        file_content += f"setBox system centers\n" # this method of setting pbc didnt work. ACTUALLY DID WORK, just in the wrong place
+        file_content += f"saveamberparm system {prmtop_file} {rst7_file}\n"
+
+        file_content += "quit\n"
+
+        intleap_path = os.path.join(output_dir, (system_name + ".intleap"))
+
+
+        with open(intleap_path, 'w') as file:
+            file.write(file_content)
+            
+        leap_command = "tleap -f " + intleap_path
+        print(intleap_path)
+        try:
+            result = subprocess.run(leap_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            if result.returncode == 0:
+                # Command executed successfully
+                print("Output:", result.stdout)
+            else:
+                 # Command failed, print error message
+                print("Error:", result.stderr)
+        except Exception as e:
+                     # Exception occurred during subprocess execution
+                    print("Exception:", e)
     
