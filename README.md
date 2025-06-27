@@ -1,16 +1,16 @@
 # Polymer Simulator
 
-This repository contains content that will allow for simulations of polymers using **openmm** with **Amber**.
+This repository contains content that will allow building arrays of polymer chains, parametrise them with **Amber** force field, and perform simulations using **openmm**
 
 ## 1. Setting up the environment and cloning repository
 
-(Important: If you are working in windows, please follow the steps in section section 4 <a name="section-4"></a> (Working with windows) to first set up a linux distribution in your computer before following the steps to set up the environment. If you are working in linux or macos, you will not require any prerequisite steps to setting up the environment given below)
+(Important: If you are working in windows, please follow the steps in section section 4 <a name="section-4"></a> (Working with windows) to first set up a linux system in your computer before following the steps to set up the environment. If you are working in Unix (linux or macOS), you will not require any prerequisite steps before setting up the environment given below)
 
-To run the code in this folder, an environment containing **RDkit**, **AmberTools** and **openmm** is required and is set up by running the lines steps 1-4 in your command line. (In windows, open ubuntu and enter these lines into that terminal)
+To run this code, a Python environment containing **RDkit**, **AmberTools** and **openmm** is required. This environment is set up by running the lines described in the following steps 1-4 in your terminal (command line). (In windows, open ubuntu and enter these lines into the terminal)
 
 1. Install miniconda
 
-   Miniconda is a package and environment manager for python. The following commands install miniconda in your home directory and intialise for setting up environments.
+   Miniconda is a package and environment manager for Python. The following commands install miniconda in your home directory and intialise it for setting up environments.
    
 ```
 cd 
@@ -23,7 +23,7 @@ bash ~/miniconda3/miniconda.sh -b -u -p ~/miniconda3
 ```
 2. Create environment
 
-Creating an environment is useful as it creates a seperate container for all of the packages required in this project. 
+Creating an environment is useful as it creates a separate container for all packages required in the project. 
 The following commands create an environment called "AmberTools23" and activate it.
    ```
    conda create --name AmberTools23 
@@ -40,31 +40,31 @@ The following commands create an environment called "AmberTools23" and activate 
    conda install -c conda-forge openbabel
    ```
    
-3.1 Install jupyter **notebook**
+3.1 Install **Jupyter notebooks**
 
-   We need to install jupyter notebooks in this environment so we can run AmberTools from the notebook (in addition to running from commmand line)
+   We need to install Jupyter notebooks in this environment to run AmberTools from a Python notebook (in addition to running it from the terminal)
     
    ```
    sudo apt install python3-pip python3-dev
    pip install jupyter
    ```
     
-3.2 Test jupyter notebook
+3.2 Test the Jupyter notebook
 
-   In the terminal (or ubuntu terminal if using a windows machine), we need to enter the following:
+   In the terminal (or Ubuntu terminal if using a Windows machine), we need to enter the following:
     
    ```
    jupyter notebook
    ```
-   This will start a remote jupyter notebook server with the environment we have just set up.
+   This will start a remote Jupyter notebook server within the environment we have just set up.
     
-   You will see the following after entering 'jupyter notebook':
+   You will see the following prompt after entering 'Jupyter notebook':
 
 <img width="510" alt="jupyter_tut" src="https://github.com/DanielYyork/polymer_simulator/assets/93723782/9718b875-aeb0-421b-a134-87e945d9b585">
 
-   No we can select the first URL (the one containing 'localhost:8888') and copy and paste it into a browser, this will launch jupyter notebook (fingers crossed!)
+   Now, you can select the first URL (the one containing 'localhost:8888') and copy and paste it into a browser, this will launch Jupyter notebook (fingers crossed!)
     
-   From there we can naviagate to the jupyter notebook folder and launch notebooks from there.
+   From there we can navigate to the Jupyter notebook folder and launch notebooks from there.
     
    For now, we will close the notebook and ensure our other packages are working properly.
     
