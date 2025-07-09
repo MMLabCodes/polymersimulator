@@ -2244,7 +2244,8 @@ class BuildAmberSystems(BuildSystems):
 
         rescode = self.manager.retrieve_rescode(molecule_name)
 
-        file_content = f"""loadamberprep {molecule_prepi_file}
+        file_content = f"""source leaprc.gaff
+             loadamberprep {molecule_prepi_file}
              loadamberparams {molecule_frcmod_file}
 
              list
