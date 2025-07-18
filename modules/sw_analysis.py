@@ -1065,31 +1065,38 @@ class Analysis:
     @staticmethod
     def plot_tg_from_replicas(universes, min_temp=None, max_temp=None, quench=20):
         """
-        Compute and plot Tg from multiple replica simulations using piecewise linear fit.
+        Compute Tg from combined data and estimate Tg uncertainty in Kelvin
+        from the variation in Tg estimates across individual replicas.
 
         Parameters:
             universes (list): List of replica objects, each with a `.data` DataFrame.
             min_temp (float): Minimum temperature to consider.
             max_temp (float): Maximum temperature to consider.
             quench (int): Temperature bin size (e.g., 20 K).
+
+        Returns:
+            tuple: (Tg_combined, Tg_error_K) both in Kelvin
         """
 
-        # Step 1: Combine all data from replicas
+        # Step 1: Combine all data
         all_data = pd.concat([u.data for u in universes], ignore_index=True)
 
-        # Step 2: Filter by temperature range
+        # Step 2: Filter by temperature
         filtered_data = all_data[
-            (all_data['Temperature (K)'] >= min_temp) & 
+            (all_data['Temperature (K)'] >= min_temp) &
             (all_data['Temperature (K)'] <= max_temp)
         ]
 
-        # Step 3: Bin temperatures
-        bins = pd.cut(filtered_data['Temperature (K)'], bins=range(min_temp, max_temp + quench, quench))
-        average_density = filtered_data.groupby(bins)['Density (g/mL)'].mean()
-        temp_midpoints = average_density.index.categories.mid
+        # Step 3: Bin temperatures and average density
+        bin_edges = list(range(min_temp, max_temp + quench, quench))
+        bins = pd.cut(filtered_data['Temperature (K)'], bins=bin_edges)
+        binned = filtered_data.groupby(bins)['Density (g/mL)']
+        avg_density = binned.mean()
+        std_density = binned.std()
+        temp_midpoints = avg_density.index.categories.mid
 
-        # Step 4: Piecewise Linear Fit
-        pwlf_model = pwlf.PiecewiseLinFit(temp_midpoints, average_density)
+        # Step 4: Piecewise fit on combined data
+        pwlf_model = pwlf.PiecewiseLinFit(temp_midpoints, avg_density)
         max_segments = 5
         best_segments = 1
         best_aic = float('inf')
@@ -1097,44 +1104,65 @@ class Analysis:
 
         for n in range(2, max_segments + 1):
             breaks = pwlf_model.fit(n)
-            aic = pwlf_model.ssr + 2 * n  # Approximate AIC
+            aic = pwlf_model.ssr + 2 * n
             if aic < best_aic:
                 best_aic = aic
                 best_segments = n
                 best_breaks = breaks
 
-        # Final fit with optimal segments
         pwlf_model.fit(best_segments)
+        tg_combined = float(f'{best_breaks[1]:.2f}')
+        print(f'Tg (combined data): {tg_combined} K')
 
-        # Report segment equations
-        for i in range(best_segments):
-            slope = pwlf_model.slopes[i]
-            intercept = pwlf_model.intercepts[i]
-            print(f'Segment {i+1}: y = {slope:.4f}x + {intercept:.4f}')
-    
-        # Identify breakpoints as potential Tg candidates
-        print(f'Breakpoints at: {best_breaks[1:-1]} K')
+        # Step 5: Estimate Tg for each individual replica
+        tg_replicas = []
+        for u in universes:
+            df = u.data
+            df = df[
+                (df['Temperature (K)'] >= min_temp) &
+                (df['Temperature (K)'] <= max_temp)
+            ]
+            bins = pd.cut(df['Temperature (K)'], bins=bin_edges)
+            avg = df.groupby(bins)['Density (g/mL)'].mean()
+            mids = avg.index.categories.mid
 
-        # Compute standard deviation for error bars
-        std_density = filtered_data.groupby(bins)['Density (g/mL)'].std()
+            if len(mids) < 4:
+                continue
 
-        # Plotting
+            try:
+                model = pwlf.PiecewiseLinFit(mids, avg)
+                model.fit(best_segments)
+                tg_rep = model.fit(best_segments)[1]
+                tg_replicas.append(tg_rep)
+            except:
+                continue
+
+        # Step 6: Calculate standard deviation in Tg (in Kelvin)
+        if len(tg_replicas) >= 2:
+            tg_std_k = float(f'{np.std(tg_replicas, ddof=1):.2f}')
+            print(f'Tg error (STD across replicas): ±{tg_std_k} K')
+        else:
+            tg_std_k = None
+            print("Warning: Not enough Tg estimates to calculate error.")
+
+        # Step 7: Plot
         plt.figure(figsize=(10, 6))
         plt.errorbar(
             temp_midpoints,
-            average_density,
+            avg_density,
             yerr=std_density,
             fmt='o',
-            capsize=3,        # Smaller caps
-            elinewidth=0.8,   # Thinner error bar lines
-            capthick=0.8,     # Thinner caps
-            alpha=0.8,        # Slight transparency
-            label='Avg Density ± Std (All Replicas)')
+            capsize=3,
+            elinewidth=0.8,
+            capthick=0.8,
+            alpha=0.8,
+            label='Avg Density ± Std (Combined)'
+        )
         plt.plot(temp_midpoints, pwlf_model.predict(temp_midpoints), 'r-', label='Piecewise Fit')
 
         for bp in best_breaks[1:-1]:
             plt.axvline(bp, linestyle='--', color='black', alpha=0.6)
-            plt.text(bp, min(average_density), f'{bp:.2f} K', rotation=90, verticalalignment='bottom', fontsize=12)
+            plt.text(bp, min(avg_density), f'{bp:.2f} K', rotation=90, verticalalignment='bottom', fontsize=12)
 
         plt.xlabel('Temperature (K)', fontsize=14)
         plt.ylabel('Average Density (g/mL)', fontsize=14)
@@ -1143,6 +1171,9 @@ class Analysis:
         plt.grid(True)
         plt.tight_layout()
         plt.show()
+
+        return tg_combined, tg_std_k
+
 
     
     def plot_columns(df, x_col, y_col, title=None, xlabel=None, ylabel=None, bins=None):
