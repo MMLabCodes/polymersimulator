@@ -1062,9 +1062,92 @@ class Analysis:
         plt.show()
         return(float(f'{best_breaks[1:-1][0]:.2f}'))
 
-    def plot_columns(df, x_col, y_col, title=None, xlabel=None, ylabel=None):
+    @staticmethod
+    def plot_tg_from_replicas(universes, min_temp=None, max_temp=None, quench=20):
         """
-        Plots two columns from a DataFrame against each other.
+        Compute and plot Tg from multiple replica simulations using piecewise linear fit.
+
+        Parameters:
+            universes (list): List of replica objects, each with a `.data` DataFrame.
+            min_temp (float): Minimum temperature to consider.
+            max_temp (float): Maximum temperature to consider.
+            quench (int): Temperature bin size (e.g., 20 K).
+        """
+
+        # Step 1: Combine all data from replicas
+        all_data = pd.concat([u.data for u in universes], ignore_index=True)
+
+        # Step 2: Filter by temperature range
+        filtered_data = all_data[
+            (all_data['Temperature (K)'] >= min_temp) & 
+            (all_data['Temperature (K)'] <= max_temp)
+        ]
+
+        # Step 3: Bin temperatures
+        bins = pd.cut(filtered_data['Temperature (K)'], bins=range(min_temp, max_temp + quench, quench))
+        average_density = filtered_data.groupby(bins)['Density (g/mL)'].mean()
+        temp_midpoints = average_density.index.categories.mid
+
+        # Step 4: Piecewise Linear Fit
+        pwlf_model = pwlf.PiecewiseLinFit(temp_midpoints, average_density)
+        max_segments = 5
+        best_segments = 1
+        best_aic = float('inf')
+        best_breaks = None
+
+        for n in range(2, max_segments + 1):
+            breaks = pwlf_model.fit(n)
+            aic = pwlf_model.ssr + 2 * n  # Approximate AIC
+            if aic < best_aic:
+                best_aic = aic
+                best_segments = n
+                best_breaks = breaks
+
+        # Final fit with optimal segments
+        pwlf_model.fit(best_segments)
+
+        # Report segment equations
+        for i in range(best_segments):
+            slope = pwlf_model.slopes[i]
+            intercept = pwlf_model.intercepts[i]
+            print(f'Segment {i+1}: y = {slope:.4f}x + {intercept:.4f}')
+    
+        # Identify breakpoints as potential Tg candidates
+        print(f'Breakpoints at: {best_breaks[1:-1]} K')
+
+        # Compute standard deviation for error bars
+        std_density = filtered_data.groupby(bins)['Density (g/mL)'].std()
+
+        # Plotting
+        plt.figure(figsize=(10, 6))
+        plt.errorbar(
+            temp_midpoints,
+            average_density,
+            yerr=std_density,
+            fmt='o',
+            capsize=3,        # Smaller caps
+            elinewidth=0.8,   # Thinner error bar lines
+            capthick=0.8,     # Thinner caps
+            alpha=0.8,        # Slight transparency
+            label='Avg Density ± Std (All Replicas)')
+        plt.plot(temp_midpoints, pwlf_model.predict(temp_midpoints), 'r-', label='Piecewise Fit')
+
+        for bp in best_breaks[1:-1]:
+            plt.axvline(bp, linestyle='--', color='black', alpha=0.6)
+            plt.text(bp, min(average_density), f'{bp:.2f} K', rotation=90, verticalalignment='bottom', fontsize=12)
+
+        plt.xlabel('Temperature (K)', fontsize=14)
+        plt.ylabel('Average Density (g/mL)', fontsize=14)
+        plt.title('Density vs Temperature (Combined Replicas)', fontsize=16)
+        plt.legend()
+        plt.grid(True)
+        plt.tight_layout()
+        plt.show()
+
+    
+    def plot_columns(df, x_col, y_col, title=None, xlabel=None, ylabel=None, bins=None):
+        """
+        Plots two columns from a DataFrame against each other with optional binning.
 
         Parameters:
             df (pd.DataFrame): The input DataFrame.
@@ -1073,9 +1156,29 @@ class Analysis:
             title (str, optional): Title of the plot.
             xlabel (str, optional): Label for the x-axis. Defaults to x_col.
             ylabel (str, optional): Label for the y-axis. Defaults to y_col.
+            bins (int, optional): Number of bins to group the data into.
         """
+        x = df[x_col]
+        y = df[y_col]
+
+        if bins:
+            # Sort by x to maintain order before binning
+            sorted_df = df[[x_col, y_col]].sort_values(by=x_col)
+            x = sorted_df[x_col].values
+            y = sorted_df[y_col].values
+
+            # Create bin indices
+            bin_edges = np.linspace(x.min(), x.max(), bins + 1)
+            bin_indices = np.digitize(x, bins=bin_edges) - 1  # bin indices start at 0
+
+            # Compute mean x and y per bin
+            binned_x = [x[bin_indices == i].mean() for i in range(bins) if len(x[bin_indices == i]) > 0]
+            binned_y = [y[bin_indices == i].mean() for i in range(bins) if len(y[bin_indices == i]) > 0]
+
+            x, y = binned_x, binned_y
+
         plt.figure(figsize=(10, 6))
-        plt.plot(df[x_col], df[y_col], marker='o', linestyle='-', markersize=2)
+        plt.plot(x, y, marker='o', linestyle='-', markersize=3)
         plt.title(title if title else f"{y_col} vs {x_col}")
         plt.xlabel(xlabel if xlabel else x_col)
         plt.ylabel(ylabel if ylabel else y_col)
