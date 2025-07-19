@@ -896,7 +896,7 @@ class Analysis:
         return pls, pbs
 
     @staticmethod
-    def plot_expansion_coeff(universe_object, bin_params=None, fit=True, plot=None):
+    def plot_expansion_coeff(universe_object, bin_params=None, fit=True, plot=False):
         if bin_params is None:
             print("Please specify the bin parameters for your system: [start_temp, target_temp, temp_increments]")
             return None, None
@@ -1162,7 +1162,7 @@ class Analysis:
 
         for bp in best_breaks[1:-1]:
             plt.axvline(bp, linestyle='--', color='black', alpha=0.6)
-            plt.text(bp, min(avg_density), f'{bp:.2f} K', rotation=90, verticalalignment='bottom', fontsize=12)
+            plt.text(bp, min(avg_density), f'{bp:.2f} K', rotation=90, verticalalignment='bottom', fontsize=16)
 
         plt.xlabel('Temperature (K)', fontsize=14)
         plt.ylabel('Average Density (g/mL)', fontsize=14)
