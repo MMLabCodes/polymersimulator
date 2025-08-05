@@ -1204,7 +1204,7 @@ class complex_fluid_model_builder:
         pass
 
     @staticmethod
-    def generate_packmol_bio_oil_cube(manager=None, model=None, tolerance=None, filetype=None, volume_scalar=None, molecule_scalar=None, molecule_path=None):
+    def generate_packmol_bio_oil_cube(manager=None, model=None, tolerance=None, filetype=None, volume_scalar=None, molecule_scalar=None, molecule_path=None, run_packmol=True):
         """
         Generates a Packmol input file to pack molecules into a 3D cube for bio-oil simulation.
 
@@ -1307,6 +1307,9 @@ class complex_fluid_model_builder:
             f.write('\n')
         f.close()   
 
+        if run_packmol == False:
+            return()
+        
         packmol_command = str(manager.packmol_path) + " < " + packmol_input_filepath
         print(packmol_command)
         try:
