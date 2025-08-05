@@ -1204,7 +1204,7 @@ class complex_fluid_model_builder:
         pass
 
     @staticmethod
-    def generate_packmol_bio_oil_cube(manager=None, model=None, tolerance=None, filetype=None, volume_scalar=None, molecule_scalar=None, molecule_path=None, run_packmol=True):
+    def generate_packmol_bio_oil_cube(manager=None, model=None, tolerance=None, filetype=None, volume_scalar=None, molecule_scalar=None, molecule_path=None, run_packmol=True, output_dir=None):
         """
         Generates a Packmol input file to pack molecules into a 3D cube for bio-oil simulation.
 
@@ -1257,18 +1257,22 @@ class complex_fluid_model_builder:
             model_name = f"{model.model_name}_mol_x{str(molecule_scalar)}_vol_x{str(volume_scalar)}"
 
         volume_scalar = 1.5 if volume_scalar is None else volume_scalar
+        molecule_scalar = 1 if molecule_scalar is None else molecule_scalar
         total_volume = model.min_vol_for_sim * molecule_scalar * volume_scalar
 
-        molecule_scalar = 1 if molecule_scalar is None else molecule_scalar
+        
 
         size = int((math.pow(total_volume, (1/3)))) # Note this is the side of one length of the box
         
         packmol_input_filename = model_name + ".inp"
         packmol_input_filepath = os.path.join(manager.packmol_inputs, packmol_input_filename)
-
         packmol_output_filename = model_name + ".pdb"
-        packmol_output_filepath = os.path.join(manager.packmol_systems, packmol_output_filename)
-      
+
+        if output_dir == None:
+            packmol_output_filepath = os.path.join(manager.packmol_systems, packmol_output_filename)
+        else:
+            packmol_output_filepath = os.path.join(output_dir, packmol_output_filename)
+        
         lines = []
     
         if tolerance is None:
@@ -1285,7 +1289,7 @@ class complex_fluid_model_builder:
             if molecule_path == None:
                 name = "structure " + manager.molecules_dir + f"/{name}/{name}.pdb" 
             else:
-                name = "structure" + molecule_path + f"/{name}/{name}.pdb"
+                name = "structure " + molecule_path + f"/{name}/{name}.pdb"
     
             if ratio == False:
                 number = "	" + "number " + str(1*molecule_scalar)
