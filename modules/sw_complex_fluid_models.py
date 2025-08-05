@@ -1204,7 +1204,7 @@ class complex_fluid_model_builder:
         pass
 
     @staticmethod
-    def generate_packmol_bio_oil_cube(manager=None, model=None, tolerance=None, filetype=None, volume_scalar=None, molecule_scalar=None):
+    def generate_packmol_bio_oil_cube(manager=None, model=None, tolerance=None, filetype=None, volume_scalar=None, molecule_scalar=None, molecule_path=None):
         """
         Generates a Packmol input file to pack molecules into a 3D cube for bio-oil simulation.
 
@@ -1257,7 +1257,7 @@ class complex_fluid_model_builder:
             model_name = f"{model.model_name}_mol_x{str(molecule_scalar)}_vol_x{str(volume_scalar)}"
 
         volume_scalar = 1.5 if volume_scalar is None else volume_scalar
-        total_volume = model.min_vol_for_sim * volume_scalar
+        total_volume = model.min_vol_for_sim * molecule_scalar * volume_scalar
 
         molecule_scalar = 1 if molecule_scalar is None else molecule_scalar
 
@@ -1281,9 +1281,12 @@ class complex_fluid_model_builder:
         filetype = "filetype " + filetype
         lines.extend([tolerance, ter, output, filetype])
 
-        def write_packmol_struct_block(manager, lines, name, ratio, total_mols_in_model, size):#
-         
-            name = "structure " + manager.molecules_dir + f"/{name}/{name}.pdb" 
+        def write_packmol_struct_block(manager, lines, name, ratio, total_mols_in_model, size, molecule_path=molecule_path):
+            if molecule_path == None:
+                name = "structure " + manager.molecules_dir + f"/{name}/{name}.pdb" 
+            else:
+                name = "structure" + molecule_path + f"/{name}/{name}.pdb"
+    
             if ratio == False:
                 number = "	" + "number " + str(1*molecule_scalar)
             else:
