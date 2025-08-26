@@ -1168,6 +1168,41 @@ class complex_fluid_models:
         write_output(output_file, lines)
         return(output_file)
 
+    @staticmethod
+    def gen_all_models(model_name):
+        from modules.sw_directories import complex_model_dirs
+        print(f"""Currently generating the following models for {model_name}:
+        - ALL
+        - FT
+        - PT
+        - AG
+        - SG
+
+        (If new models have been added this list might not comprehensive and/or new  models may not be generated)
+            """)
+    
+        manager = complex_model_dirs(os.getcwd(), model_name)
+
+        csv = os.path.join(manager.bio_oil_GC_data, f"{model_name}.csv")
+        molecules = csv_to_orca_class(csv)
+    
+         # Generate all model
+        all_model = complex_fluid_models.all_model(model_name, molecules)
+
+        # Generate fixed threshold model - and specify a selection threshold (i.e. 5%)
+        ft_model = complex_fluid_models.fixed_threshold_model(model_name, molecules, 5)
+
+        # Generate proportional threshold model
+        pt_model = complex_fluid_models.proportional_threshold_model(model_name, molecules)
+
+        # Generate abundancy grouping model
+        ag_model = complex_fluid_models.abundancy_grouped_model(model_name, molecules)
+
+        # Generate scored grouping model
+        sg_model = complex_fluid_models.scored_grouped_model(model_name, molecules)
+
+        return([all_model, ft_model, pt_model, ag_model, sg_model])
+
 class complex_fluid_model_builder:
     """
     A class responsible for generating, manipulating, and preparing complex fluid models for simulations.
@@ -1495,4 +1530,6 @@ class complex_fluid_model_builder:
         except Exception as e:
                      # Exception occurred during subprocess execution
                     print("Exception:", e)
+
+
     
