@@ -393,6 +393,7 @@ class BuildSimulation():
     # Start temp, max temp, cycles, holding_steps, steps at each temp
     anneal_parameters = [300, 700, 5, 10, 500000]
     minimized_only = None # This will change to True/False and will determine how periodic box vectors are set
+    acrylate_check_freq = 100
     
     def __init__(self, manager, filename):
         """
@@ -492,7 +493,7 @@ class BuildSimulation():
         """Display help information for the minimize_energy method."""
         print(cls.minimize_energy.__doc__)    
      
-    def anneal_NVT(self, simulation, start_temp=None, max_temp=None, cycles=None, quench_rate=None, steps_per_cycle=None, filename=None, save_restart=False, restart_name=None):
+    def anneal_NVT(self, simulation, start_temp=None, max_temp=None, cycles=None, quench_rate=None, steps_per_cycle=None, filename=None, save_restart=False, restart_name=None, verbose=True):
         """
         Function to perform simulated annealing on the provided simulation system.
         
@@ -598,6 +599,14 @@ class BuildSimulation():
         steps_per_slope = int(steps_per_cycle*0.4)
         holding_steps = int(steps_per_cycle*0.1) 
         steps_at_increment = int(steps_per_slope/increments)
+        if verbose==True:
+            print(f"""Annealing information:
+                 - Number of heating/cooling increments: {increments}
+                 - Steps per temperature in-/decrease: {steps_per_slope}
+                 - Holding steps at {max_temp} k: {holding_steps}
+                 - Steps at heating/cooling increment: {steps_at_increment}
+                 - Total simulation time {(total_steps * self.timestep):.0f} fs
+                    """)
 
         def cycle(start_temp, max_temp, steps_at_increment, holding_steps, increments, quench_rate):
             integrator.setTemperature(start_temp)
@@ -646,7 +655,7 @@ class BuildSimulation():
     def anneal_help(cls):
         """Display help information for the anneal method."""
         print(cls.anneal.__doc__)    
-    def basic_NPT(self, simulation, total_steps=None, temp=None, pressure=None, filename=None, save_restart=False, restart_name=None):
+    def basic_NPT(self, simulation, total_steps=None, temp=None, pressure=None, filename=None, save_restart=False, restart_name=None, verbose=True):
         """
         Function to equilibrate the provided simulation to reach a specified temperature and pressure.
         
@@ -697,6 +706,14 @@ class BuildSimulation():
             temp = self.temp
         if pressure is None:
             pressure = self.pressure
+
+        if verbose==True:
+            print(f"""Basic npt information
+                - Total steps: {total_steps}
+                - Total simulation time: {(total_steps * self.timestep):.0f} fs
+                - Temperature: {temp} K
+                - Pressure: {pressure} atm
+                """)
             
         # Extract positional info
         state = simulation.context.getState(getPositions=True, getEnergy=True) # Define state object 
@@ -770,7 +787,7 @@ class BuildSimulation():
         """Display help information for the equilibrate method."""
         print(cls.basic_NPT.__doc__) 
         
-    def basic_NVT(self, simulation, total_steps=None, temp=None, filename=None, save_restart=False, restart_name=None):
+    def basic_NVT(self, simulation, total_steps=None, temp=None, filename=None, save_restart=False, restart_name=None, check_acrylate=False, verbose=True):
         """
         Function to perform a production run simulation with the provided parameters.
         
@@ -815,6 +832,13 @@ class BuildSimulation():
             total_steps = self.total_steps
         if temp is None:
             temp = self.temp
+
+        if verbose==True:
+            print(f"""Basic npt information
+                - Total steps: {total_steps}
+                - Total simulation time: {(total_steps * self.timestep):.0f} fs
+                - Temperature: {temp} K
+                """)
             
         # Extract positional info
         state = simulation.context.getState(getPositions=True, getEnergy=True) # Define state object 
@@ -854,7 +878,18 @@ class BuildSimulation():
         output_dataname = os.path.join(self.output_dir, (self.filename + filename + str(self.timestamp)))
         dataWriter = DataWriter(output_dataname, self.reporter_freq, total_steps)
         simulation.reporters.append(dataWriter.stateDataReporter) 
-        simulation.step(total_steps)
+        if check_acrylate == False:
+            simulation.step(total_steps)
+        else:
+            print(f"Total steps are: {total_steps}. Acrylate check steps are: {self.acrylate_check_freq}")
+            number_of_checks = int(total_steps/self.acrylate_check_freq)
+            print(f"Number of checks: {number_of_checks}")
+            
+            for i in range(number_of_checks):
+                simulation.step(self.acrylate_check_freq)
+                new_coords = self.save_rst(simulation, restart_name="Acrylate_check", overwrite=True)
+                AcrylateReact.identify_acrylate_bonds_dist(self.topology_file, new_coords)
+                # Then need to check if close enough and then update topology
 
         prod_end_time = time.time()
         time_taken = prod_end_time - prod_start_time
@@ -1121,7 +1156,7 @@ class BuildSimulation():
             
         return(simulation, (output_dataname + ".txt"))
         
-    def save_rst(self, simulation, restart_name=None):
+    def save_rst(self, simulation, restart_name=None, overwrite=False):
         if restart_name == None:
             restart_name = f'final_{self.filename}'
         else:
@@ -1140,13 +1175,17 @@ class BuildSimulation():
         restart_folder = os.path.join(self.manager.systems_dir, restart_name)
         if not os.path.exists(restart_folder):
             os.makedirs(restart_folder)
-        rst_filename = os.path.join(restart_folder, restart_name)
-        parm.save(f"{rst_filename}.rst7", format='rst7')
+        rst_filename = os.path.join(restart_folder, f"{restart_name}.rst7")
+
+        if overwrite == True:
+            parm.save(rst_filename, format='rst7', overwrite=overwrite)
+        else:
+            parm.save(rst_filename, format='rst7')
 
         # Finally copy the topology
         new_top_name = os.path.join(restart_folder, f"{restart_name}.prmtop")
         shutil.copy(self.topology_file, new_top_name)
-
+        return(rst_filename)
     
     @classmethod
     def production_run_help(cls):
@@ -1615,3 +1654,55 @@ class ANISimulation(BuildSimulation):
         """
         cls.potential = potential
         print("Potential set to: ", str(potential))
+
+class AcrylateReact():
+    def __init__(self):
+        pass
+
+    def identify_acrylate_bonds(topology=None, coordinates=None, step_check_freq=None):
+        parm = pm.load_file(topology, coordinates)
+
+        double_bonds = []
+        sp2_types = {'c2', 'ce'}
+
+        for bond in parm.bonds:
+            a1, a2 = bond.atom1, bond.atom2
+            if a1.atomic_number == 6 and a2.atomic_number == 6:
+                if a1.type in sp2_types and a2.type in sp2_types:
+                    double_bonds.append((a1, a2))
+
+        print(double_bonds)
+
+    def identify_acrylate_bonds_dist(topology=None, coordinates=None, step_check_freq=None, bond_center_cutoff=6):
+        parm = pm.load_file(topology, coordinates)
+        sp2_types = {'c2', 'ce'}
+
+        double_bonds = []
+        bond_centers = []
+
+        for bond in parm.bonds:
+            a1, a2 = bond.atom1, bond.atom2
+            if a1.atomic_number == 6 and a2.atomic_number == 6:
+                if a1.type in sp2_types and a2.type in sp2_types:
+                    double_bonds.append((a1, a2))
+                    # Compute center of bond
+                    pos1 = parm.coordinates[a1.idx]
+                    pos2 = parm.coordinates[a2.idx]
+                    center = 0.5 * (pos1 + pos2)
+                    bond_centers.append(center)
+
+        print(f"Found {len(double_bonds)} C=C candidate bonds.")
+
+        # Report pairwise bond center distances
+        for (i, j) in itertools.combinations(range(len(bond_centers)), 2):
+            center1 = bond_centers[i]
+            center2 = bond_centers[j]
+            dist = np.linalg.norm(center1 - center2)
+            print(f"Center distance between bond {i} and bond {j}: {dist:.3f} Å")
+
+            if dist < bond_center_cutoff:
+                print(f"  -> Close bond centers detected (distance < {bond_center_cutoff} Å)")
+
+    def react_acrylate_groups():
+        pass
+        
