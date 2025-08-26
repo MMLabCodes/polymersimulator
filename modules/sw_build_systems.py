@@ -466,7 +466,7 @@ class BuildAmberSystems(BuildSystems):
         with open(file_path, 'w') as file:
             file.writelines(modified_lines)
     
-    def parameterize_mol(self, molecule_name=None, forcefield=None):
+    def parameterize_mol(self, molecule_name=None, forcefield=None, charge_model=None):
         if  molecule_name == None:
             print("Please provide 1 argument as follows: parametrize_mol(molecule_name)")
             print("Directories: A python object generated with the PolymerSimulatorDirs(filepath) method imported from sw_directories")
@@ -477,6 +477,16 @@ class BuildAmberSystems(BuildSystems):
             forcefield = "GAFF"
         else:
             forcefield = forcefield
+
+        if charge_model == None:
+            print("Charge models supported are: bcc, abcg2")
+            charge_model = "bcc -s 2"
+        elif charge_model == "bcc":
+            charge_model = "bcc -s 2"
+        else:
+            charge_model = charge_model
+
+        
         # Create a new directory for param files for the molecule and copy pdb there
         pdb_filepath = os.path.join(self.manager.pdb_file_dir, (molecule_name + ".pdb"))
         self.mod_pdb_file(pdb_filepath)
@@ -489,7 +499,8 @@ class BuildAmberSystems(BuildSystems):
         # Specify paths for tleap
         pdb_filepath = os.path.join(param_mol_dir, (molecule_name + ".pdb"))
         mol2_filepath = os.path.join(param_mol_dir, (molecule_name + ".mol2"))
-        antechamber_command = "antechamber -i " + pdb_filepath + " -fi pdb -o " + mol2_filepath + " -fo mol2 -c bcc -s 2"       
+        antechamber_command = f"antechamber -i {pdb_filepath} -fi pdb -o {mol2_filepath} -fo mol2 -c {charge_model} -at {forcefield}"
+        #antechamber_command = "antechamber -i " + pdb_filepath + " -fi pdb -o " + mol2_filepath + " -fo mol2 -c bcc -s 2"       
         subprocess.run(antechamber_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     
         frcmod_filepath = os.path.join(param_mol_dir, (molecule_name + ".frcmod"))
@@ -1341,6 +1352,7 @@ class BuildAmberSystems(BuildSystems):
         box_edge_len = int((max(x,y,z))*2)
         box_sizes = box_edge_len, box_edge_len, box_edge_len
         file_content=f"""tolerance 2.0
+            add_amber_ter
             output {array_pdb}
             filetype pdb
             structure {pdb_file}
@@ -1364,8 +1376,7 @@ class BuildAmberSystems(BuildSystems):
         except Exception as e:
         # Exception occurred during subprocess execution
             print("Exception:", e)
-        
-        self.add_ter_to_pckml_result(array_pdb, base_molecule_name)
+
         return(system_name)
 
     def gen_amber_params_4_pckml_array(self, system_name, base_molecule_name):
@@ -1674,6 +1685,7 @@ class BuildAmberSystems(BuildSystems):
         box_edge_len = int((max(x,y,z))*2)
         box_sizes = box_edge_len, box_edge_len, box_edge_len
         file_content=f"""tolerance 2.0
+            add_amber_ter
             output {array_pdb}
             filetype pdb
             structure {pdb_file}
@@ -1697,8 +1709,7 @@ class BuildAmberSystems(BuildSystems):
         except Exception as e:
         # Exception occurred during subprocess execution
             print("Exception:", e)
-        
-        self.add_ter_to_pckml_result(array_pdb, base_molecule_name)
+
         return(system_name)
         
     def generate_polymer_5_5_array(self, base_molecule_name, molecule_name, method, crystal_trans=None):
