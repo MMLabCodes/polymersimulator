@@ -557,62 +557,55 @@ class PolyDataDirs(SnippetSimManage):
         display(multi_select, custom_text, clear_checkbox, button)
 
     
-    def get_poly_param(self, name, column, condition=None):
+    def get_poly_param(self, name, column, index=None, condition=None):
         """
-        Retrieve a parameter value from the CSV for a given molecule name.
-    
+        Retrieve a parameter from the CSV for a given molecule name.
+
         Parameters:
-        - file_path (str): Path to the CSV file.
-        - name (str): The molecule name to search for.
-        - column (str): The parameter name to retrieve.
-        - condition (function, optional): A function to apply extra conditions on the result.
+        - name (str): Molecule name to look for.
+        - column (str): Column name to retrieve data from.
+        - index (int, optional): Return the i-th item if the value is a list.
+        - condition (function, optional): Apply a custom function to the result.
 
         Returns:
-        - The extracted parameter (list, float, etc.), or None if not found.
+        - The result value (full list, element, or condition output), or None.
         """
-        if column == "Thermal expansion params":
-            condition = self.parse_list
         try:
-            # Read the CSV file
             df = pd.read_csv(self.poly_data)
 
-            # Ensure columns exist
             if "Name" not in df.columns or column not in df.columns:
                 print("Requested column or 'Name' column does not exist.")
                 return None
 
-            # Find the row for the given molecule
             value = df.loc[df["Name"] == name, column]
 
             if value.empty:
                 print("No entry found for this molecule.")
                 return None
 
-            # Extract first match
             value = value.iloc[0]
 
-            # Convert list-like strings back into Python lists
             try:
-                value = ast.literal_eval(value)  # Safely convert if it's a list
+                value = ast.literal_eval(value)
             except (ValueError, SyntaxError):
-                pass  # If conversion fails, keep it as a string/float
+                pass  # leave as-is
 
-            # Apply a condition if provided
+            if index is not None and isinstance(value, list):
+                return value[index] if index < len(value) else None
+
             if condition is not None and callable(condition):
-                if condition == self.parse_list:
-                    value = condition(value)
-                return(value)  # Apply condition function
-            else:
-                return value
+                return condition(value)
+
+            return value
 
         except Exception as e:
             print(f"Error reading CSV: {e}")
             return None
 
-    def update_poly_csv(self, name, column, value):
+    def update_poly_csv(self, name, column, value, overwrite=False):
         file_path = self.poly_data
 
-        # Load CSV if it exists, otherwise create an empty DataFrame
+        # Load or initialize DataFrame
         if os.path.exists(file_path) and os.path.getsize(file_path) > 0:
             df = pd.read_csv(file_path)
         else:
@@ -622,7 +615,7 @@ class PolyDataDirs(SnippetSimManage):
         if "Name" not in df.columns:
             df["Name"] = ""
 
-        # Check if the row with 'name' exists
+        # Add new row if needed
         if name not in df["Name"].values:
             new_row = pd.DataFrame({"Name": [name]})
             df = pd.concat([df, new_row], ignore_index=True)
@@ -631,18 +624,36 @@ class PolyDataDirs(SnippetSimManage):
         if column not in df.columns:
             df[column] = ""
 
-        # Convert value to string if it's a list/array
-        if isinstance(value, (list, tuple, dict, pd.Series, pd.DataFrame, np.ndarray)):  
-            value = str(value)  
+        # Get current value (if any)
+        current_value = df.loc[df["Name"] == name, column].values[0]
 
-        # Assign value properly
-        df.loc[df["Name"] == name, column] = value
+        # Convert from string to list if needed
+        if not overwrite and pd.notna(current_value) and current_value != "":
+            try:
+                current_list = eval(current_value)
+                if not isinstance(current_list, list):
+                    current_list = [current_list]
+            except:
+                current_list = [current_value]
+        else:
+            current_list = []
 
-        # Save the updated CSV
+        # Append or overwrite
+        if overwrite:
+            new_value = [value] if not isinstance(value, list) else value
+        else:
+            if isinstance(value, list):
+                new_value = current_list + value
+            else:
+                new_value = current_list + [value]
+
+        # Store as string
+        df.loc[df["Name"] == name, column] = str(new_value)
+
+        # Save and update internal data
         df.to_csv(file_path, index=False)
         print(f"Updated {file_path} successfully!")
 
-        # Update dataframe attribute
         self.data = pd.read_csv(self.poly_data)
 
 
@@ -668,10 +679,6 @@ class BioOilDirs(SnippetSimManage):
         self.bio_oil_dir = os.path.join(main_dir, 'bio_oil')
         if not os.path.exists(self.bio_oil_dir):
             os.makedirs(self.bio_oil_dir)
-
-        self.bio_oil_systems_dir = os.path.join(self.bio_oil_dir, 'systems')
-        if not os.path.exists(self.bio_oil_systems_dir):
-            os.makedirs(self.bio_oil_systems_dir)
 
         self.bio_oil_GC_data = os.path.join(self.bio_oil_dir, 'GC_data')
         if not os.path.exists(self.bio_oil_GC_data):
@@ -712,82 +719,6 @@ class BioOilDirs(SnippetSimManage):
                     except Exception as e:
                         print(f"Error reading {csv_file}: {e}")
 
-    def bio_oil_pckml_inputs_avail(self):
-        avail_files = []
-        # Walk through the directory tree recursively
-        for root, dirs, files in os.walk(self.bio_oil_systems_dir):
-            dirs[:] = [d for d in dirs if d != 'depreceated']
-            # Check each file in the current directory
-            for file in files:
-                # Check if the file has a .pdb extension
-                if file.endswith(".pdckml") or file.endswith(".inp"):
-                    # Construct the full path to the .pdb file
-                    pdb_file_path = os.path.join(root, file)
-                    # Extract molecule name
-                    pdb_file = pdb_file_path.split("/")[-1]
-                    avail_files.append(pdb_file_path)
-                    print(pdb_file)
-        return(avail_files)
-
-    def bio_oil_amber_systems_avail(self):
-        a = False
-        amber_system_avail =[]
-        for root, dirs, files in os.walk(self.bio_oil_systems_dir):
-            dirs[:] = [d for d in dirs if d != 'depreceated']
-            # Check each file in the current directory
-            for file in files:
-                # Check if the file has a .pdb extension
-                if file.endswith(".prmtop"):
-                    a = True
-                    # Construct the full path to the .pdb file
-                    prmtop_filepath = os.path.join(root, file)
-                    # Extract molecule name
-                    prmtop_file = prmtop_filepath.split("/")[-1]
-                    amber_system_avail.append(prmtop_file)
-                    #print(pdb_file)
-                if file.endswith(".rst7"):
-                    a = True
-                    # Construct the full path to the .pdb file
-                    rst7_filepath = os.path.join(root, file)
-                    amber_system_avail.append(rst7_filepath)
-                    # Extract molecule name
-                    rst7_file = rst7_filepath.split("/")[-1]
-                    #print(pdb_file)
-        if a == True:
-            print("")
-            print("Remember you need both .prmtop and .rst7 files to run a simulation")    
-            return(amber_system_avail)
-        if a == False:
-            print("No parametrized molecules.")
-            return(None)
-
-    def load_bio_oil_amber_filepaths(self, system_name=None):
-        prmtop_file_path = None
-        coord_file_path = None
-        if system_name == None:
-            print("Please provide the name of the system you are retrieving files as follows: 'topology_file, coordinate_file = directories.retrieve_top_crds('ethane')")
-            print("Change ethane for the name of the desired system")
-            print("NOTE: Amber files must be generated using tleap prior to this step")
-            return(None)
-        for root, dirs, files in os.walk(self.bio_oil_systems_dir):
-            dirs[:] = [d for d in dirs if d != 'depreceated']
-            # Check each file in the current directory
-            for file in files:
-                # Check if the file has a .pdb extension
-                #if file.endswith(".prmtop") and system_name in file: 
-                if file == (system_name + ".prmtop"):
-                    # Construct the full path to the .pdb file
-                    prmtop_file_path = os.path.join(root, file)
-                #if file.endswith(".rst7") and system_name in file:
-                if file == (system_name + ".rst7"):
-                    # Construct the full path to the .pdb file
-                    coord_file_path = os.path.join(root, file)
-        if (prmtop_file_path is not None) and (coord_file_path is not None):
-            return(prmtop_file_path, coord_file_path)
-        else:
-            print("Files not found. Check name of molecule/system and if files have been generated.")
-            return(None)
-
 
 # This class should be inititated when you start handing specific data for a model
 # i.e. there will be an instance of this specific to each model
@@ -795,7 +726,7 @@ class complex_model_dirs(BioOilDirs):
     def __init__(self, main_dir, model_name, *args, **kwargs):
         super().__init__(main_dir, *args, **kwargs)
         
-        self.complex_model_dir = os.path.join(self.bio_oil_dir, model_name)
+        self.complex_model_dir = os.path.join(self.bio_oil_models_dir, model_name)
         if not os.path.exists(self.complex_model_dir):
             os.makedirs(self.complex_model_dir)
 
@@ -803,17 +734,25 @@ class complex_model_dirs(BioOilDirs):
         if not os.path.exists(self.dft_input_dir):
             os.makedirs(self.dft_input_dir)
 
-        self.packmol_inputs = os.path.join(self.complex_model_dir, "packmol_inputs")
+        self.packmol_dir = os.path.join(self.complex_model_dir, "packmol")
+        if not os.path.exists(self.packmol_dir):
+            os.makedirs(self.packmol_dir)
+
+        self.packmol_inputs = os.path.join(self.packmol_dir, "packmol_inputs")
         if not os.path.exists(self.packmol_inputs):
             os.makedirs(self.packmol_inputs)
 
-        self.packmol_systems = os.path.join(self.complex_model_dir, "packmol_systems")
+        self.packmol_systems = os.path.join(self.packmol_dir, "packmol_pdbs")
         if not os.path.exists(self.packmol_systems):
             os.makedirs(self.packmol_systems)
 
         self.output_files = os.path.join(self.complex_model_dir, "output_files")
         if not os.path.exists(self.output_files):
             os.makedirs(self.output_files)
+
+        self.amber = os.path.join(self.complex_model_dir, "amber")
+        if not os.path.exists(self.amber):
+            os.makedirs(self.amber)    
 
     def packmol_systems_avail(self):
         avail_files = []
