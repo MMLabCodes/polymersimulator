@@ -1169,8 +1169,7 @@ class complex_fluid_models:
         return(output_file)
 
     @staticmethod
-    def gen_all_models(model_name):
-        from modules.sw_directories import complex_model_dirs
+    def gen_all_models(manager, model_name, write_output=True):
         print(f"""Currently generating the following models for {model_name}:
         - ALL
         - FT
@@ -1180,8 +1179,6 @@ class complex_fluid_models:
 
         (If new models have been added this list might not comprehensive and/or new  models may not be generated)
             """)
-    
-        manager = complex_model_dirs(os.getcwd(), model_name)
 
         csv = os.path.join(manager.bio_oil_GC_data, f"{model_name}.csv")
         molecules = csv_to_orca_class(csv)
@@ -1201,7 +1198,16 @@ class complex_fluid_models:
         # Generate scored grouping model
         sg_model = complex_fluid_models.scored_grouped_model(model_name, molecules)
 
-        return([all_model, ft_model, pt_model, ag_model, sg_model])
+        # Create ranked dataframe of models
+        models = [all_model, ft_model, pt_model, ag_model, sg_model]
+        df = complex_fluid_models.generate_model_df(models)
+        ranked_df = complex_fluid_models.rank_models(df)
+
+        if write_output == True:
+            output_filename = os.path.join(manager.output_files, f"{model_name}.out")
+            complex_fluid_models.write_output_file(manager, models, output_filename, ranked_df)
+  
+        return(ranked_df, models)
 
 class complex_fluid_model_builder:
     """
@@ -1363,7 +1369,7 @@ class complex_fluid_model_builder:
         # Exception occurred during subprocess execution
             print("Exception:", e)
     
-        return()
+        return(packmol_output_filepath)
 
     @staticmethod
     def extract_unique_rescodes(pdb_file):
@@ -1499,7 +1505,7 @@ class complex_fluid_model_builder:
 
         file_content += f"system = loadpdb {system_pdb_path}\n"
 
-        output_dir = os.path.join(manager.bio_oil_systems_dir, system_name)
+        output_dir = os.path.join(manager.amber, system_name)
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
     
@@ -1530,6 +1536,18 @@ class complex_fluid_model_builder:
         except Exception as e:
                      # Exception occurred during subprocess execution
                     print("Exception:", e)
+
+        return(prmtop_file, rst7_file)
+
+    @staticmethod
+    def prep_amber_parameters(manager, pdb_file):
+            uniq_res = complex_fluid_model_builder.extract_unique_rescodes(pdb_file)
+            molecule_list = complex_fluid_model_builder.load_molecule_list(manager)
+            matched_molecules = complex_fluid_model_builder.find_matching_molecules(uniq_res, molecule_list)
+            top, coord = complex_fluid_model_builder.generate_amber_params_from_packmol_bio_oil(manager, matched_molecules, pdb_file)
+        
+            return(top, coord)
+        
 
 
     
