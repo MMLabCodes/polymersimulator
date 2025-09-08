@@ -33,6 +33,7 @@ class DFT_input_generator():
     basis_set = "def2-tzvp"
     keepdens = True
     opt = True
+    resp = False
     nprocs = 10
     
     def __init__(self):
@@ -49,6 +50,9 @@ class DFT_input_generator():
         keywords += (" " + cls.basis_set)
         if cls.opt:
             keywords += " Opt"
+        if cls.resp:
+            keywords += " chelpg"
+            
         template_filled = cls.dft_template.format(
             keywords=keywords,
             dens_file=filename + ".dens.cube",
@@ -66,6 +70,9 @@ class DFT_input_generator():
 
     @classmethod
     def set_opt(cls, opt):
+        if not isinstance(opt, bool):
+            print("Please provide True or False.")
+            return()
         cls.opt = opt
         if opt == True:
             print("Geometry optimization will be executed.")
@@ -73,12 +80,44 @@ class DFT_input_generator():
             print("No geometry optimization will be executed.")
 
     @classmethod
+    def set_resp(cls, resp):
+        if not isinstance(resp, bool):
+            print("Please provide True or False.")
+            return()
+        cls.resp = resp
+        if resp == True:
+            print("Resp file will be generated.")
+        if resp == False:
+            print("No resp file will be generated.")
+
+    @classmethod
     def set_functional(cls, functional):
-        list_of_accepted_functionals = []
+        list_of_accepted_functionals = ["HF"]
         if functional in list_of_accepted_functionals:
+            print(f"Functional set to {functional}")
             cls.functional = functional
         else:
             print("Functional not accepted. Using B3LYP as default.")
+
+    @classmethod
+    def set_dispersion_correction(cls, dispersion_correction):
+        if not isinstance(dispersion_correction, bool):
+            print("Please provide true or false")
+        cls.dispersion_correction = dispersion_correction
+        if dispersion_correction == True:
+            print("Disperion correction will be applied.")
+
+        if dispersion_correction == False:
+            print("Dispersion correction will not be applied.")
+            
+    @classmethod
+    def set_basis_set(cls, basis_set):
+        list_of_accepted_basis_sets = ["6-31G*"]
+        if basis_set in list_of_accepted_basis_sets:
+            print(f"Basis set set to {basis_set}")
+            cls.basis_set = basis_set
+        else:
+            print("Basis set not accepted. Using def2-tzvp as default.")
 
     @classmethod
     def set_nprocs(cls, nprocs):
