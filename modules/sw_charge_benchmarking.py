@@ -5,6 +5,9 @@ from openff.toolkit.topology import Molecule
 from openff.units import unit
 from openff.toolkit.utils.toolkits import NAGLToolkitWrapper
 
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning, module="naglmbis.utils")
+
 import matplotlib.pyplot as plt
 import itertools
 import os as os
@@ -20,6 +23,8 @@ class benchmark_charges():
         self.charge_models = ["bcc", "mul", "gas"]#, "abcg2"]
         self.charge_paths = []
         self.base_labels = None
+        self.mbis_script_path = "/home/dan/polymersimulator/bin/calculate_mbis.sh"
+        self.naglmbis_dir = "/home/dan/polymersimulator/naglmbis"
 
         if self.pdb_file == None:
             try:
@@ -61,7 +66,7 @@ class benchmark_charges():
             """)
             
         # Load molecule from pdb and smiles
-        mol = Molecule.from_pdb_and_smiles(self.pdb_file, self.smiles)
+        mol = Molecule.from_pdb_and_smiles(self.pdb_file, self.smiles, allow_undefined_stereo=True)
 
         # Initialize Nagl
         nagl = NAGLToolkitWrapper()
@@ -76,7 +81,19 @@ class benchmark_charges():
             for i, charge in enumerate(mol.partial_charges):
                 f.write(f"Atom {i}: {charge.m:.6f} e\n")
         self.charge_paths.append(nagl_path)
-                
+
+    def calculate_mbis_charge(self):
+        filename = os.path.join(self.benchmarking_dir, "mbis.mbis")
+        try:
+            result = subprocess.run(["bash", self.mbis_script_path, filename, self.smiles], check=True, text=True, capture_output=True)
+            print("Script output:\n", result.stdout)
+            if result.stderr:
+                pass
+                print("Script errors:\n", result.stderr)
+        except subprocess.CalledProcessError as e:
+            print(f"Error while running {self.mbis_script_path}: {e}")
+            print("stderr:\n", e.stderr)
+        self.charge_paths.append(filename)
         
     def extract_mol2_charges(self, filename):
         atom_labels = []
@@ -123,6 +140,29 @@ class benchmark_charges():
                         pass
         return charges
 
+    def extract_naglmbis_charges(self, filename):
+        """
+        Extract charges from a NAGL-MBIS .txt file (one charge per line).
+
+        Returns
+        -------
+        labels : list of str
+            Atom labels like '1', '2', ...
+        charges : list of float
+            List of partial charges
+        """
+        charges = []
+        with open(filename, "r") as f:
+            for line in f:
+                line = line.strip()
+                if line:
+                    try:
+                        charges.append(float(line))
+                    except ValueError:
+                        pass
+        labels = [str(i+1) for i in range(len(charges))]
+        return charges
+        
             
     def plot_charges(self, show_plot=True):
         """
@@ -145,6 +185,7 @@ class benchmark_charges():
         line_width = 1.0
 
         for infile in self.charge_paths:
+            print(infile)
             marker_style = next(marker_cycle)
 
             if infile.endswith(".mol2"):
@@ -159,6 +200,10 @@ class benchmark_charges():
                 linestyle = '-.'
             elif infile.endswith(".nagl"):
                 charges = self.extract_nagl_charges(infile)
+                labels = self.base_labels
+                linestyle = '--'
+            elif infile.endswith(".mbis"):
+                charges = self.extract_naglmbis_charges(infile)
                 labels = self.base_labels
                 linestyle = '--'
             else:
