@@ -98,7 +98,7 @@ class initialise:
             Dictionary mapping simulation steps to lists of corresponding files.
         """
         grouped_files = defaultdict(list)
-        sim_step_strings = ["1_atm", "temp_ramp_heat", "temp_ramp_cool", "min", "prod", "cooling_NPT_cool"]
+        sim_step_strings = ["1_atm", "temp_ramp_heat", "temp_ramp_cool", "min", "prod", "cooling_NPT_cool", "anneal"]
 
         for file in os.listdir(self.simulation_directory):
             if file.endswith(('.txt', '.dcd', '.pdb')):
@@ -445,6 +445,27 @@ class bio_oil_Universe(Universe):
 
         # Store molecule dictionary for reference
         self.molecule_dictionary = molecule_dictionary
+
+    @staticmethod
+    def atom_selection_to_res_selection(selected_atoms):
+        resid=None
+        list_of_res = []
+        res = []
+        for i in range(len(selected_atoms)):
+            if i == 0:
+                resid = selected_atoms[i].resid
+                res.append(selected_atoms[i])
+            elif selected_atoms[i].resid == resid:
+                res.append(selected_atoms[i])
+            elif selected_atoms[i].resid != resid:
+                list_of_res.append(sum(res))
+                resid = selected_atoms[i].resid
+                res = []
+                res.append(selected_atoms[i])
+            if i == len(selected_atoms)-1:
+                list_of_res.append(sum(res))
+
+        return(list_of_res)
         
         
 
@@ -1216,7 +1237,78 @@ class Analysis:
         plt.grid(True)
         plt.tight_layout()
         plt.show()
-        
+
+    @staticmethod
+    def run_kinisi(universe, list_of_atom_groups, name_of_atoms):
+        """
+        Analyzes diffusion properties of atom groups in a given universe.
+
+        Parameters:
+        universe : MDAnalysis.Universe
+            The molecular dynamics universe containing trajectory data.
+        list_of_atom_groups : list
+            List of atom groups to be analyzed.
+        name_of_atoms : str
+            Name of the atoms used for labeling the output.
+        """
+    
+        kinisi_selections = [selection.ids.tolist() for selection in list_of_atom_groups]
+    
+        # Ensure trajectory dimensions are properly set
+        universe.universe.dimensions = universe.universe.dimensions[:6]
+    
+        params = {
+            'specie': None,
+            'time_step': 0.001,
+            'step_skip': 1,
+            'progress': True,
+            'specie_indices': kinisi_selections
+        }
+    
+        xyz = {'dimension': 'xyz'}
+        kinisi_from_universe = DiffusionAnalyzer.from_universe(universe.universe, parser_params=params, uncertainty_params=xyz)
+    
+        kinisi_from_universe.diffusion(0.25)  # Cutoff for start of analysis
+    
+        print(f"The diffusion coefficient for {name_of_atoms} is {kinisi_from_universe.D.n}")
+    
+        # Plot Mean Squared Displacement (MSD) with confidence intervals
+        credible_intervals = [[16, 84], [2.5, 97.5], [0.15, 99.85]]
+        alpha = [0.6, 0.4, 0.2]
+    
+        plt.plot(kinisi_from_universe.dt, kinisi_from_universe.msd, 'k-')
+        for i, ci in enumerate(credible_intervals):
+            plt.fill_between(
+                kinisi_from_universe.dt,
+                *np.percentile(kinisi_from_universe.distribution, ci, axis=1),
+                alpha=alpha[i],
+                color='#0173B7',
+                lw=0
+            )
+        plt.ylabel('MSD/Å$^2$')
+        plt.xlabel(r'$\Delta t$/ps')
+        plt.show()
+
+    @staticmethod
+    def calc_diff(universe):
+        """
+        Calculates diffusion properties for each molecule type in the universe.
+
+        Parameters:
+        universe : MDAnalysis.Universe
+            The molecular dynamics universe containing trajectory and molecule information.
+        """
+    
+        names = list(universe.molecule_dictionary.keys())
+        rescodes = list(universe.molecule_dictionary.values())
+    
+        print(names)
+        print(rescodes)
+    
+        for name, rescode in zip(names, rescodes):
+            selected_atoms = universe.universe.select_atoms(f"resname {rescode}")
+            molecule_selections = bio_oil_Universe.atom_selection_to_res_selection(selected_atoms)
+            Analysis.run_kinisi(universe, molecule_selections, name)
 
 class universe_coord_extraction():
     # This class can extract coordinates and atom types of from mdanalysis universes and can write them to xyz files
