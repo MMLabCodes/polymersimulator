@@ -1240,6 +1240,9 @@ class Analysis:
 
     @staticmethod
     def run_kinisi(universe, list_of_atom_groups, name_of_atoms):
+        import kinisi
+        from kinisi.analyze import DiffusionAnalyzer
+        from MDAnalysis.transformations.nojump import NoJump
         """
         Analyzes diffusion properties of atom groups in a given universe.
 
@@ -1291,9 +1294,6 @@ class Analysis:
 
     @staticmethod
     def calc_diff(universe):
-        import kinisi
-        from kinisi.analyze import DiffusionAnalyzer
-        from MDAnalysis.transformations.nojump import NoJump
         """
         Calculates diffusion properties for each molecule type in the universe.
 
