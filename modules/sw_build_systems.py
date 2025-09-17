@@ -466,7 +466,7 @@ class BuildAmberSystems(BuildSystems):
         with open(file_path, 'w') as file:
             file.writelines(modified_lines)
     
-    def parameterize_mol(self, molecule_name=None, forcefield=None, charge_model=None):
+    def parameterize_mol(self, molecule_name=None, forcefield=None, charge_model=None, benchmarking_charges=False, benchmark_output=None):
         if  molecule_name == None:
             print("Please provide 1 argument as follows: parametrize_mol(molecule_name)")
             print("Directories: A python object generated with the PolymerSimulatorDirs(filepath) method imported from sw_directories")
@@ -480,28 +480,42 @@ class BuildAmberSystems(BuildSystems):
 
         if charge_model == None:
             print("Charge models supported are: bcc, abcg2")
-            charge_model = "bcc -s 2"
-        elif charge_model == "bcc":
-            charge_model = "bcc -s 2"
+            charge_model = "bcc"
         else:
             charge_model = charge_model
 
         
         # Create a new directory for param files for the molecule and copy pdb there
-        pdb_filepath = os.path.join(self.manager.pdb_file_dir, (molecule_name + ".pdb"))
-        self.mod_pdb_file(pdb_filepath)
-        param_mol_dir = os.path.join(self.manager.molecules_dir, molecule_name)
-        if not os.path.exists(param_mol_dir):
-            os.makedirs(param_mol_dir, exist_ok=True)
-        shutil.copy2(pdb_filepath, param_mol_dir)
-        os.remove(pdb_filepath)
-        
-        # Specify paths for tleap
-        pdb_filepath = os.path.join(param_mol_dir, (molecule_name + ".pdb"))
-        mol2_filepath = os.path.join(param_mol_dir, (molecule_name + ".mol2"))
+        try:
+            pdb_filepath = os.path.join(self.manager.pdb_file_dir, (molecule_name + ".pdb"))
+            self.mod_pdb_file(pdb_filepath)
+            if not os.path.exists(param_mol_dir):
+                os.makedirs(param_mol_dir, exist_ok=True)
+            shutil.copy2(pdb_filepath, param_mol_dir)
+            os.remove(pdb_filepath)
+        except Exception as e:
+            try: 
+                pdb_filepath = self.manager.load_pdb_filepath(molecule_name)
+            except Exception as e:
+                print(f"No pdb file found for {molecule_name}")
+                print("")
+                print(f"""The error can be found below:
+
+                {e}
+                """)
+                     
+        if benchmarking_charges == True:
+            mol2_filepath = f"{benchmark_output}.mol2"
+        else:
+            param_mol_dir = os.path.join(self.manager.molecules_dir, molecule_name)
+            pdb_filepath = os.path.join(param_mol_dir, (molecule_name + ".pdb"))
+            mol2_filepath = os.path.join(param_mol_dir, (molecule_name + ".mol2"))
+            
         antechamber_command = f"antechamber -i {pdb_filepath} -fi pdb -o {mol2_filepath} -fo mol2 -c {charge_model} -at {forcefield}"
-        #antechamber_command = "antechamber -i " + pdb_filepath + " -fi pdb -o " + mol2_filepath + " -fo mol2 -c bcc -s 2"       
         subprocess.run(antechamber_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+  
+        if benchmarking_charges == True:
+            return()
     
         frcmod_filepath = os.path.join(param_mol_dir, (molecule_name + ".frcmod"))
         parmchk_command = "parmchk2 -i " + mol2_filepath + " -f mol2 -o " + frcmod_filepath      
@@ -2456,4 +2470,48 @@ class PrepPackmolForAmber():
         except Exception as e:
                      # Exception occurred during subprocess execution
                     print("Exception:", e)
+
+    @staticmethod
+    def edit_itp_file(filename):
+
+        inside_atomtypes = False
+        new_lines = []
+
+        with open(filename, "r") as f:
+            for line in f:
+                stripped = line.strip()
+
+                # Detect start/end of atomtypes block
+                if stripped.startswith("[ atomtypes ]"):
+                    inside_atomtypes = True
+                    new_lines.append(line)
+                    continue
+                if inside_atomtypes and stripped.startswith("[") and not stripped.startswith("[ atomtypes ]"):
+                    inside_atomtypes = False
+
+                if inside_atomtypes and stripped:
+                    if stripped.startswith(";"):
+                        # Replace "bond_type" in the header with spaces
+                        new_line = line.replace("bond_type", " " * len("bond_type"))
+                        new_lines.append(new_line)
+                    else:
+                        # Split into words and spaces, preserving formatting
+                        parts = re.split(r"(\s+)", line.rstrip("\n"))
+
+                        # Word positions are at even indices
+                        words = [i for i in range(0, len(parts), 2)]
+
+                        if len(words) > 1:
+                            second_word_index = words[2]  # <-- second "word" column
+                            word = parts[second_word_index]
+                            # Replace with spaces of same length
+                            parts[second_word_index] = " " * len(word)
+
+                        new_line = "".join(parts) + "\n"
+                        new_lines.append(new_line)
+                else:
+                    new_lines.append(line)
+
+        with open(filename, "w") as f:
+            f.writelines(new_lines)
     
