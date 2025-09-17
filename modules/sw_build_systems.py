@@ -10,6 +10,7 @@ import os
 import subprocess
 import numpy as np
 import shutil
+import re
 from openbabel import openbabel, pybel
 from rdkit import Chem
 from rdkit.Chem import AllChem
@@ -2299,6 +2300,80 @@ class BuildAmberSystems(BuildSystems):
             print("Exception:", e)
         return(output_name)  
 
+    @staticmethod
+    def edit_itp_file(filename):
+
+        inside_atomtypes = False
+        new_lines = []
+
+        with open(filename, "r") as f:
+            for line in f:
+                stripped = line.strip()
+
+                # Detect start/end of atomtypes block
+                if stripped.startswith("[ atomtypes ]"):
+                    inside_atomtypes = True
+                    new_lines.append(line)
+                    continue
+                if inside_atomtypes and stripped.startswith("[") and not stripped.startswith("[ atomtypes ]"):
+                    inside_atomtypes = False
+
+                if inside_atomtypes and stripped:
+                    if stripped.startswith(";"):
+                        # Replace "bond_type" in the header with spaces
+                        new_line = line.replace("bond_type", " " * len("bond_type"))
+                        new_lines.append(new_line)
+                    else:
+                        # Split into words and spaces, preserving formatting
+                        parts = re.split(r"(\s+)", line.rstrip("\n"))
+
+                        # Word positions are at even indices
+                        words = [i for i in range(0, len(parts), 2)]
+
+                        if len(words) > 1:
+                            second_word_index = words[2]  # <-- second "word" column
+                            word = parts[second_word_index]
+                            # Replace with spaces of same length
+                            parts[second_word_index] = " " * len(word)
+
+                        new_line = "".join(parts) + "\n"
+                        new_lines.append(new_line)
+                else:
+                    new_lines.append(line)
+
+        with open(filename, "w") as f:
+            f.writelines(new_lines)
+
+    @staticmethod
+    def run_acpype(manager, name, top, coord):
+        output_dir = os.path.join(manager.systems_dir, name)
+        output_file = f"{name}_GMX.top"
+        os.chdir(output_dir)
+    
+        try:
+            result = subprocess.run(["acpype", "-p", top, "-x", coord], capture_output=True, text=True)
+
+            print(f""" 
+            Return code: {result.returncode}
+            STDOUT: {result.stdout}
+            """)
+
+            generated_gromacs_path = os.path.join(output_dir, f"{name}.amb2gmx", output_file)
+            itp_file_path = os.path.join(output_dir, f"{name}.itp")
+            shutil.copy(generated_gromacs_path, itp_file_path)
+        
+    
+        except Exception as e:
+            print(f"""There was an error generating the .itp file {name}.
+
+            The error is printed below:
+
+            {e}""")
+
+        BuildAmberSystems.edit_itp_file(itp_file_path)
+
+        os.chdir(manager.main_dir)
+
         
 class PrepPackmolForAmber():
     
@@ -2471,47 +2546,5 @@ class PrepPackmolForAmber():
                      # Exception occurred during subprocess execution
                     print("Exception:", e)
 
-    @staticmethod
-    def edit_itp_file(filename):
 
-        inside_atomtypes = False
-        new_lines = []
-
-        with open(filename, "r") as f:
-            for line in f:
-                stripped = line.strip()
-
-                # Detect start/end of atomtypes block
-                if stripped.startswith("[ atomtypes ]"):
-                    inside_atomtypes = True
-                    new_lines.append(line)
-                    continue
-                if inside_atomtypes and stripped.startswith("[") and not stripped.startswith("[ atomtypes ]"):
-                    inside_atomtypes = False
-
-                if inside_atomtypes and stripped:
-                    if stripped.startswith(";"):
-                        # Replace "bond_type" in the header with spaces
-                        new_line = line.replace("bond_type", " " * len("bond_type"))
-                        new_lines.append(new_line)
-                    else:
-                        # Split into words and spaces, preserving formatting
-                        parts = re.split(r"(\s+)", line.rstrip("\n"))
-
-                        # Word positions are at even indices
-                        words = [i for i in range(0, len(parts), 2)]
-
-                        if len(words) > 1:
-                            second_word_index = words[2]  # <-- second "word" column
-                            word = parts[second_word_index]
-                            # Replace with spaces of same length
-                            parts[second_word_index] = " " * len(word)
-
-                        new_line = "".join(parts) + "\n"
-                        new_lines.append(new_line)
-                else:
-                    new_lines.append(line)
-
-        with open(filename, "w") as f:
-            f.writelines(new_lines)
     
