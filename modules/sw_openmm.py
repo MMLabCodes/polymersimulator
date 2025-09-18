@@ -5,6 +5,7 @@ Created on Wed Mar 13 13:50:12 2024
 @author: danie
 """
 import parmed as pm
+from parmed import load_file
 import numpy as np
 import pandas as pd
 import csv
@@ -445,8 +446,10 @@ class BuildSimulation():
             return "AMB"
         if isinstance(self, ANISimulation):
             return "ANI"
+        if isinstance(self, GromacsSimulation):
+            return "GRO"
         else:
-            return "Please specify type of simulation by calling <AmberSimulation> OR <ANISimulation> classes"
+            return "Please specify type of simulation by calling <AmberSimulation> OR <ANISimulation> OR <GromacsSimulation> classes"
     
     def minimize_energy(self):
         """
@@ -472,6 +475,11 @@ class BuildSimulation():
             platform = PLatform.getPlatformByName('CUDA')
             simulation = app.Simulation(self.ani_topology, system, integrator, platform)
             simulation.context.setPositions(self.ani_coordinates)
+
+        if BuildSimulation.type_of_simulation(self) == "GRO":
+            system = self.gro_topology.createSystem(nonbondedMethod=app.PME, nonbondedCutoff=self.nonbondedcutoff*nanometers, constraints=HBonds)
+            simulation = app.Simulation(self.gro_topology.topology, system, integrator)
+            simulation.context.setPositions(self.gro_coordinates.positions)
         
         simulation.minimizeEnergy()
 
@@ -1534,7 +1542,72 @@ class BuildSimulation():
             writer.writeheader()
             for section, info in self.log_info.items():
                 writer.writerow({'Section': section, **info})
-                
+
+class GromacsSimulation(BuildSimulation):
+    """
+    A class representing an AMBER molecular dynamics simulation.
+
+    This class is designed to initialize and manage an AMBER simulation using specified 
+    topology and coordinates files. It inherits from the BuildSimulation class.
+
+    Attributes:
+        manager (str): A manager object that handles directories and file paths for simulations.
+        filename (str): The base name of the topology file without the extension.
+        amb_coordinates (app.AmberInpcrdFile): An object representing the AMBER coordinates file.
+        amb_topology (app.AmberPrmtopFile): An object representing the AMBER topology file, 
+                                            which also includes periodic box vectors.
+
+    Methods:
+        __new__(cls, *args, **kwargs):
+            Creates a new instance of AmberSimulation. Ensures the correct number of arguments 
+            are provided before creating an instance.
+        __init__(self, manager, topology_file, coordinates_file):
+            Initializes an AmberSimulation object with the specified manager, topology file, 
+            and coordinates file.
+        __str__(self):
+            Returns a user-friendly string representation of the AmberSimulation object.
+
+    Raises:
+        TypeError: If an incorrect number of arguments are provided to the __new__ method.
+
+    Example:
+        # Create a new AmberSimulation object
+        sim = AmberSimulation(manager, 'path/to/topology.prmtop', 'path/to/coordinates.inpcrd')
+
+        # Print the string representation
+        print(sim)
+    """
+    def __new__(cls, *args, **kwargs):
+        if len(args) != 3:
+            raise TypeError(
+                f"GromacsSimulation expected 3 arguments, but {len(args)} were given. "
+                "Usage: 'sim = GromacsSimulation(manager, topology_file, coordinates_file)'"
+            )
+        return super().__new__(cls)
+
+    def __init__(self, manager, topology_file, coordinates_file):
+        self.manager = manager
+        self.filename = os.path.basename(topology_file).split('.')[0]
+
+        super().__init__(manager, self.filename)
+        self.coordinates_file = coordinates_file
+        self.topology_file = topology_file
+
+        # Load with ParmEd
+        self.gro_coordinates = load_file(coordinates_file)
+        self.gro_topology = load_file(topology_file)
+
+        # 🔍 Ensure box information is present
+        if self.gro_coordinates.box is None:
+            raise ValueError(
+                f"No box vectors found in {coordinates_file}. "
+                "Add a box in GROMACS (.gro last line) or assign manually."
+            )
+
+        # Synchronize topology and coordinates box if needed
+        if self.gro_topology.box is None:
+            self.gro_topology.box = self.gro_coordinates.box
+
 class AmberSimulation(BuildSimulation):
     """
     A class representing an AMBER molecular dynamics simulation.
