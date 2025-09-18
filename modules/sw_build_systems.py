@@ -11,6 +11,7 @@ import subprocess
 import numpy as np
 import shutil
 import re
+from pathlib import Path
 from openbabel import openbabel, pybel
 from rdkit import Chem
 from rdkit.Chem import AllChem
@@ -2373,6 +2374,122 @@ class BuildAmberSystems(BuildSystems):
         BuildAmberSystems.edit_itp_file(itp_file_path)
 
         os.chdir(manager.main_dir)
+
+    @staticmethod
+    def combine_itps(itp_files, output_file):
+        """
+        Concatenate multiple .itp files into one system-level .itp.
+        Only the first file may contribute [ defaults ] and [ atomtypes ] sections.
+        """
+        skip_sections = {"[ defaults ]", "[ atomtypes ]"}
+        seen_sections = set()
+
+        with open(output_file, "w") as outfile:
+            for idx, f in enumerate(itp_files):
+                with open(f, "r") as infile:
+                    lines = infile.readlines()
+
+                copy_block = True
+                for line in lines:
+                    stripped = line.strip().lower()
+
+                    # check if this line starts a skip section
+                    if any(stripped.startswith(sec) for sec in skip_sections):
+                        if idx > 0:  # skip if not the first file
+                            copy_block = False
+                            continue
+                        else:
+                            seen_sections.add(stripped)
+
+                    # detect start of new section: re-enable copying
+                    if stripped.startswith("[") and stripped.endswith("]") and stripped not in skip_sections:
+                        copy_block = True
+
+                    if copy_block:
+                        outfile.write(line)
+
+                outfile.write("\n\n")  # spacing between files
+
+        print(f"✅ Combined {len(itp_files)} files into {output_file}")
+
+    @staticmethod
+    def run_gmx_min(manager, system_dir, gro_file, top_file):
+        polyply_en_min = "/home/dan/polymersimulator/bin/em.mdp"
+        os.chdir(system_dir)
+
+        try:
+            results = subprocess.run(["gmx", "grompp", "-f", polyply_en_min, "-c", gro_file, "-p", top_file, "-o", "em.tpr"], capture_output=True, text=True)
+            results = subprocess.run(["gmx", "mdrun", "-deffnm", "em"], capture_output=True, text=True)
+        except Exception as e:
+            pass
+        os.chdir(manager.main_dir)
+    
+
+    @staticmethod
+    def run_polyply(manager, polymer_names, num_poly, dens=1000, run_min=True):
+
+        # Create a name for the system
+        for i in range(len(polymer_names)):
+            if i == 0:
+                system_name = f"{polymer_names[i]}_{str(num_poly[i])}"
+            else:
+                system_name = f"{system_name}_{polymer_names[i]}_{str(num_poly[i])}"
+        system_name = f"{system_name}_amorph"       
+
+        # Create an output directory for the files that are to be generated
+        system_dir = os.path.join(manager.systems_dir, system_name)
+        os.makedirs(system_dir, exist_ok=True)
+
+        # Create names for the gromacs files
+        system_top = os.path.join(system_dir, f"{system_name}.top")
+        system_gro = os.path.join(system_dir, f"{system_name}.gro")
+        system_itp_file = os.path.join(system_dir, f"{system_name}.itp")
+        print(system_top)
+        print(system_gro)
+
+        # Load all itp files and check if they exist
+        itp_files = [(os.path.join(manager.systems_dir, polymer_name, f"{polymer_name}.itp")) for polymer_name in polymer_names]
+        assert all(os.path.exists(f) for f in itp_files), "One or more .itp files are missing!"
+
+        BuildAmberSystems.combine_itps(itp_files, system_itp_file)
+
+        # Generate the file text for the include statements
+        include_statements = "\n".join([f'#include "{itp_file}"' for itp_file in itp_files])
+
+        # Generate the file text for the number of molecule statements
+        molecule_statements = "\n".join([f"{polymer_names[i]} {str(num_poly[i]-1)}" for i in range(len(polymer_names))])
+
+        # Create the file
+        file_content = f"""
+        #include "{system_itp_file}"
+
+        [ system ] 
+        Packed {polymer_names[i]}
+
+        [ molecules ]
+        {molecule_statements}
+        """
+
+        with open(system_top, "w") as f:
+            f.writelines(file_content)
+
+        try:
+            result = subprocess.run(["polyply", "gen_coords", "-p", system_top, "-o", system_gro, "-dens", str(dens)], capture_output=True, text=True)
+
+            print(f""" 
+            Return code: {result.returncode}
+            STDOUT: {result.stdout}
+            """)
+
+        except Exception as e:
+            print(f"""Error running polyply, the error will printed below:
+
+            {e}""")
+
+        if run_min == True:
+            BuildAmberSystems.run_gmx_min(manager, system_dir, system_gro, system_top)
+        
+        return(system_dir, system_top, system_gro, system_itp_file)
 
         
 class PrepPackmolForAmber():
