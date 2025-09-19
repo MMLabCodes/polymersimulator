@@ -196,6 +196,21 @@ class SnippetSimManage:
                     pdb_file_path = os.path.join(root, file)
                     return pdb_file_path
 
+    def load_smiles(self, molecule_name=None):
+        if molecule_name == None:
+            print(f"Please provide a molecule name to this function")
+            return(None)
+
+        df = pd.read_csv(self.residue_code_csv, sep=None, engine="python", header=None, names=["name", "smiles", "rescode"])
+    
+        # Find the row where name matches
+        row = df.loc[df["name"] == molecule_name]
+    
+        if not row.empty:
+            return row.iloc[0]["smiles"]
+        else:
+            raise ValueError(f"Molecule name '{name}' not found in {csv_path}")
+
         
                     
     def ac_files_avail(self):
@@ -271,6 +286,34 @@ class SnippetSimManage:
                     coord_file_path = os.path.join(root, file)
         if (prmtop_file_path is not None) and (coord_file_path is not None):
             return(prmtop_file_path, coord_file_path)
+        else:
+            print("Files not found. Check name of molecule/system and if files have been generated.")
+            return(None)
+
+    def load_gromacs_filepaths(self, system_name=None):
+        top_file_path = None
+        gro_file_path = None
+        if system_name == None:
+            print("Please provide the name of the system you are retrieving files as follows: 'topology_file, coordinate_file = directories.retrieve_top_crds('ethane')")
+            print("Change ethane for the name of the desired system")
+            print("NOTE: Amber files must be generated using tleap prior to this step")
+            return(None)
+        for root, dirs, files in os.walk(self.systems_dir):
+            dirs[:] = [d for d in dirs if d != 'depreceated']
+            # Check each file in the current directory
+            for file in files:
+                # Check if the file has a .pdb extension
+                #if file.endswith(".prmtop") and system_name in file: 
+                if file == (system_name + ".top"):
+                    # Construct the full path to the .pdb file
+                    top_file_path = os.path.join(root, file)
+                #if file.endswith(".rst7") and system_name in file:
+                if file == (system_name + ".gro"):
+                    # Construct the full path to the .pdb file
+                    gro_file_path = os.path.join(root, file)
+               
+        if (top_file_path is not None) and (gro_file_path is not None):
+            return(top_file_path, gro_file_path)
         else:
             print("Files not found. Check name of molecule/system and if files have been generated.")
             return(None)
@@ -770,7 +813,6 @@ class complex_model_dirs(BioOilDirs):
                     avail_files.append(pdb_file_path)
                     #print(pdb_file)
         return(avail_files)
-
 
 class DFT_manager(SnippetSimManage):
     max_jobs = 8
