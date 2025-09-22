@@ -768,7 +768,7 @@ class BuildAmberSystems(BuildSystems):
         with open(original_pdb_file, 'w') as outfile:
             outfile.writelines(updated_lines)
     
-    def gen_polymer_pdb_and_params(self, base_name=molecule_name, poly_len=number_of_units, box_radius=None, infinite=None):
+    def gen_polymer_pdb_and_params(self, base_name=None, poly_len=None, box_radius=None, infinite=None):
         """
         Generates a polymer PDB file using `tleap` based on the specified molecule and number of units.
 
@@ -798,6 +798,10 @@ class BuildAmberSystems(BuildSystems):
             dirs = DirectoryPaths('path/to/main/project/directory')
             gen_polymer_pdb(dirs, "3HB_trimer", 10)
         """
+        if base_name is None or poly_len is None:
+            print("Please provide a polymer base_name and polymer length.")
+            return
+        
         if box_radius == None:
             box_radius = 10.0
         else:
