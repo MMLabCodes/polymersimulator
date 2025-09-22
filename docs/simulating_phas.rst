@@ -1,12 +1,16 @@
 Building and Simulating Monodisperse PHAs
 =========================================
 
+.. important::
+   All notebooks and code should be run from the home directory: **~/polymersimulator**.  
+   Running code from other directories may cause issues with file paths and prevent required Python modules from being loaded.
+
 This guide will cover how to build polymers and run simulations of **polyhydroxyalkanoates (PHAs)** using pre-generated parameters.
 
-The associated notebook can be found in the main PolymerSimulator directory and is called **simulating_polyhydroxyalkanotes.ipynb**.
+The associated notebook can be found in the main PolymerSimulator directory and is called **simulating_monodisperse_PHAs.ipynb**.
 
 .. note::
-   PHA examples provided here are intended as a starting point. You can adapt the workflow to other polymer systems using the more detailed instructions in the documentation.
+   PHA examples provided here are intended as a starting point and parameters are provided. You can adapt the workflow to other polymer systems using the more detailed instructions later on in the documentation.
 
 1: Taking a Look at Pre-Parameterized PHAs
 ------------------------------------------
@@ -46,20 +50,23 @@ Now that the modules are loaded, two different classes — **PolySimManage** and
    manager = PolySimManage(os.getcwd())
    builder = BuildAmberSystems(manager)
 
-As mentioned, the **manager** is a filepath manager and the **builder** is the workhorse for building polymers and preparing systems for simulations.
+As mentioned, the **manager** is a filepath manager and the **builder** contains the methods for building polymers and preparing systems for simulations.
 
 .. note::
    In Python, these objects are called **classes**.  
-   Classes can contain **functions**, which are called **methods**, that define the behaviors of the objects.
+   Classes can contain **functions**, which are called **methods**, that define the behaviors of the objects (i.e. what functions do they carry out, how is the package structured).
 
 4: Build a Polymer
 ------------------
 
-With the modules loaded and the **manager** and **builder** objects initialized, you can now build a polymer.
+With the modules loaded and the **manager** and **builder** objects initialized, a polymer can be built.
 
-PHAs listed at the beginning of this tutorial have already been parameterized using AmberTools with the GAFF2 force field and abcg2 charges.  
+PHAs listed at the beginning of this tutorial have already been parameterized using AmberTools .
 
-The parameterization process includes:
+.. note::
+   All PHAs have been parameterized with **GAFF2** and **abcg2** charges.  
+
+The parameterization process at a glance:
 
 1. Build a trimer  
 2. Parameterize the trimer  
@@ -67,12 +74,17 @@ The parameterization process includes:
 4. Save these units in files so polymers can be built 
 
 .. note::
-   This parameterization process is explained in more detail at later on in the documentation at:LINK, but this guide focuses on using pre-parameterized polymers.
+   Parameterizing polymers with the polymersimulator is explained in more detail in other parts of this documentation. Please refer to it for projects where the parameters for different polymers do not already exist.
 
-To build a polymer, you need:
+To build a polymer, two things are required:
 
-1. The name of the base trimer (so the filepath manager can load the polymer units, e.g., `"3HB_trimer"`)  
-2. The desired length of the final polymer (e.g., `10` units)
+**name of the base trimer**
+   For any given polymer, this is: {prefix}_trimer ; where the prefix is the name of the polymer (i.e. 3HB)
+
+   *Examples: "4HB_trimer", "3HB_trimer", "3HHp_trimer"*
+   
+**The desired length of the final polymer**
+   The number of monomers required in the final polymer (i.e 10)
 
 Assign these variables in Python:
 
@@ -81,7 +93,7 @@ Assign these variables in Python:
    polymer_base_name = "3HB_trimer"
    number_of_units = 10
 
-Pass these variables to the **gen_polymer_pdb_and_params** method of the builder object:
+Pass these variables to the **gen_polymer_pdb_and_params** method of the builder object and assign the output to a variable called **polymer**:
 
 .. code-block:: python
 
@@ -102,7 +114,7 @@ The variable **polymer** contains three outputs:
 2. Amber topology filepath of the built polymer  
 3. Amber coordinate filepath of the built polymer
 
-These outputs can be examined as follows:
+These outputs can be examined as follows and will provide filepaths to the generated files:
 
 .. code-block:: python
 
@@ -118,7 +130,7 @@ For the example of 3HB, the final polymer can be visualized in VMD from the PDB 
 .. image:: images/3HB_decamer.PNG
 
 .. note::
-   These new files will be in their own folder:  
+   These new files for the contstructed polymer will be in their own folder:  
    **~polymersimulator/pdb_files/systems/3HB_10_polymer**  
 
    The files for building the polymer units can be found at: **~polymersimulator/pdb_files/molecules/3HB_trimer**
@@ -145,7 +157,7 @@ Step 5.2: Loading Polymer Files
 
 While not critical to this guide, it is useful to understand how to load individual polymer files.  
 
-Continuing with **"3HB_10_polymer"**, the files can be loaded using the **manager** object:
+Continuing with **"3HB_10_polymer"**, the  pdb files and amber topology/coordinate files can be loaded using the **manager** object:
 
 .. code-block:: python
 
@@ -170,7 +182,7 @@ Step 6: Building Amorphous Systems of Polymers
 ----------------------------------------------
 
 The next step is to build an amorphous system of polymers with **Polyply**.  
-There is one issue with the current setup: the polymers were parameterized and built with **AmberTools**, but **Polyply** was developed to be used with **GROMACS**. This means the current topologies are in the wrong format.
+There is one issue with the current setup: the polymers were parameterized and built with **AmberTools**, but **Polyply** was developed to be used with **GROMACS**. This means the current topologies are in the wrong format and a conversion to GROMACS file formats is required.
 
 Step 6.1: Converting Amber Topologies to GROMACS
 ------------------------------------------------
@@ -179,7 +191,7 @@ AmberTools has a module called **acpype** which can convert topologies from Ambe
 
 .. note::
    A more detailed explanation of Amber → GROMACS conversion will be added to the in-depth documentation.  
-   A helper function has been implemented in PolymerSimulator for repeated use, which is what is demonstrated in this quickstart guide.
+   A function has been implemented in PolymerSimulator for running this conversion esaily, which is what is demonstrated in this quickstart guide.
 
 The function only requires inputs that have already been defined:
 
@@ -190,6 +202,7 @@ The function only requires inputs that have already been defined:
 This conversion is carried out with:
 
 .. code-block:: python
+
    builder.run_acypype(name=polymer_name, top=amb_top, coord=amb_coord)
 
 Step 6.2: Building a System with Polyply
@@ -207,12 +220,14 @@ The arguments required are a list of polymer names and a corresponding list of t
 For example, to pack a system of **25 3HB_10_polymers**, use:
 
 .. code-block:: python
+
    polymer_names = ["3HB_10_polymer"]
    number_of_polymers = [25]
 
 These can be passed to the function as follows:
 
 .. code-block:: python
+
    system_name, system_top, system_coord, system_itp = builder.run_polyply(
        polymer_names=polymer_names,
        num_poly=number_of_polymers
@@ -220,3 +235,7 @@ These can be passed to the function as follows:
 
 There are additional optional arguments, but they are not covered in this quickstart guide.  
 The system will be generated with a density of 0.75 g/mL by default.
+
+The final system, visualised in vmd, will look similar to this:
+
+.. image:: images/3HB_10_poylymer_10_amorph.PNG
