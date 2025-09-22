@@ -2449,9 +2449,10 @@ class BuildAmberSystems(BuildSystems):
 
         os.chdir(manager.main_dir)
     
-
-    @staticmethod
-    def run_polyply(manager, polymer_names, num_poly, dens=1000, run_min=True):
+    def run_polyply(self, polymer_names=None, num_poly=None, dens=750, run_min=True):
+        if polymer_names == None or num_poly == None:
+            print("Please provide a list of polymer names and a list of each amount of polymers.")
+            return()
 
         # Create a name for the system
         for i in range(len(polymer_names)):
@@ -2462,7 +2463,7 @@ class BuildAmberSystems(BuildSystems):
         system_name = f"{system_name}_amorph"       
 
         # Create an output directory for the files that are to be generated
-        system_dir = os.path.join(manager.systems_dir, system_name)
+        system_dir = os.path.join(self.manager.systems_dir, system_name)
         os.makedirs(system_dir, exist_ok=True)
 
         # Create names for the gromacs files
@@ -2473,7 +2474,7 @@ class BuildAmberSystems(BuildSystems):
         print(system_gro)
 
         # Load all itp files and check if they exist
-        itp_files = [(os.path.join(manager.systems_dir, polymer_name, f"{polymer_name}.itp")) for polymer_name in polymer_names]
+        itp_files = [(os.path.join(self.manager.systems_dir, polymer_name, f"{polymer_name}.itp")) for polymer_name in polymer_names]
         assert all(os.path.exists(f) for f in itp_files), "One or more .itp files are missing!"
 
         BuildAmberSystems.combine_itps(itp_files, system_itp_file)
@@ -2512,7 +2513,7 @@ class BuildAmberSystems(BuildSystems):
             {e}""")
 
         if run_min == True:
-            BuildAmberSystems.run_gmx_min(manager, system_dir, system_gro, system_top)
+            self.run_gmx_min(self.manager, system_dir, system_gro, system_top)
         
         return(system_name, system_top, system_gro, system_itp_file)
 
