@@ -2517,7 +2517,7 @@ class BuildAmberSystems(BuildSystems):
         
         return(system_name, system_top, system_gro, system_itp_file)
 
-    def find_polyply_starting_structure(self, polymer_names=polymer_names, num_poly=number_of_polymers, max_attempts=10):
+    def find_polyply_starting_structure(self, polymer_names=None, num_poly=None, max_attempts=10):
         if polymer_names == None or num_poly == None:
             print("Please provide a list of polymer names and a list of each amount of polymers.")
             return()
@@ -2526,7 +2526,7 @@ class BuildAmberSystems(BuildSystems):
         success = False
         while not success:
             try:
-                system_name, gro_top, gro_coord, gro_itp = self.run_polyply(polymer_names, number_of_polymers, dens=750, run_min=True)
+                system_name, gro_top, gro_coord, gro_itp = self.run_polyply(polymer_names, num_poly, dens=750, run_min=True)
                 top, coord = self.manager.load_gromacs_filepaths(system_name)
                 simulation = GromacsSimulation(manager, top, coord)
                 min_sim = simulation.minimize_energy()
