@@ -812,7 +812,8 @@ class BuildAmberSystems(BuildSystems):
                 print("Plase pass the box radius as a float")
                 print("Example: gen_amber_params_sing_poly('base_trimer_name', 'polymer_name', 20.0)")
                 return()
-                
+
+        molecule_name = base_name
         molecule_dir = os.path.join(self.manager.molecules_dir, molecule_name)
         try:
             os.chdir(molecule_dir)
