@@ -28,6 +28,7 @@ Contents
 
    introduction
    installation
+   simulating_phas
    packagecontents
    modules
    errors

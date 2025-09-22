@@ -124,8 +124,8 @@ To fix this, update OpenMM:
 Then retry the import.
 
 
-In-depth tutorials
-==================
+Launching Jupyter Notebook
+--------------------------
 
 The repository includes Jupyter Notebook tutorials. You can launch them from your linux command prompt:
 
@@ -136,9 +136,6 @@ The repository includes Jupyter Notebook tutorials. You can launch them from you
 This will start a local server and display several URLs. Copy the **first link** (containing ``localhost:8888``) into your browser.
 
 From there, explore the tutorials or follow the detailed guides in this documentation.
-
-.. note::
-   While tutorials are available, the documentation also provides enough step-by-step guidance to perform all key Polymer Simulator workflows.
 
 Tutorials
 ---------
