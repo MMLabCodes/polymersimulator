@@ -2517,6 +2517,39 @@ class BuildAmberSystems(BuildSystems):
         
         return(system_name, system_top, system_gro, system_itp_file)
 
+    def find_polyply_starting_structure(self, polymer_names=polymer_names, num_poly=number_of_polymers, max_attempts=10):
+        if polymer_names == None or num_poly == None:
+            print("Please provide a list of polymer names and a list of each amount of polymers.")
+            return()
+    
+        attempts = 1
+        success = False
+        while not success:
+            try:
+                system_name, gro_top, gro_coord, gro_itp = self.run_polyply(polymer_names, number_of_polymers, dens=750, run_min=True)
+                top, coord = self.manager.load_gromacs_filepaths(system_name)
+                simulation = GromacsSimulation(manager, top, coord)
+                min_sim = simulation.minimize_energy()
+                print("sim_min")
+                simulation.set_total_steps(1000)
+                simulation.set_reporter_freq(10)
+                npt_sim, npt_sim_data = simulation.basic_NPT(min_sim)
+                simulation.graph_state_data(npt_sim_data)
+                success=True
+                succesful_polymers[0].append(polymer_name)
+                succesful_polymers[1].append(attempts+1)
+            except Exception as e:
+                attempts+=1
+                print("")
+                print("Restarting.... simulation geometry imposing too many forces....")
+                print(e)
+                print("")
+                if attempts == max_attempts:
+                    print("MAx attempts reached")
+                    return()
+        print(f"Starting system found in {attempts} attempts")
+        return(system_name, gro_top, gro_coord, gro_itp)
+
         
 class PrepPackmolForAmber():
     
