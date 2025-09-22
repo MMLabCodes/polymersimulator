@@ -1,18 +1,29 @@
-Welcome to the **Polymer Simulator** Documentation
-==================================================
+Polymer Simulator Documentation
+===============================
 
-In this documentation you will find many things:
+Welcome to the **Polymer Simulator** documentation!
 
-- Introduction
-- Installation instructions
-- Documented python code
-- Tutorials and examples of what each python module does
+This site will guide you through everything you need to know about installing, using, and contributing to the project. Whether you're just getting started or diving into advanced usage, you’ll find detailed explanations and examples here.
+
+What you’ll find inside:
+------------------------
+
+- **Introduction** – Overview of the project and its purpose.
+- **Installation** – Step-by-step instructions to get up and running.
+- **Package Contents** – A summary of the modules included.
+- **Modules** – In-depth documentation of each module.
+- **Errors** – Common issues and how to resolve them.
+- **Usage** – Tutorials and guides with practical examples.
+- **API Reference** – Auto-generated documentation of the Python API.
+- **Contributing** – How to help improve Polymer Simulator.
+- **FAQ** – Answers to frequently asked questions.
+- **License** – Legal information and usage terms.
 
 Contents
 --------
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 2
    :caption: Table of Contents
 
    introduction
