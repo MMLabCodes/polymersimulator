@@ -768,7 +768,7 @@ class BuildAmberSystems(BuildSystems):
         with open(original_pdb_file, 'w') as outfile:
             outfile.writelines(updated_lines)
     
-    def gen_polymer_pdb_and_params(self, molecule_name, number_of_units, box_radius=None, infinite=None):
+    def gen_polymer_pdb_and_params(self, base_name=molecule_name, poly_len=number_of_units, box_radius=None, infinite=None):
         """
         Generates a polymer PDB file using `tleap` based on the specified molecule and number of units.
 
@@ -2417,11 +2417,27 @@ class BuildAmberSystems(BuildSystems):
         polyply_en_min = "/home/dan/polymersimulator/bin/em.mdp"
         os.chdir(system_dir)
 
+        # Use the input gro file basename (without extension) as the output name
+        base_name = os.path.splitext(os.path.basename(gro_file))[0]
+
         try:
-            results = subprocess.run(["gmx", "grompp", "-f", polyply_en_min, "-c", gro_file, "-p", top_file, "-o", "em.tpr"], capture_output=True, text=True)
-            results = subprocess.run(["gmx", "mdrun", "-deffnm", "em"], capture_output=True, text=True)
+            # Prepare the tpr file
+            result_grompp = subprocess.run(
+                ["gmx", "grompp", "-f", polyply_en_min, "-c", gro_file, "-p", top_file, "-o", f"{base_name}.tpr"],
+                capture_output=True, text=True
+            )
+            print(result_grompp.stdout)
+
+            # Run minimization; outputs will overwrite gro_file if base_name matches
+            result_mdrun = subprocess.run(
+                ["gmx", "mdrun", "-deffnm", base_name],
+                capture_output=True, text=True
+            )
+            print(result_mdrun.stdout)
+
         except Exception as e:
-            pass
+            print(f"Error running GROMACS minimization:\n{e}")
+
         os.chdir(manager.main_dir)
     
 
@@ -2489,7 +2505,7 @@ class BuildAmberSystems(BuildSystems):
         if run_min == True:
             BuildAmberSystems.run_gmx_min(manager, system_dir, system_gro, system_top)
         
-        return(system_dir, system_top, system_gro, system_itp_file)
+        return(system_name, system_top, system_gro, system_itp_file)
 
         
 class PrepPackmolForAmber():
