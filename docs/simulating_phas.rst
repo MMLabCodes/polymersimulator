@@ -21,6 +21,7 @@ TABLE OF PHAS
 To begin the workflow, a few modules need to be imported first:
 
 .. code-block:: python
+
    from modules.sw_directories import *
    from modules.sw_build_systems import *
    import os
@@ -35,6 +36,7 @@ To begin the workflow, a few modules need to be imported first:
 Now that the modules are loaded, two different classes — **PolySimManage** and **BuildAmberSystems** — are used to create the **manager** and **builder** objects:
 
 .. code-block:: python
+
    manager = PolySimManage(os.getcwd())
    builder = BuildAmberSystems(manager)
 
