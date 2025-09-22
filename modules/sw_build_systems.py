@@ -2371,7 +2371,7 @@ class BuildAmberSystems(BuildSystems):
             itp_file_path = os.path.join(output_dir, f"{name}.itp")
             shutil.copy(generated_gromacs_path, itp_file_path)
             print(f"""
-            Succesful conversion of Amber --> Gromacs format for {polymer_name}.""")
+            Succesful conversion of Amber --> Gromacs format for {name}.""")
     
         except Exception as e:
             print(f"""There was an error generating the .itp file {name}.
