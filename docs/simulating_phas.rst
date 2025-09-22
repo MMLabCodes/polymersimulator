@@ -228,7 +228,7 @@ These can be passed to the function as follows:
 
 .. code-block:: python
 
-   system_name, system_top, system_coord, system_itp = builder.run_polyply(
+   system_name, gro_top, gro_coord, gro_itp = builder.run_polyply(
        polymer_names=polymer_names,
        num_poly=number_of_polymers
    )
@@ -239,3 +239,31 @@ The system will be generated with a density of 0.75 g/mL by default.
 The final system, visualised in vmd, will look similar to this:
 
 .. image:: images/3HB_10_poylymer_10_amorph.PNG
+
+6.3 Issues with polyply starting systems
+----------------------------------------
+
+When running a simulation with a system generated with polyply, a common error is encountered:
+
+.. code-block:: python
+
+   OpenMMException: Particle coordinate is NaN.  For more information, see https://github.com/openmm/openmm/wiki/Frequently-Asked-Questions#nan
+
+This error typically occurs because atoms are too close to eachother and create massive repulsive forces (leading to a near infinite term for these forces in the Lennard-Jones potential). This is an artifact from the polyply packing process. The polymers are packed coarsely as minimized representations before being expanded during energy minimization. 
+
+.. container:: images-side-by-side
+
+   .. image:: images/polyply_out.PNG
+      :width: 45%
+      :align: left
+
+   .. image:: images/polyply_em.PNG
+      :width: 45%
+      :align: right
+
+In the above images the **left** shows the polyply output and the condensed polymers. On the **right**, after energy minimization, this is what the final polymer system looks like. Due to this minimized representation --> packing --> expansion approach, there can be some unwanted steric clashes within the system leading to a system that produces a NaN error. This effect is non-existent at very low denstities but quickly becomes an issue when trying to pack high-density systems. With this in mind, a default target of a system with 0.75 g/ml density is given as the desired structure.
+
+To avoid this, a series of extremely short simulations can be carried wtih the **builder.find_polyply_starting_structrue** method. The outputs are the same as **builder.run_polyply** to avoid any confusion - except the generated files have been succesfully used to run an openmm simulation.
+
+.. note::
+   Test this in your own pc with a very small system. Issues should only be encoutnerred with extremely large systems but it is always worth it to be sure.
