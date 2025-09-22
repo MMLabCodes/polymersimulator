@@ -20,15 +20,15 @@ from IPython.display import display
 from modules.sw_file_formatter import DFT_input_generator
 from modules.sw_basic_functions import get_homo_lumo_from_xyz
 '''
-SnippetSim Directories Module
+PolySim Directories Module
 
-This module defines the SnippetSimManage class, which is used for initializing
+This module defines the PolySimManage class, which is used for initializing
 and organizing directories for polymer simulation setup. It creates specific
 directories such as 'python_scripts', 'pdb_files', 'molecules', 'systems', and manages
 files like 'residue_codes.csv'.
 
 Attributes:
-    main_dir (str): The main directory for snippet simulation setup.
+    main_dir (str): The main directory of the cloned directory.
 
 Example:
     >>> from PolymerSimulatorDirs import PolymerSimulatorDirs
@@ -39,12 +39,12 @@ Example:
 Note:
     The main_dir must be provided as a valid path and must already exist.
 '''
-class SnippetSimManage:
+class PolySimManage:
     packmol_path = "/home/dan/packmol-20.14.4-docs1/packmol-20.14.4-docs1/packmol"
     # Class for intialsing and building files and folders for polymer simulation set up and the like
     def __init__(self, main_dir): 
         """
-        Initialize SnippetSimManage object.
+        Initialize PolySimManage object.
 
         Args:
             main_dir (str): The main directory for polymer simulation setup.
@@ -462,10 +462,10 @@ class SnippetSimManage:
             return(avail_sims)
             
 
-#class PolymerConformerDFT(SnipperSimManage):
+#class PolymerConformerDFT(PolySimManage):
     #def __init__(self, 
 
-class PolyDataDirs(SnippetSimManage):
+class PolyDataDirs(PolySimManage):
 
     def __init__(self, main_dir, *args, **kwargs):
         """
@@ -700,7 +700,7 @@ class PolyDataDirs(SnippetSimManage):
         self.data = pd.read_csv(self.poly_data)
 
 
-class BioOilDirs(SnippetSimManage):
+class BioOilDirs(PolySimManage):
 
     def __init__(self, main_dir, *args, **kwargs):
         """
@@ -814,7 +814,7 @@ class complex_model_dirs(BioOilDirs):
                     #print(pdb_file)
         return(avail_files)
 
-class DFT_manager(SnippetSimManage):
+class DFT_manager(PolySimManage):
     max_jobs = 8
     nprocs = 10
     runorca_path = "/scratch/scw1976/dan/polymersimulator-main/bin/runorca.sh"
