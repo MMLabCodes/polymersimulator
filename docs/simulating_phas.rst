@@ -152,8 +152,8 @@ For example, using a 3HB trimer with 10 units, the polymer name will be:
 
    3HB_10_polymer
 
-Step 5.2: Loading Polymer Files
--------------------------------
+5.2: Loading Polymer Files
+--------------------------
 
 While not critical to this guide, it is useful to understand how to load individual polymer files.  
 
@@ -178,14 +178,14 @@ These variables can then be examined similarly to before:
 
 This method works for all polymers, molecules, and systems. Only the name needs to be passed to the appropriate method in the filepath manager.
 
-Step 6: Building Amorphous Systems of Polymers
-----------------------------------------------
+6: Building Amorphous Systems of Polymers
+-----------------------------------------
 
 The next step is to build an amorphous system of polymers with **Polyply**.  
 There is one issue with the current setup: the polymers were parameterized and built with **AmberTools**, but **Polyply** was developed to be used with **GROMACS**. This means the current topologies are in the wrong format and a conversion to GROMACS file formats is required.
 
-Step 6.1: Converting Amber Topologies to GROMACS
-------------------------------------------------
+6.1: Converting Amber Topologies to GROMACS
+-------------------------------------------
 
 AmberTools has a module called **acpype** which can convert topologies from Amber → GROMACS format. 
 
@@ -205,8 +205,8 @@ This conversion is carried out with:
 
    builder.run_acypype(name=polymer_name, top=amb_top, coord=amb_coord)
 
-Step 6.2: Building a System with Polyply
-----------------------------------------
+6.2: Building a System with Polyply
+-----------------------------------
 
 .. note::
    A more detailed explanation of this function will be added to the documentation.  
