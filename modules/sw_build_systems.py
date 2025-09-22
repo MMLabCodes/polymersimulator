@@ -2350,9 +2350,12 @@ class BuildAmberSystems(BuildSystems):
         with open(filename, "w") as f:
             f.writelines(new_lines)
 
-    @staticmethod
-    def run_acpype(manager, name, top, coord):
-        output_dir = os.path.join(manager.systems_dir, name)
+    def run_acpype(self, name=None, top=None, coord=None):
+        if name is None or top is None or coord is None:
+            print("Please provide a name, amber topology and amber coordinate")
+            return()
+        
+        output_dir = os.path.join(self.manager.systems_dir, name)
         output_file = f"{name}_GMX.top"
         os.chdir(output_dir)
     
@@ -2367,7 +2370,8 @@ class BuildAmberSystems(BuildSystems):
             generated_gromacs_path = os.path.join(output_dir, f"{name}.amb2gmx", output_file)
             itp_file_path = os.path.join(output_dir, f"{name}.itp")
             shutil.copy(generated_gromacs_path, itp_file_path)
-        
+            print(f"""
+            Succesful conversion of Amber --> Gromacs format for {polymer_name}.""")
     
         except Exception as e:
             print(f"""There was an error generating the .itp file {name}.
@@ -2378,7 +2382,7 @@ class BuildAmberSystems(BuildSystems):
 
         BuildAmberSystems.edit_itp_file(itp_file_path)
 
-        os.chdir(manager.main_dir)
+        os.chdir(self.manager.main_dir)
 
     @staticmethod
     def combine_itps(itp_files, output_file):
