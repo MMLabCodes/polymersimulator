@@ -395,6 +395,7 @@ class BuildSimulation():
     anneal_parameters = [300, 700, 5, 10, 500000]
     minimized_only = None # This will change to True/False and will determine how periodic box vectors are set
     acrylate_check_freq = 100
+    restrain_heavys = False
     
     def __init__(self, manager, filename):
         """
@@ -477,6 +478,8 @@ class BuildSimulation():
             simulation.context.setPositions(self.ani_coordinates)
 
         if BuildSimulation.type_of_simulation(self) == "GRO":
+            print("Atoms in GRO:", len(self.gro_coordinates.positions))
+            print("Atoms in TOP:", self.gro_topology.topology.getNumAtoms())
             system = self.gro_topology.createSystem(nonbondedMethod=app.PME, nonbondedCutoff=self.nonbondedcutoff*nanometers, constraints=HBonds)
             simulation = app.Simulation(self.gro_topology.topology, system, integrator)
             simulation.context.setPositions(self.gro_coordinates.positions)
@@ -577,6 +580,10 @@ class BuildSimulation():
             system = self.potential.createSystem(self.ani_topology, nonbondedMethod=app.PME, nonbondedCutoff=self.nonbondedcutoff*nanometers, constraints=app.HBonds)
             platform = PLatform.getPlatformByName('CUDA')
             simulation = app.Simulation(self.ani_topology, system, integrator, platform)
+
+        if BuildSimulation.type_of_simulation(self) == "GRO":
+            system = self.gro_topology.createSystem(nonbondedMethod=app.PME, nonbondedCutoff=self.nonbondedcutoff*nanometers, constraints=HBonds)
+            simulation = app.Simulation(self.gro_topology.topology, system, integrator)
 
         # Update the xyz of each atom
         simulation.context.setPeriodicBoxVectors(vx, vy, vz)
@@ -743,6 +750,13 @@ class BuildSimulation():
             platform = PLatform.getPlatformByName('CUDA')
             simulation = app.Simulation(self.ani_topology, system, integrator, platform)
 
+        if BuildSimulation.type_of_simulation(self) == "GRO":
+            system = self.gro_topology.createSystem(nonbondedMethod=app.PME, nonbondedCutoff=self.nonbondedcutoff*nanometers, constraints=HBonds)
+            #system = self.restrain_heavy_atoms(system, self.gro_topology.topology, self.gro_coordinates.positions)
+            #print("heavy atoms restrained")
+            system.addForce(barostat)
+            simulation = app.Simulation(self.gro_topology.topology, system, integrator)
+
         # We set the box vectors with the output from the the previous simulation
         #if self.minimized_only == False:       
         simulation.context.setPeriodicBoxVectors(vx, vy, vz)
@@ -863,7 +877,13 @@ class BuildSimulation():
         if BuildSimulation.type_of_simulation(self) == "ANI":
             system = self.potential.createSystem(self.ani_topology, nonbondedMethod=app.PME, nonbondedCutoff=self.nonbondedcutoff*nanometers, constraints=app.HBonds)
             platform = PLatform.getPlatformByName('CUDA')
-            simulation = app.Simulation(self.ani_topology, system, integrator, platform)  
+            simulation = app.Simulation(self.ani_topology, system, integrator, platform) 
+
+        if BuildSimulation.type_of_simulation(self) == "GRO":
+            system = self.gro_topology.createSystem(nonbondedMethod=app.PME, nonbondedCutoff=self.nonbondedcutoff*nanometers, constraints=HBonds)
+            #system = self.restrain_heavy_atoms(system, self.gro_topology.topology, self.gro_coordinates.positions)
+            #print("heavy atoms restrained")
+            simulation = app.Simulation(self.gro_topology.topology, system, integrator)
         
         # Update positional info
         simulation.context.setPositions(xyz)
@@ -997,6 +1017,10 @@ class BuildSimulation():
             platform = PLatform.getPlatformByName('CUDA')
             simulation = app.Simulation(self.ani_topology, system, integrator, platform)
 
+        if BuildSimulation.type_of_simulation(self) == "GRO":
+            system = self.gro_topology.createSystem(nonbondedMethod=app.PME, nonbondedCutoff=self.nonbondedcutoff*nanometers, constraints=HBonds)
+            simulation = app.Simulation(self.gro_topology.topology, system, integrator)
+
         # Update the xyz of each atom
         simulation.context.setPeriodicBoxVectors(vx, vy, vz)
         simulation.context.setPositions(xyz)
@@ -1019,8 +1043,14 @@ class BuildSimulation():
         output_dataname = os.path.join(self.output_dir, output_filename)
         dataWriter = DataWriter(output_dataname, self.reporter_freq, total_steps)
         simulation.reporters.append(dataWriter.stateDataReporter)
+
+        if heating:
+            incremental_temps = np.arange(start_temp, max_temp + quench_rate, quench_rate).tolist()
+        else:
+            incremental_temps = np.arange(start_temp, max_temp - quench_rate, -quench_rate).tolist()
+
         
-        incremental_temps = np.arange(start_temp, max_temp + quench_rate, quench_rate).tolist()
+        #incremental_temps = np.arange(start_temp, max_temp + quench_rate, quench_rate).tolist()
      
         if heating is True:
             pass # List will be low to high
@@ -1119,7 +1149,11 @@ class BuildSimulation():
         if BuildSimulation.type_of_simulation(self) == "ANI":
             system = self.potential.createSystem(self.ani_topology, nonbondedMethod=app.PME, nonbondedCutoff=self.nonbondedcutoff*nanometers, constraints=app.HBonds)
             platform = PLatform.getPlatformByName('CUDA')
-            simulation = app.Simulation(self.ani_topology, system, integrator, platform)  
+            simulation = app.Simulation(self.ani_topology, system, integrator, platform) 
+
+        if BuildSimulation.type_of_simulation(self) == "GRO":
+            system = self.gro_topology.createSystem(nonbondedMethod=app.PME, nonbondedCutoff=self.nonbondedcutoff*nanometers, constraints=HBonds)
+            simulation = app.Simulation(self.gro_topology.topology, system, integrator)
         
         # Update positional info
         simulation.context.setPositions(xyz)
@@ -1199,6 +1233,21 @@ class BuildSimulation():
     def production_run_help(cls):
         """Display help information for the production run method."""
         print(cls.production_run.__doc__)
+
+    def restrain_heavy_atoms(self, system, topology, positions):
+        force = openmm.CustomExternalForce("1000*(x-x0)^2 + 1000*(y-y0)^2 + 1000*(z-z0)^2")
+        force.addPerParticleParameter("x0")
+        force.addPerParticleParameter("y0")
+        force.addPerParticleParameter("z0")
+
+        for atom in topology.atoms():
+            if atom.element.symbol != "H":  # restrain heavy atoms
+                pos = positions[atom.index]
+                force.addParticle(atom.index, [pos.x, pos.y, pos.z])
+
+        system.addForce(force)
+        return system
+        
         
     def __repr__(self):
         """
@@ -1594,19 +1643,8 @@ class GromacsSimulation(BuildSimulation):
         self.topology_file = topology_file
 
         # Load with ParmEd
-        self.gro_coordinates = load_file(coordinates_file)
-        self.gro_topology = load_file(topology_file)
-
-        # 🔍 Ensure box information is present
-        if self.gro_coordinates.box is None:
-            raise ValueError(
-                f"No box vectors found in {coordinates_file}. "
-                "Add a box in GROMACS (.gro last line) or assign manually."
-            )
-
-        # Synchronize topology and coordinates box if needed
-        if self.gro_topology.box is None:
-            self.gro_topology.box = self.gro_coordinates.box
+        self.gro_coordinates = GromacsGroFile(coordinates_file)
+        self.gro_topology = GromacsTopFile(topology_file, periodicBoxVectors=self.gro_coordinates.getPeriodicBoxVectors())
 
 class AmberSimulation(BuildSimulation):
     """
