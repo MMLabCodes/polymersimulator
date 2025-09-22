@@ -798,7 +798,7 @@ class BuildAmberSystems(BuildSystems):
             dirs = DirectoryPaths('path/to/main/project/directory')
             gen_polymer_pdb(dirs, "3HB_trimer", 10)
         """
-        if base_name is None or poly_len is None:
+        if base_name is None or number_of_units is None:
             print("Please provide a polymer base_name and polymer length.")
             return
         
