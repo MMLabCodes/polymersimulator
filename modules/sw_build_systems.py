@@ -768,7 +768,7 @@ class BuildAmberSystems(BuildSystems):
         with open(original_pdb_file, 'w') as outfile:
             outfile.writelines(updated_lines)
     
-    def gen_polymer_pdb_and_params(self, base_name=None, poly_len=None, box_radius=None, infinite=None):
+    def gen_polymer_pdb_and_params(self, base_name=None, number_of_units=None, box_radius=None, infinite=None):
         """
         Generates a polymer PDB file using `tleap` based on the specified molecule and number of units.
 
