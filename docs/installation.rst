@@ -11,6 +11,39 @@ If you are on **Windows**, we recommend installing **Miniconda** inside **Ubuntu
 .. note::
    Ubuntu (via WSL on Windows) is required because some external programs used by this package are only available in Linux environments.
 
+Cloning the repository
+----------------------
+
+Clone the GitHub repository to access the Python modules.
+
+**Method 1: Standard Clone**
+
+1. Go to the repo: https://github.com/MMLabCodes/polymersimulator  
+2. Click the blue **<> Code** button, select **HTTPS**, and copy the link.  
+3. From your terminal (Ubuntu/WSL), run:
+
+.. code-block:: bash
+
+   git clone <copied-link>
+
+This will clone the repository into your home directory.
+
+**Method 2: Using a Personal Access Token**
+
+If the standard method fails, you can use a GitHub personal access token:
+
+1. In GitHub, go to:  
+   ``Settings → Developer settings → Personal access tokens → Tokens (classic)``  
+2. Generate a new token with the ``repo`` permission.  
+3. Use the token to clone:
+
+.. code-block:: bash
+
+   git clone https://USERNAME:YOUR_TOKEN@github.com/MMLabCodes/polymersimulator.git
+   cd polymersimulator
+
+The final ``cd`` command places you inside the repo where tutorials and scripts are stored.
+
 Creating a Conda Environment
 ----------------------------
 
@@ -18,11 +51,11 @@ First, create and activate a new Conda environment:
 
 .. code-block:: bash
 
-   conda create --name AmberTools23
-   conda activate AmberTools23
+   conda create --name polymer_simulator
+   conda activate polymer_simulator
 
 .. tip::
-   The environment name does not have to be ``AmberTools23``. Choose any name that makes sense to you.
+   The environment name does not have to be named ``polymer_simulator``. Choose any name that makes sense to you.
 
 Next, install all required dependencies using the provided ``environment.yml`` file:
 
@@ -90,43 +123,11 @@ To fix this, update OpenMM:
 
 Then retry the import.
 
-Cloning the Repository
-----------------------
 
-Clone the GitHub repository to access the Python modules.
+In-depth tutorials
+==================
 
-**Method 1: Standard Clone**
-
-1. Go to the repo: https://github.com/MMLabCodes/polymersimulator  
-2. Click the blue **<> Code** button, select **HTTPS**, and copy the link.  
-3. From your terminal (Ubuntu/WSL), run:
-
-.. code-block:: bash
-
-   git clone <copied-link>
-
-This will clone the repository into your home directory.
-
-**Method 2: Using a Personal Access Token**
-
-If the standard method fails, you can use a GitHub personal access token:
-
-1. In GitHub, go to:  
-   ``Settings → Developer settings → Personal access tokens → Tokens (classic)``  
-2. Generate a new token with the ``repo`` permission.  
-3. Use the token to clone:
-
-.. code-block:: bash
-
-   git clone https://USERNAME:YOUR_TOKEN@github.com/MMLabCodes/polymersimulator.git
-   cd polymersimulator
-
-The final ``cd`` command places you inside the repo where tutorials and scripts are stored.
-
-Jupyter Notebook Tutorials
-==========================
-
-The repository includes Jupyter Notebook tutorials. To launch them:
+The repository includes Jupyter Notebook tutorials. You can launch them from your linux command prompt:
 
 .. code-block:: bash
 

@@ -1,30 +1,33 @@
 Introduction
 ============
 
-Welcome to the **Polymer Simulator** documentation! This tool allows you to build and simulate organic properties using molecular dynamics!
+Welcome to the **Polymer Simulator** documentation!  
+This tool provides a framework for building and simulating organic materials using molecular dynamics (MD).  
 
-The main features of the Polymer Simulator include:  
-- Preparing molecular dynamic simulations (i.e. parameterization, system building)  
+Key Features
+------------
 
-- Analyzing molecular dynamic simulations  
+- **Simulation Preparation** – Parameterization and system building for MD simulations.  
+- **Analysis Tools** – Post-processing and analysis of simulation results.  
+- **Simulation Recipes** – Ready-to-use workflows for different classes of MD simulations.  
 
-- Carrying out various different molecular dynamic simulation 'recipes'  
-
-To get started, please check out the installation instructions below.
+If you are new to Polymer Simulator, start with the :doc:`installation` guide.
 
 Authors
 -------
 
-All of the code has been written and compiled by:  
+The Polymer Simulator was developed and maintained by:
 
-**Daniel J. York** and **Dr. Isaac Vidal-Daza**    
+- **Daniel J. York**  
+- **Dr. Isaac Vidal-Daza**
 
-With invaluable advice from:  
+With invaluable advice from:
 
-**Dr. Francisco Martin-Martinez**  
+- **Dr. Francisco Martin-Martinez**
 
-And testing from:  
+Testing and feedback by:
 
-**Sinem Bektas** and **Daniel Clarke**  
+- **Sinem Bektas**  
+- **Daniel Clarke**
 
-Who are all current or past members of the `Martin-Martinez Lab <https://www.martinmartinezlab.com/>`_.
+All contributors are current or past members of the `Martin-Martinez Lab <https://www.martinmartinezlab.com/>`_.
