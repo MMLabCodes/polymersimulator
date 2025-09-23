@@ -64,7 +64,7 @@ With the modules loaded and the **manager** and **builder** objects initialized,
 PHAs listed at the beginning of this tutorial have already been parameterized using AmberTools .
 
 .. note::
-   All PHAs have been parameterized with **GAFF2** and **abcg2** [#f1]_` charges.  
+   All PHAs have been parameterized with **GAFF2** and **abcg2** [#f1]_ charges.  
 
 The parameterization process at a glance:
 
