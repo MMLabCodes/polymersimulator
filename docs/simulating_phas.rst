@@ -64,7 +64,7 @@ With the modules loaded and the **manager** and **builder** objects initialized,
 PHAs listed at the beginning of this tutorial have already been parameterized using AmberTools .
 
 .. note::
-   All PHAs have been parameterized with **GAFF2** and **abcg2** [#f1]_ charges.  
+   All PHAs have been parameterized with **GAFF2** [#f1]_ and **abcg2** [#f2]_ charges.  
 
 The parameterization process at a glance:
 
@@ -81,7 +81,8 @@ To build a polymer, two things are required:
 **name of the base trimer**
    For any given polymer, this is: {prefix}_trimer ; where the prefix is the name of the polymer (i.e. 3HB)
 
-   *Examples: "4HB_trimer", "3HB_trimer", "3HHp_trimer"*
+.. code-block:: python
+   Examples: "4HB_trimer", "3HB_trimer", "3HHp_trimer"
    
 **The desired length of the final polymer**
    The number of monomers required in the final polymer (i.e 10)
@@ -181,13 +182,13 @@ This method works for all polymers, molecules, and systems. Only the name needs 
 6: Building Amorphous Systems of Polymers
 -----------------------------------------
 
-The next step is to build an amorphous system of polymers with **Polyply**.  
-There is one issue with the current setup: the polymers were parameterized and built with **AmberTools**, but **Polyply** was developed to be used with **GROMACS**. This means the current topologies are in the wrong format and a conversion to GROMACS file formats is required.
+The next step is to build an amorphous system of polymers with **Polyply** [#f3]_.  
+There is one issue with the current setup: the polymers were parameterized and built with **AmberTools** [#f4]_, but **Polyply** was developed to be used with **GROMACS** [#f5]_. This means the current topologies are in the wrong format and a conversion to GROMACS file formats is required.
 
 6.1: Converting Amber Topologies to GROMACS
 -------------------------------------------
 
-AmberTools has a module called **acpype** which can convert topologies from Amber → GROMACS format. 
+AmberTools has a module called **acpype** [#f6]_ which can convert topologies from Amber → GROMACS format. 
 
 .. note::
    A more detailed explanation of Amber → GROMACS conversion will be added to the in-depth documentation.  
@@ -277,3 +278,8 @@ References
 ----------
 
 .. [#f1] https://doi.org/10.1021/acs.jctc.5c00038
+.. [#f2] https://doi.org/10.1021/acs.jctc.8b01039
+.. [#f3] https://doi.org/10.1038/s41467-021-27627-4
+.. [#f4] https://doi.org/10.1021/acs.jcim.3c01153
+.. [#f5] https://doi.org/10.1016/j.softx.2015.06.001
+.. [#f6] https://doi.org/10.1186/1756-0500-5-367
