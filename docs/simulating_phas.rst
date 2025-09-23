@@ -224,7 +224,7 @@ For example, to pack a system of **25 3HB_10_polymers**, use:
    polymer_names = ["3HB_10_polymer"]
    number_of_polymers = [25]
 
-These can be passed to the function as follows:
+These can be passed to **builder.run_polyply**:
 
 .. code-block:: python
 
@@ -233,12 +233,12 @@ These can be passed to the function as follows:
        num_poly=number_of_polymers
    )
 
-There are additional optional arguments, but they are not covered in this quickstart guide.  
-The system will be generated with a density of 0.75 g/mL by default.
-
-The final system, visualised in vmd, will look similar to this:
+The final system, visualised in vmd, will look similar to this (each colour is corresponds to either a head, mainchain or tail unit):
 
 .. image:: images/3HB_10_poylymer_10_amorph.PNG
+
+There are some noticeable *floating* atoms and bonds, this is nothing to worry about and these are atoms and bonds that lie accross the periodic boudnary conditions.
+
 
 6.3 Issues with polyply starting systems
 ----------------------------------------
@@ -261,9 +261,19 @@ This error typically occurs because atoms are too close to eachother and create 
       :width: 45%
       :align: right
 
+
+
+
+
 In the above images the **left** shows the polyply output and the condensed polymers. On the **right**, after energy minimization, this is what the final polymer system looks like. Due to this minimized representation --> packing --> expansion approach, there can be some unwanted steric clashes within the system leading to a system that produces a NaN error. This effect is non-existent at very low denstities but quickly becomes an issue when trying to pack high-density systems. With this in mind, a default target of a system with 0.75 g/ml density is given as the desired structure.
 
 To avoid this, a series of extremely short simulations can be carried wtih the **builder.find_polyply_starting_structrue** method. The outputs are the same as **builder.run_polyply** to avoid any confusion - except the generated files have been succesfully used to run an openmm simulation.
+
+.. code-block:: python
+
+   find_polyply_starting_structure(polymer_names=polymer_names, 
+      num_poly=number_of_polymers, 
+      max_attempts=100)
 
 .. note::
    Test this in your own pc with a very small system. Issues should only be encoutnerred with extremely large systems but it is always worth it to be sure.
