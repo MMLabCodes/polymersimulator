@@ -64,7 +64,7 @@ With the modules loaded and the **manager** and **builder** objects initialized,
 PHAs listed at the beginning of this tutorial have already been parameterized using AmberTools .
 
 .. note::
-   All PHAs have been parameterized with **GAFF2** and **abcg2** charges.  
+   All PHAs have been parameterized with **GAFF2** and **abcg2**:sup:`[1] <ref1_>` charges.  
 
 The parameterization process at a glance:
 
@@ -251,19 +251,14 @@ When running a simulation with a system generated with polyply, a common error i
 
 This error typically occurs because atoms are too close to eachother and create massive repulsive forces (leading to a near infinite term for these forces in the Lennard-Jones potential). This is an artifact from the polyply packing process. The polymers are packed coarsely as minimized representations before being expanded during energy minimization. 
 
-.. container:: images-side-by-side
+.. list-table::
+   :widths: 50 50
+   :header-rows: 0
 
-   .. image:: images/polyply_out.PNG
-      :width: 45%
-      :align: left
-
-   .. image:: images/polyply_em.PNG
-      :width: 45%
-      :align: right
-
-
-
-
+   * - .. image:: images/polyply_out.PNG
+          :width: 90%
+     - .. image:: images/polyply_em.PNG
+          :width: 90%
 
 In the above images the **left** shows the polyply output and the condensed polymers. On the **right**, after energy minimization, this is what the final polymer system looks like. Due to this minimized representation --> packing --> expansion approach, there can be some unwanted steric clashes within the system leading to a system that produces a NaN error. This effect is non-existent at very low denstities but quickly becomes an issue when trying to pack high-density systems. With this in mind, a default target of a system with 0.75 g/ml density is given as the desired structure.
 
@@ -277,3 +272,8 @@ To avoid this, a series of extremely short simulations can be carried wtih the *
 
 .. note::
    Test this in your own pc with a very small system. Issues should only be encoutnerred with extremely large systems but it is always worth it to be sure.
+
+References
+----------
+
+.. _ref1: https://doi.org/10.1021/acs.jctc.5c00038
