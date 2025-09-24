@@ -23,11 +23,11 @@ Below is a list of all PHAs that are already parameterized and available upon cl
 
    * - Image
      - Name
-   * - .. image:: images/3HB_trimer.png
+   * - .. image:: images/3HB_trimer.PNG
           :width: 100px
           :align: center
      - **3HB** (3-hydroxybutyrate)
-   * - .. image:: images/4HB_trimer.png
+   * - .. image:: images/4HB_trimer.PNG
           :width: 100px
           :align: center
      - **4HB** (4-hydroxybutyrate)
