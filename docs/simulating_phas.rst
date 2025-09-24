@@ -1,5 +1,5 @@
-Building and Simulating Monodisperse PHAs
-=========================================
+Building and Simulating Monodisperse PHAs: walkthrough
+======================================================
 
 .. important::
    All notebooks and code should be run from the home directory: **~/polymersimulator**.  
@@ -17,7 +17,20 @@ The associated notebook can be found in the main PolymerSimulator directory and 
 
 Below is a list of all PHAs that are already parameterized and available upon cloning the repository.
 
-TABLE OF PHAS
+.. list-table::
+   :header-rows: 1
+   :widths: 20 80
+
+   * - Image
+     - Name
+   * - .. image:: images/3HB_trimer.png
+          :width: 100px
+          :align: center
+     - **3HB** (3-hydroxybutyrate)
+   * - .. image:: images/4HB_trimer.png
+          :width: 100px
+          :align: center
+     - **4HB** (4-hydroxybutyrate)
 
 2: Load Python Modules
 ----------------------
