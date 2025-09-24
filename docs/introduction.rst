@@ -20,9 +20,6 @@ The Polymer Simulator was developed and maintained by:
 
 - **Daniel J. York**  
 - **Dr. Isaac Vidal-Daza**
-
-With invaluable advice from:
-
 - **Dr. Francisco Martin-Martinez**
 
 Testing and feedback by:
