@@ -31,6 +31,117 @@ Below is a list of all PHAs that are already parameterized and available upon cl
           :width: 100px
           :align: center
      - **4HB** (4-hydroxybutyrate)
+   * - .. image:: images/3HV_trimer.PNG
+          :width: 100px
+          :align: center
+     - **3HV** (3-hydroxyvalerate)
+   * - .. image:: images/6HHx_trimer.PNG
+          :width: 100px
+          :align: center
+     - **6HHx** (6-hydroxyhexanoate)
+   * - .. image:: images/7HHp_trimer.PNG
+          :width: 100px
+          :align: center
+     - **7HHp** (7-hydroxyheptanoate)
+   * - .. image:: images/2HB_trimer.PNG
+          :width: 100px
+          :align: center
+     - **2HB** (2-hydroxybutyrate)
+   * - .. image:: images/2HP_trimer.PNG
+          :width: 100px
+          :align: center
+     - **2HP** (2-hydroxypropionate)
+   * - .. image:: images/3HHx_trimer.PNG
+          :width: 100px
+          :align: center
+     - **3HHx** (3-hydroxyhexanoate)
+   * - .. image:: images/3HHp_trimer.PNG
+          :width: 100px
+          :align: center
+     - **3HHp** (3-hydroxyheptanoate)
+   * - .. image:: images/3HO_trimer.PNG
+          :width: 100px
+          :align: center
+     - **3HO** (3-hydroxyoctanoate)
+   * - .. image:: images/3HD_trimer.PNG
+          :width: 100px
+          :align: center
+     - **3HD** (3-hydroxydecanoate)
+   * - .. image:: images/3HDD_trimer.PNG
+          :width: 100px
+          :align: center
+     - **3HDD** (3-hydroxydodecanoate)
+   * - .. image:: images/3H4PhB_trimer.PNG
+          :width: 100px
+          :align: center
+     - **3H4PhB** (3-hydroxy-4-phenylbutyrate)
+   * - .. image:: images/3H5PhV_trimer.PNG
+          :width: 100px
+          :align: center
+     - **3H5PhV** (3-hydroxy-5-phenylvalerate)
+   * - .. image:: images/3H6PhHx_trimer.PNG
+          :width: 100px
+          :align: center
+     - **3H6PhHx** (3-hydroxy-6-phenylhexanoate)
+   * - .. image:: images/3H7PhHp_trimer.PNG
+          :width: 100px
+          :align: center
+     - **3H7PhHp** (3-hydroxy-7-phenylheptanoate)
+   * - .. image:: images/3H8PhO_trimer.PNG
+          :width: 100px
+          :align: center
+     - **3H8PhO** (3-hydroxy-8-phenyloctanoate)
+   * - .. image:: images/3H4mMPxPB_trimer.PNG
+          :width: 100px
+          :align: center
+     - **3H4mMPxPB** (3-hydroxy-4-methylphenoxybutyrate)
+   * - .. image:: images/3H4pMPxPB_trimer.PNG
+          :width: 100px
+          :align: center
+     - **3H4pMPxPB** (3-hydroxy-4-methoxyphenoxybutyrate)
+   * - .. image:: images/3H5BzV_trimer.PNG
+          :width: 100px
+          :align: center
+     - **3H5BzV** (3-hydroxy-5-benzylvalerate)
+   * - .. image:: images/3H5PxV_trimer.PNG
+          :width: 100px
+          :align: center
+     - **3H5PxV** (3-hydroxy-5-phenoxyvalerate)
+   * - .. image:: images/3H5pFPxV_trimer.PNG
+          :width: 100px
+          :align: center
+     - **3H5pFPxV** (3-hydroxy-5-fluorophenoxyvalerate)
+   * - .. image:: images/3H5opF2PxV_trimer.PNG
+          :width: 100px
+          :align: center
+     - **3H5opF2PxV** (3-hydroxy-5-ortho,para-difluorophenoxyvalerate)
+   * - .. image:: images/3H6mMpXHx_trimer.PNG
+          :width: 100px
+          :align: center
+     - **3H6mMpXHx** (3-hydroxy-6-methylphenoxyhexanoate)
+   * - .. image:: images/3H6pMPxHx_trimer.PNG
+          :width: 100px
+          :align: center
+     - **3H6pMPxHx** (3-hydroxy-6-methoxyphenoxyhexanoate)
+   * - .. image:: images/3H7PxHp_trimer.PNG
+          :width: 100px
+          :align: center
+     - **3H7PxHp** (3-hydroxy-7-phenoxyheptanoate)
+   * - .. image:: images/3H4MeV_trimer.PNG
+          :width: 100px
+          :align: center
+     - **3H4MeV** (3-hydroxy-4-methylvalerate)
+   * - .. image:: images/3H3PhP_trimer.PNG
+          :width: 100px
+          :align: center
+     - **3H3PhP** (3-hydroxy-3-phenylpropionate)
+   * - .. image:: images/3H5pMePxV_trimer.PNG
+          :width: 100px
+          :align: center
+     - **3H5pMePxV** (3-hydroxy-5-methylphenoxyvalerate)
+
+
+
 
 2: Load Python Modules
 ----------------------
