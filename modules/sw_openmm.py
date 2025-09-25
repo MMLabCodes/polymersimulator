@@ -1019,6 +1019,9 @@ class BuildSimulation():
 
         if BuildSimulation.type_of_simulation(self) == "GRO":
             system = self.gro_topology.createSystem(nonbondedMethod=app.PME, nonbondedCutoff=self.nonbondedcutoff*nanometers, constraints=HBonds)
+            if ensemble == "NPT":
+                barostat = MonteCarloBarostat((pressure*atmosphere), ((start_temp if heating==True else max_temp)*kelvin))
+                system.addForce(barostat)
             simulation = app.Simulation(self.gro_topology.topology, system, integrator)
 
         # Update the xyz of each atom
