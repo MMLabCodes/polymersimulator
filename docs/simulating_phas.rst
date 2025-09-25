@@ -385,7 +385,7 @@ This error typically occurs because atoms are too close to eachother and create 
      - .. image:: images/polyply_em.PNG
           :width: 90%
 
-In the above images the **left** shows the polyply output and the condensed polymers. On the **right**, after energy minimization, this is what the final polymer system looks like. Due to this minimized representation --> packing --> expansion approach, there can be some unwanted steric clashes within the system leading to a system that produces a NaN error. This effect is non-existent at very low denstities but quickly becomes an issue when trying to pack high-density systems. With this in mind, a default target of a system with 0.75 g/ml density is given as the desired structure.
+In the above images the **left** shows the polyply output and the condensed polymers. On the **right**, after energy minimization, this is what the final polymer system looks like. Due to this minimized representation --> packing --> expansion approach, there can be some unwanted steric clashes within the system leading to a system that produces a NaN error. This effect is non-existent at very low densities but quickly becomes an issue when trying to pack high-density systems. With this in mind, a default target of a system with 0.75 g/ml density is given as the desired structure.
 
 To avoid this, a series of extremely short simulations can be carried wtih the **builder.find_polyply_starting_structrue** method. The outputs are the same as **builder.run_polyply** to avoid any confusion - except the generated files have been succesfully used to run an openmm simulation.
 
@@ -397,6 +397,76 @@ To avoid this, a series of extremely short simulations can be carried wtih the *
 
 .. note::
    Test this in your own pc with a very small system. Issues should only be encoutnerred with extremely large systems but it is always worth it to be sure.
+
+7. Running simulations
+----------------------
+Now a starting structure has been found, simulations can now be ran.
+
+Import simulation module and intialise simulation
+-------------------------------------------------
+
+The first step is to import the **sw_openmm** module. This contains all of the methods to run simulations, set parameters and visualise output data.
+
+.. code-block:: python
+
+   from modules.sw_openmm import *
+
+Then the toology and coordinate files can be loaded using the name of the system and the manager object.
+
+.. code-block:: python
+
+   system_name = "3HB_10_polymer_25_amorph"
+   gro_top, gro_coord = manager.load_gromacs_filepaths(system_name)
+
+This returns the two files required to intialise the openmm simulation - **gro_top** (topology) and **gro_coord** (coordinates).
+
+.. code-block:: python
+
+   sim = GromacsSimulation(manager, gro_top, gro_coord)
+
+This returns a simulation object constructed with the given files and it is ready to do some MD!
+
+What is the simulation object?
+------------------------------
+
+Now the simulation has been defined, a lot of information is now contained in a single python object. A list of some key attributes is given below and what they contain is given below.
+
+.. list-table:: Simulation Attributes
+   :header-rows: 1
+   :widths: 30 70
+
+   * - **Attribute**
+     - **Description**
+   * - ``sim.filename``
+     - The name of the system.
+   * - ``sim.timestep``
+     - The timestep of the system (fs).
+   * - ``sim.temp``
+     - The temperature (K).
+   * - ``sim.pressure``
+     - The pressure (atm).
+   * - ``sim.total_steps``
+     - The total number of steps in the simulation.
+   * - ``sim.nonbondedcutoff``
+     - The nonbonded interaction cutoff (Å).
+   * - ``sim.topology_file``
+     - Path to the topology file.
+   * - ``sim.coordinates_file``
+     - Path to the coordinates file.
+
+In the case of parameters like **pressure**, **temperature**, **timestep**, etc.. these are default parameters and can be changed with a single line in between simulation steps.
+
+How to change parameters?
+-------------------------
+.. note::
+   Many of the parameters can be passed directly to function, overiding the default parameters, but the default parameters can also be changed.
+
+TABLE OF:
+WHAT CAN CHANGE
+HOW TO CHANGE IT
+FORMAT OF INPUT
+
+
 
 References
 ----------
