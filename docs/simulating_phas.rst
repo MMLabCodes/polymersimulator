@@ -461,12 +461,191 @@ How to change parameters?
 .. note::
    Many of the parameters can be passed directly to function, overiding the default parameters, but the default parameters can also be changed.
 
-TABLE OF:
-WHAT CAN CHANGE
-HOW TO CHANGE IT
-FORMAT OF INPUT
+.. list-table:: Functions for Changing Simulation Parameters
+   :header-rows: 1
+   :widths: 35 45 20
 
+   * - **Function**
+     - **Effect**
+     - **Input Format**
+   * - ``sim.set_total_steps(total_steps)``
+     - Updates the total number of simulation steps.
+     - ``int``
+   * - ``sim.set_temperature(temperature)``
+     - Sets the simulation temperature.
+     - ``float`` (Kelvin)
+   * - ``sim.set_pressure(pressure)``
+     - Sets the simulation pressure.
+     - ``float`` (atm)
+   * - ``sim.set_timestep(timestep)``
+     - Updates the timestep of the simulation.
+     - ``float`` (fs)
 
+Where are the simulation files saved?
+-------------------------------------
+
+The last thing (*i promise!*) to be aware of before running simulations is where the simulation outputs saved?
+
+The manager object handles the creation of a simulation directory and saving the outputs to this directory and the constructed filepaths to the output directory will follow this general form.
+
+```python
+
+ sim_dir = f"~polymersimulator/pdb_files/systems/{system_name}/{date_and_timestamp}"   
+
+An an example for the simulation that is being carried in this guide will look like this:
+
+```python
+
+   sim_dir = "~polymersimulator/pdb_files/systems/3HB_10_polymer_25_amorph/2025-01-01_0000"
+
+.. note::
+   Each simulation is given a unique timestamp so that multiple instances of the same simulation can be ran without the files ever overwriting eachother.
+
+The path for the simulation output directory can also be printed out with:
+
+```python
+
+   print(sim.output_dir)
+
+Minimizing the energy of the system
+-----------------------------------
+
+Now the simualtions is intialized with (and assigned to the variable: **sim**), different methods can be applied to the simulations. The first step is always an energy minimization and this is carried out as so:
+
+.. code-block:: python
+
+   min_sim = sim.minimize_energy()
+
+An output is assigned to this method so it can be passed to the next stage of the simulation.
+
+.. note::
+   The assignment of these output variables is critical as it allows the openmm simulation methodology to be modular as any output variable from any stage can be passed to any stage.
+
+Next steps in a simulation
+--------------------------
+
+There are various different methods that can be applied to the system now the energy has been minimized.
+
+.. code-block:: python
+
+   sim.basic_NPT()
+   sim.basic_NVT()
+   sim.annealing_NVT()
+   sim.thermal_ramp()
+
+These methods all require an output from either **min_sim** or one of the methods shown above and other arguments that will be shown as examples in the following few sections.
+
+The **important** thing here, that has be reiterated a few times is that these methods are modular, however, there is one key difference to the **minimize_energy** method. That method only assigned a single variable to the outputs, but for every other method, two different variables should be assigned:
+
+- Simulation object that can be passed to another step
+- Path to the data file, for quick visualisation of the results
+
+.. note::
+   The order of methods that are chosen are entirely down to the user but must make sense in the context of the project. For this example, the methods should be ordered as so, 0: Energy min., 1: NPT density equilibration, 2: NVT annealing cycle, 3: NPT heating production run.
+
+Order of simulation stages in this example
+------------------------------------------
+
+For the system in this guide **3HB_10_polymer_25_amorph** the workflow is as follows:
+
+- Energy minimization (already carried out at this point)
+- Short NPT density equilibration (ensuring the system has reached the correct density)
+- Singular NVT annealing cycle (ensure any conformationl bias inferred by packing is removed from the initial system)
+- Thermal ramping NPT production run (this is the production run and intends to find thermodynamic properties of the system)
+
+Density equilibration
+---------------------
+
+This step aims to allow the system to reach the correct density (remember systems were packed to a density of 0.75 g/ml). Before running this stage, some parameters need to be set:
+
+.. code-block:: python
+
+   sim.set_total_steps(10000)
+   sim.set_temperature(300)
+   sim.set_timestep(2.0)
+   sim.set_pressure(1.0)
+
+Setting the parameters before each step is useful to ensure simulations are running as intended.
+
+.. note::
+   Note: The total number of steps for any stage in this notebook will ideally be more and equate to a much longer simulation time than show in this notebook, however, these are just examples and longer simulations should be ran in hpc.
+
+The variable **min_sim** can now be passed to the **basic_NPT** method and is the only argument required (all parameters have already been set).
+
+.. code-block:: python
+
+   npt_sim, npt_sim_data = sim.basic_NPT(min_sim)
+
+This step assigns two variables with **npt_sim** being the important one that can be passed to the next stage in the simulation. **npt_sim_data** is the path to the data file and this filepath can be retrieved by printing the variable.
+
+.. important::
+   Whilst steps have been taken to avoid "Particle coordinate is NaN" errors, there is a possibility is persists after the openmm energy minimization. If this error occurs, rerun the simulation from the beggining. This error will be something that will be something that is avoided in a future iteration by using python exceptions.
+
+.. code-block:: python
+
+   print(npt_sim_data)
+
+There is an inbuilt funciton in the simulation methodology that can produce some quick graphs from this data file:
+
+.. code-block:: python
+
+   sim.graph_state_data(npt_sim_data)
+
+.. note::
+   These graphs are not super important for final analysis as there are many other things that will be of interest to analyse. However, they are an easy way to ensure the simulation step was working as intended by making sure things like; temperature and density evolved throughout the simulation as expected.
+
+Annealing
+---------
+
+The final stage before running the production run is to anneal the simulation and remove any conformational bias imposed by the initial conformation of the system.
+
+Setting parameters for annealing follows a slightly different approach to that of the previous simulation step.
+
+.. code-block:: python
+
+   sim.set_anneal_parameters([start_temp, target_temp, cycles, quench_rate, total_steps])
+
+Start temp: the temperature the annealing will start at
+Target temp: the temperature the annealing will reach
+Cycles: the number of annealing cycles
+Quench rate: how quick the temperature will in-/de-crease
+Total steps: total steps for the annealing process
+
+For this simulation the annealing parameters that will be assigned are:
+
+Start temp: 300
+Target temp: 600
+Cycles: 1
+Quench rate: 10
+Total steps: 100000
+
+.. code-block:: python
+
+   sim.set_anneal_parameters([300, 600, 1, 10, 10000])
+
+Running the simulation is then the same as in the previous **basic_NPT** simulation, where two varaibles are assigned.
+
+.. code-block:: python
+
+   annealed_sim, annealed_sim_data = sim.anneal_NVT(npt_sim)
+
+And the data can be show in a similar way.
+
+.. code-block:: python
+
+   sim.graph_state_data(annealed_sim_data)
+
+Thermal ramping production
+--------------------------
+
+Now the system is at the correct density and has been annealed, the production run is finally able to be ran! (YAYYY :P)
+
+The idea here is to heat the system from 300 K to past its experimental glass transition temperature and be able to calculate this (and other thermodynamic properties). This means that a target temperature of 600 K + is ideal.
+
+.. note::
+   These graphs are not super important for final analysis as there are many other things that will be of interest to analyse. However, they are an easy way to ensure the simulation step was working as intended by making sure things like; temperature and density evolved throughout the simulation as expected.
+
+FROM HERE
 
 References
 ----------
