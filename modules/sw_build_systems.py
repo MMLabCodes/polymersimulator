@@ -17,6 +17,7 @@ from rdkit import Chem
 from rdkit.Chem import AllChem
 from rdkit.Chem.rdmolfiles import MolFromPDBFile
 
+
 class BuildSystems():
     """
     A class for building and simulating molecular systems.
@@ -2517,7 +2518,8 @@ class BuildAmberSystems(BuildSystems):
         
         return(system_name, system_top, system_gro, system_itp_file)
 
-    def find_polyply_starting_structure(self, polymer_names=None, num_poly=None, max_attempts=10):
+    def find_polyply_starting_structure(self, polymer_names=None, num_poly=None, dens=750, max_attempts=10):
+        from modules.sw_openmm import GromacsSimulation, BuildSimulation
         if polymer_names == None or num_poly == None:
             print("Please provide a list of polymer names and a list of each amount of polymers.")
             return()
@@ -2526,9 +2528,9 @@ class BuildAmberSystems(BuildSystems):
         success = False
         while not success:
             try:
-                system_name, gro_top, gro_coord, gro_itp = self.run_polyply(polymer_names, num_poly, dens=750, run_min=True)
+                system_name, gro_top, gro_coord, gro_itp = self.run_polyply(polymer_names, num_poly, dens=dens, run_min=True)
                 top, coord = self.manager.load_gromacs_filepaths(system_name)
-                simulation = GromacsSimulation(manager, top, coord)
+                simulation = GromacsSimulation(self.manager, top, coord)
                 min_sim = simulation.minimize_energy()
                 print("sim_min")
                 simulation.set_total_steps(1000)
@@ -2536,8 +2538,6 @@ class BuildAmberSystems(BuildSystems):
                 npt_sim, npt_sim_data = simulation.basic_NPT(min_sim)
                 simulation.graph_state_data(npt_sim_data)
                 success=True
-                succesful_polymers[0].append(polymer_name)
-                succesful_polymers[1].append(attempts+1)
             except Exception as e:
                 attempts+=1
                 print("")
@@ -2545,7 +2545,7 @@ class BuildAmberSystems(BuildSystems):
                 print(e)
                 print("")
                 if attempts == max_attempts:
-                    print("MAx attempts reached")
+                    print("Max attempts reached - No solution found")
                     return()
         print(f"Starting system found in {attempts} attempts")
         return(system_name, gro_top, gro_coord, gro_itp)
