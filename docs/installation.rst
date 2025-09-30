@@ -137,13 +137,3 @@ This will start a local server and display several URLs. Copy the **first link**
 
 From there, explore the tutorials or follow the detailed guides in this documentation.
 
-Tutorials
----------
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Tutorials
-
-   sw_directories_tutorial
-   sw_build_systems_tutorial
-   sw_openmm_tutorial
