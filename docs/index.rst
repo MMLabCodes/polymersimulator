@@ -28,7 +28,6 @@ Contents
 
    introduction
    installation
-   launching_jupyter
    simulating_phas
    simulating_phas_example_script
    tutorials
