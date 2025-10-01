@@ -1,5 +1,5 @@
-sw_directories tutorial
-=======================
+sw_directories guide
+====================
 
 This module is the workhorse of the package and ensures every file is sent to the correct place and each file can be found for its required purpose.
 

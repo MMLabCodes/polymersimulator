@@ -1,5 +1,5 @@
-sw_openmm tutorial
-==================
+sw_openmm guide
+===============
 
 **sw_openmm** carries out molecular dynamics simulations. It uses the openmm python module and supports:
 

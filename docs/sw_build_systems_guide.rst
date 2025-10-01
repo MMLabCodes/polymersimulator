@@ -1,5 +1,5 @@
-sw_build_systems tutorial
-=========================
+sw_build_systems guide
+======================
 
 This module is the basis for almost all of the tasks carried out by other modules in this package. It relies on the **SnippetSimManage** class in the **sw_directories** module
 for a lot of file finding//directing. 
