@@ -182,17 +182,18 @@ PHAs listed at the beginning of this tutorial have already been parameterized us
 To build a polymer, two things are required:
 
 **name of the base trimer**
-   For any given polymer, this is: {prefix}_trimer ; where the prefix is the name of the polymer (i.e. 3HB)
+   For any given polymer, this is: {prefix}_trimer 
+   where the prefix is the name of the polymer (i.e. 3HB)
 
 **The desired length of the final polymer**
    The number of monomers required in the final polymer (i.e 10)
 
 .. code-block:: python
 
-   Examples: "4HB_trimer", "3HB_trimer", "3HHp_trimer", etc...
-   Examples: 10, 20, 30, etc...
+   Base trimer examples: "4HB_trimer", "3HB_trimer", "3HHp_trimer", etc...
+   Polymer length examples: 10, 20, 30, etc...
 
-The example below generates a 3HB decamer
+The example code below will generate a 3HB decamer.
 
 .. code-block:: python
 
@@ -240,7 +241,7 @@ As an example, decamers will be built for:
 This will build 3 different decamers for the given prefixes. If you are unsure of how to call the parameters and pdb files for the generated polymers, this is explained here: https://polymersimulator.readthedocs.io/en/latest/simulating_phas.html#loading-polymer-files
 
 .. note::
-   This example builds only decamers but by using i notation, a second list of differeing polymer lengths can be defined allowing for packing different lengths of the same type of polymer. An example of this will be shown in the final script of this guide.
+   This example is limited to buuilding decamers. However, by using i notation in a for loop, a second list of differeing polymer lengths can be defined allowing for packing different lengths of the same type of polymer. An example of this will be shown in the final script of this guide.
 
 4: Script to build systems - 1 type of polymer
 ----------------------------------------------
@@ -254,12 +255,12 @@ This step pipes together 3 functions that;
 - Converts these files into the GROMACS format
 - Builds a system of a given number of these polymers using polyply
 
-This example will buuild the same system as seen in the walkthrough - **25 3HB decamers**. Only 2 things need to be defined:
+This example will build the same system as seen in the walkthrough - **25 3HB decamers**. Only 2 things need to be defined:
 
 - Name of the polymer
 - Amount of the polymer 
 
-If you are unsure how the polymer is called, please refer here: https://polymersimulator.readthedocs.io/en/latest/simulating_phas.html#polymer-naming-conventions
+If you are unsure how the polymer is named, please refer here: https://polymersimulator.readthedocs.io/en/latest/simulating_phas.html#polymer-naming-conventions
 
 .. code-block:: python
 
@@ -276,7 +277,7 @@ If you are unsure how the polymer is called, please refer here: https://polymers
    # Build polyply system
     system_name, gro_top, gro_coord, gro_itp = builder.find_polyply_starting_structure(polymer_names=polymer_names, num_poly=number_of_polymers, dens=750,          max_attempts=100)
 
-This will return the required filepaths to run a simulation. However, a simulation of this system was already shown in the walkthorugh notebook so lets build a more complex system.
+This will return the required filepaths to run a simulation. However, a simulation of this system was already shown in the walkthorugh notebook so lets build a more complex system - one that conntains more than 1 type of polymer.
 
 4: Script to build systems - multiple types of polymer
 ------------------------------------------------------
@@ -304,7 +305,7 @@ For this example, the **3HV**, **4HB** and **3H4MeV** decamers will packed toget
    # Build polyply system
    system_name, gro_top, gro_coord, gro_itp = builder.find_polyply_starting_structure(polymer_names=polymer_names, num_poly=number_of_polymers, dens=750,    max_attempts=100)
 
-The files returned here are the ones that will used for the example simulation script.
+The files returned here are the ones that will used for the example simulation script and **system_name** will be passed to the next stage.
 
 6: Running a simulation
 -----------------------
@@ -314,7 +315,7 @@ So far, two different systems have been generated:
 - A system of 25 3HB decamers
 - A system of 10 4HB decamer, 10 3HV decamers and 10 3H4MeV decamers
 
-A test script for a simulation will be shown for the second system and the files required for simulation can be loaded easily for this with the **system_name** variable.
+A test script for a simulation will be shown for the second system and the files required for simulation can be loaded easily for this with the **system_name** variable defined in the previous step.
 
 The simulation protocol is the same as shown in the walkthrough notebook:
 
@@ -381,7 +382,9 @@ Hopefully this runs without errors (it should!) but this is the final stage of g
 6: Final script - Pre-parameterized polymer to a simulation
 -----------------------------------------------------------
 
-Various scripts for various stages have been shown as individual entities, the final stage is to put them all together. For this, 3 things will need to be defined:
+Various scripts for various stages have been shown as individual entities, the final stage is to put them all together. The idea is to go from a few simple inputs to a fully fledged simulation in one smash of the enter key. 
+
+For this, 3 things will need to be defined:
 
 - Prefixes of the polymers
 - Number of units in each polymer

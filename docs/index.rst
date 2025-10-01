@@ -30,7 +30,7 @@ Contents
    installation
    simulating_phas
    simulating_phas_example_script
-   tutorials
+   module_guides
    packagecontents
    modules
    errors
