@@ -31,7 +31,7 @@ Contents
    simulating_phas
    simulating_phas_example_script
    module_guides
-   packagecontents
+
    modules
    errors
    usage

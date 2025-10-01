@@ -4,9 +4,6 @@ Errors
 Here some common errors that you may encounter are reported. Bear in mind that this seciton of the documentation will be updated over time
 and some errors may not be logged yet and some may not have answers.
 
-sw_openmm
-=========
-
 Periodic box size less than twice the nonbonded cutoff
 ------------------------------------------------------
 
