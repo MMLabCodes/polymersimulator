@@ -5,6 +5,8 @@ This notebook contains the same code detailed here: https://polymersimulator.rea
 
 In this section of the documentation, the explanations have been stripped back and instead provides examples of how this code can be built up to be used as an entire python script - with the end goal of being able to reproduce similar systems with different polymers.
 
+The associated notebook can be found in the main PolymerSimulator directory and is called **Simulating_Monodisperse_PHAs_Example_Scripts.ipynb**.
+
 A series of different things are covered here:
 
 - Script to build polymers
