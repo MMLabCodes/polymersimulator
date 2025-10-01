@@ -30,8 +30,8 @@ Contents
    installation
    simulating_phas
    simulating_phas_example_script
+   packagecontents
    module_guides
-
    modules
    errors
    usage
