@@ -9,6 +9,8 @@ This guide will cover how to build polymers and run simulations of **polyhydroxy
 
 The associated notebook can be found in the main PolymerSimulator directory and is called **Simulating_Monodisperse_PHAs_Walkthrough.ipynb**.
 
+If you are unsure how to launch jupyter notebook, refer here: https://polymersimulator.readthedocs.io/en/latest/installation.html#launching-jupyter-notebook
+
 .. note::
    PHA examples provided here are intended as a starting point and parameters are provided. You can adapt the workflow to other polymer systems using the more detailed instructions later on in the documentation.
 

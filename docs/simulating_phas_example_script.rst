@@ -14,6 +14,8 @@ A series of different things are covered here:
 - Script to run simulations
 - Script to carry out all of these tasks in one
 
+If you are unsure how to launch jupyter notebook, refer here: https://polymersimulator.readthedocs.io/en/latest/installation.html#launching-jupyter-notebook
+
 .. note::
    PHA examples provided here are intended as a starting point and parameters are provided. You can adapt the workflow to other polymer systems using the more detailed instructions later on in the documentation.
 

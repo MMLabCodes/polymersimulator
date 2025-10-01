@@ -2,9 +2,11 @@
 
 This repository contains content that will allow building arrays of polymer chains, parametrise them with **Amber** force field, and perform simulations using **openmm**
 
+The associated documentation can be found here: https://polymersimulator.readthedocs.io/en/latest/index.html
+
 ## 1. Setting up the environment and cloning repository
 
-(Important: If you are working in windows, please follow the steps in section section 4 <a name="section-4"></a> (Working with windows) to first set up a linux system in your computer before following the steps to set up the environment. If you are working in Unix (linux or macOS), you will not require any prerequisite steps before setting up the environment given below)
+(Important: If you are working in windows, please follow the steps in section section 3 <a name="section-3"></a> (Working with windows) to first set up a linux system in your computer before following the steps to set up the environment. If you are working in Unix (linux or macOS), you will not require any prerequisite steps before setting up the environment given below)
 
 To run this code, a Python environment containing **RDkit**, **AmberTools** and **openmm** is required. This environment is set up by running the lines described in the following steps 1-4 in your terminal (command line). (In windows, open ubuntu and enter these lines into the terminal)
 
@@ -188,116 +190,7 @@ No we can select the first URL (the one containing 'localhost:8888') and copy an
  
 From there we can navigate to the Jupyter notebook folder and launch notebooks from there.
 
-### 2.1 Jupyter notebook tutorials
-
-#### 2.1.1 Filepath manager
-
-This tutorial provides examples of how to use the filepath manager. There will be many cases where nothing is returned as no
-files are currently generated. However, it provides a useful framework for working with files and systems easily. Many of
-the other methods described in future notebooks use this filepath manager so it is crucial to understand its functionality.
-
-Do the tutorial: **Tutorial_1_filepath_manager.ipynb**
-
-#### 2.1.2 Parameterizing small molecules and polymers
-
-This notebook is split into 2 sections; <br>
-    1. Parameterizing small molecules <br>
-    2. Parameterizing polymers <br>
-    
-Parameterizing molecules is carried out using the code in **modules/sw_build_systems** and utilises amber tools to generate 
-parameters using GAFF (generalized amber forcefield).
-
-Do the tutorial: **Tutorial_2_Parameterizing_Small_Molecules_and_Polymers.ipynb**
-
-*Note: this code for generating parameters is project agnostic, and for specific cases - easier tools may alreadt exist*
-
-#### 2.1.3 Solvating small molecules and polymers
-
-This notebook is split into 2 sections; <br>
-    1. Solvating small molecules <br>
-    2. Solvating polymers <br>
-    
-Amber topologies and parameters will be generated for systems of solvated small molecules and polymers to be used for molecular dynamics simulations. <br>
-
-Do the tutorial: **Tutorial_3_Solvating_Small_Molecules_and_Polymers.ipynb**
-
-#### 2.1.4 Building systems with polymers
-
-This notebook is split into 2 sections; <br>
-    1. Building 3x3 arrays of polymers <br>
-    2. Building 2x10 arrays of polymers - *array is generated, but solvation of the array in water does not* <br>
-    
-Amber topologies and parameters will be generated for systesms of the above systesm to be used for molecular dynamics simulations. <br>
-
-#### 2.1.5 Running simulations
-
-This notebook will explain how to run simulations on systems where amber topologies and coordinates have been generated for. The example in this tutorial is for the 3x3 array of 3HB_10-mers generated in **tutorial_4**, however, this will work with any system generated in either **tutorial_3** or **tutorial_4**.
-
-
-#### 2.2.2.2 Module guides
-
-There are a series of guides that give a detailed over of what each module does - some of this information may also be included within the tutorials.
-
-1. **openmm_simulation_guide.ipynb** <br>
-
-    This notebook contains detailed explanations and examples of how to use the functions found in the **sw_openmm.py** module. This guide is essential to using this python module and should be read and referred to when running openmm simulations. This module functions as wrapper for openmm scripts and no experience with openmm is required to use this module. <br>
-
-2. **parameterization_guide.ipynb** <br>
-
-   This notebook includes details on parameterizing molecules for MD simulations using tleap and antechamber. All of methods shown here are included in the **sw_build_systems.py** module - it is recommend to work through the tutroial notebooks first and then refer to this notebook if you would like more information. <br>
-
-3. **building_systems_guide.ipynb** <br>
-
-    Notebook and associated description coming soon...
-
-3. **filepath_manager_guide.ipynb** <br>
-
-    Notebook and associated description coming soon...
-
-### 3 Python modules - easy handling 
-
-The python modules created here aim to provide easier handling of a range of different aspects of this project and are detailed in more depth below. <br>
-
-1. **sw_directories**
-
-    This module defines the PolymerSimulatorDirs class, which is used for initializing
-    and organizing directories for polymer simulation setup. It creates specific
-    directories such as 'python_scripts', 'pdb_files', 'molecules', 'systems', and manages
-    files like 'residue_codes.csv'. More information can be found in the **filepath_manager_guide.ipynb** notebook.
-
-    Attributes:
-        main_dir (str): The main directory for polymer simulation setup.
-
-    Example:
-    ```
-    >>> from PolymerSimulatorDirs import PolymerSimulatorDirs 
-    >>> polymer_dirs = PolymerSimulatorDirs('/path/to/main/dir/')
-    >>> print(polymer_dirs.pdb_file_dir)
-    '/path/to/main/dir/pdb_files'
-    ```
-
-    Note:
-        The main_dir must be provided as a valid path and must already exist.
-
-2. **sw_openmm.py**
-
-   This module defines the following classes:
-   - BuildSimulation
-   - AmberSimulation
-   - ANISimulation <br>
-
-   Functions for carrying MD simulations with openmm are contrained here; such as - annealing, equilibration and production runs. The jupyer notebook **openmm_simulation_guide.ipynb** contains examples and decriptions on how to use this module.
-
-3. **sw_build_systems.py**
-
-   Description coming soon...
-
-4. **sw_analysis.py**
-
-   Decription coming soon...
-
-
-## 4. Working on windows system <a name="section-4"></a>
+## 3. Working on windows system <a name="section-3"></a>
 
 The Amber package is made for linux and it is best to install a linux distribution for windows following the instructions below. This will allow you run all of the code here in these notebooks and python scripts in a linux environment. One thing to keep in mind is that any simulations run in your local pc are simply tests before moving to Super Computing Wales (SCW).
 
