@@ -7,7 +7,7 @@ Building and Simulating Monodisperse PHAs: walkthrough
 
 This guide will cover how to build polymers and run simulations of **polyhydroxyalkanoates (PHAs)** using pre-generated parameters.
 
-The associated notebook can be found in the main PolymerSimulator directory and is called **simulating_monodisperse_PHAs.ipynb**.
+The associated notebook can be found in the main PolymerSimulator directory and is called **Simulating_Monodisperse_PHAs_Walkthrough.ipynb**.
 
 .. note::
    PHA examples provided here are intended as a starting point and parameters are provided. You can adapt the workflow to other polymer systems using the more detailed instructions later on in the documentation.
@@ -206,6 +206,7 @@ To build a polymer, two things are required:
    For any given polymer, this is: {prefix}_trimer ; where the prefix is the name of the polymer (i.e. 3HB)
 
 .. code-block:: python
+
    Examples: "4HB_trimer", "3HB_trimer", "3HHp_trimer"
    
 **The desired length of the final polymer**
@@ -365,8 +366,8 @@ The final system, visualised in vmd, will look similar to this (each colour is c
 There are some noticeable *floating* atoms and bonds, this is nothing to worry about and these are atoms and bonds that lie accross the periodic boudnary conditions.
 
 
-6.3 Issues with polyply starting systems
-----------------------------------------
+6.3: Issues with polyply starting systems
+-----------------------------------------
 
 When running a simulation with a system generated with polyply, a common error is encountered:
 
@@ -398,7 +399,7 @@ To avoid this, a series of extremely short simulations can be carried wtih the *
 .. note::
    Test this in your own pc with a very small system. Issues should only be encoutnerred with extremely large systems but it is always worth it to be sure.
 
-7. Running simulations
+7: Running simulations
 ----------------------
 Now a starting structure has been found, simulations can now be ran.
 
@@ -426,8 +427,8 @@ This returns the two files required to intialise the openmm simulation - **gro_t
 
 This returns a simulation object constructed with the given files and it is ready to do some MD!
 
-What is the simulation object?
-------------------------------
+7.1: What is the simulation object?
+-----------------------------------
 
 Now the simulation has been defined, a lot of information is now contained in a single python object. A list of some key attributes is given below and what they contain is given below.
 
@@ -456,8 +457,8 @@ Now the simulation has been defined, a lot of information is now contained in a 
 
 In the case of parameters like **pressure**, **temperature**, **timestep**, etc.. these are default parameters and can be changed with a single line in between simulation steps.
 
-How to change parameters?
--------------------------
+7.2: How to change parameters?
+------------------------------
 .. note::
    Many of the parameters can be passed directly to function, overiding the default parameters, but the default parameters can also be changed.
 
@@ -481,8 +482,8 @@ How to change parameters?
      - Updates the timestep of the simulation.
      - ``float`` (fs)
 
-Where are the simulation files saved?
--------------------------------------
+7.3: Where are the simulation files saved?
+------------------------------------------
 
 The last thing (*i promise!*) to be aware of before running simulations is where the simulation outputs saved?
 
@@ -507,8 +508,8 @@ The path for the simulation output directory can also be printed out with:
 
    print(sim.output_dir)
 
-Minimizing the energy of the system
------------------------------------
+7.4: Minimizing the energy of the system
+----------------------------------------
 
 Now the simualtions is intialized with (and assigned to the variable: **sim**), different methods can be applied to the simulations. The first step is always an energy minimization and this is carried out as so:
 
@@ -521,8 +522,8 @@ An output is assigned to this method so it can be passed to the next stage of th
 .. note::
    The assignment of these output variables is critical as it allows the openmm simulation methodology to be modular as any output variable from any stage can be passed to any stage.
 
-Next steps in a simulation
---------------------------
+7.5: Next steps in a simulation
+-------------------------------
 
 There are various different methods that can be applied to the system now the energy has been minimized.
 
@@ -543,8 +544,8 @@ The **important** thing here, that has be reiterated a few times is that these m
 .. note::
    The order of methods that are chosen are entirely down to the user but must make sense in the context of the project. For this example, the methods should be ordered as so, 0: Energy min., 1: NPT density equilibration, 2: NVT annealing cycle, 3: NPT heating production run.
 
-Order of simulation stages in this example
-------------------------------------------
+7.6: Order of simulation stages in this example
+-----------------------------------------------
 
 For the system in this guide **3HB_10_polymer_25_amorph** the workflow is as follows:
 
@@ -553,8 +554,8 @@ For the system in this guide **3HB_10_polymer_25_amorph** the workflow is as fol
 - Singular NVT annealing cycle (ensure any conformationl bias inferred by packing is removed from the initial system)
 - Thermal ramping NPT production run (this is the production run and intends to find thermodynamic properties of the system)
 
-Density equilibration
----------------------
+7.7: Density equilibration
+--------------------------
 
 This step aims to allow the system to reach the correct density (remember systems were packed to a density of 0.75 g/ml). Before running this stage, some parameters need to be set:
 
@@ -594,8 +595,8 @@ There is an inbuilt funciton in the simulation methodology that can produce some
 .. note::
    These graphs are not super important for final analysis as there are many other things that will be of interest to analyse. However, they are an easy way to ensure the simulation step was working as intended by making sure things like; temperature and density evolved throughout the simulation as expected.
 
-Annealing
----------
+7.8: Annealing
+--------------
 
 The final stage before running the production run is to anneal the simulation and remove any conformational bias imposed by the initial conformation of the system.
 
@@ -635,8 +636,8 @@ And the data can be show in a similar way.
 
    sim.graph_state_data(annealed_sim_data)
 
-Thermal ramping production
---------------------------
+7.9: Thermal ramping production
+-------------------------------
 
 Now the system is at the correct density and has been annealed, the production run is finally able to be ran! (YAYYY :P)
 
@@ -646,6 +647,10 @@ The idea here is to heat the system from 300 K to past its experimental glass tr
    These graphs are not super important for final analysis as there are many other things that will be of interest to analyse. However, they are an easy way to ensure the simulation step was working as intended by making sure things like; temperature and density evolved throughout the simulation as expected.
 
 FROM HERE
+
+8: What next?
+-------------
+The next step is to check out the next guide which has much less explanations on the internal workings of all the methods shown in this notebook, but is a good example of how these methods can be implemented into a proper script and utilised much more efficiently. The links can be found here:
 
 References
 ----------
