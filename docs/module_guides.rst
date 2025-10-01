@@ -6,12 +6,6 @@ Module guides
 
 This section contains guides fully detailing the usage of the many python modules within this package. This does not include detailed, implementable workflows and instead focusses on detailed explanations of each method and function avaialable in these modules.
 
-Running tutorials
------------------
-
-From the command line (or ubuntu in windows) if you launch jupyter notebook from the main directory of project, you should see a range of different jupyter tutorials.
-Follow these alongside the tutorials in the documentation to get started with the python package.
-
 .. toctree::
    :maxdepth: 2
    :caption: Tutorials
