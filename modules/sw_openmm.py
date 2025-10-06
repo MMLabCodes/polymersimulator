@@ -465,10 +465,18 @@ class BuildSimulation():
         min_start_time = time.time()
         
         integrator = LangevinIntegrator(self.min_temp*kelvin, self.friction_coeff/picoseconds, self.timestep*femtoseconds)
+
+        try:
+            platform = Platform.getPlatformByName("CUDA")
+            platform.setPropertyDefaultValue("Precision", "mixed")  # or 'single', 'double'
+            print("Using CUDA platform for GPU execution.")
+        except Exception:
+            print("CUDA not available — falling back to CPU.")
+            platform = Platform.getPlatformByName("CPU")
         
         if BuildSimulation.type_of_simulation(self) == "AMB":
             system = self.amb_topology.createSystem(nonbondedMethod=app.PME, nonbondedCutoff=self.nonbondedcutoff*nanometers, constraints=HBonds)
-            simulation = app.Simulation(self.amb_topology.topology, system, integrator)
+            simulation = app.Simulation(self.amb_topology.topology, system, integrator, platform)
             simulation.context.setPositions(self.amb_coordinates.positions)
             
         if BuildSimulation.type_of_simulation(self) == "ANI":
@@ -481,7 +489,7 @@ class BuildSimulation():
             print("Atoms in GRO:", len(self.gro_coordinates.positions))
             print("Atoms in TOP:", self.gro_topology.topology.getNumAtoms())
             system = self.gro_topology.createSystem(nonbondedMethod=app.PME, nonbondedCutoff=self.nonbondedcutoff*nanometers, constraints=HBonds)
-            simulation = app.Simulation(self.gro_topology.topology, system, integrator)
+            simulation = app.Simulation(self.gro_topology.topology, system, integrator, platform)
             simulation.context.setPositions(self.gro_coordinates.positions)
         
         simulation.minimizeEnergy()
@@ -571,10 +579,18 @@ class BuildSimulation():
         
         # Set up integrator
         integrator = LangevinIntegrator(start_temp*kelvin, self.friction_coeff/picoseconds, self.timestep*femtoseconds)
+
+        try:
+            platform = Platform.getPlatformByName("CUDA")
+            platform.setPropertyDefaultValue("Precision", "mixed")  # or 'single', 'double'
+            print("Using CUDA platform for GPU execution.")
+        except Exception:
+            print("CUDA not available — falling back to CPU.")
+            platform = Platform.getPlatformByName("CPU")
         
         if BuildSimulation.type_of_simulation(self) == "AMB":
             system = self.amb_topology.createSystem(nonbondedMethod=app.PME, nonbondedCutoff=self.nonbondedcutoff*nanometers, constraints=app.HBonds)
-            simulation = app.Simulation(self.amb_topology.topology, system, integrator)
+            simulation = app.Simulation(self.amb_topology.topology, system, integrator, platform)
         
         if BuildSimulation.type_of_simulation(self) == "ANI":
             system = self.potential.createSystem(self.ani_topology, nonbondedMethod=app.PME, nonbondedCutoff=self.nonbondedcutoff*nanometers, constraints=app.HBonds)
@@ -583,7 +599,7 @@ class BuildSimulation():
 
         if BuildSimulation.type_of_simulation(self) == "GRO":
             system = self.gro_topology.createSystem(nonbondedMethod=app.PME, nonbondedCutoff=self.nonbondedcutoff*nanometers, constraints=HBonds)
-            simulation = app.Simulation(self.gro_topology.topology, system, integrator)
+            simulation = app.Simulation(self.gro_topology.topology, system, integrator. platform)
 
         # Update the xyz of each atom
         simulation.context.setPeriodicBoxVectors(vx, vy, vz)
@@ -738,11 +754,19 @@ class BuildSimulation():
         # Set up integrator and barostat
         barostat = MonteCarloBarostat((pressure*atmosphere), (temp*kelvin)) # Define barostat (pressure, temp)
         integrator = LangevinIntegrator(temp*kelvin, self.friction_coeff/picoseconds, self.timestep*femtoseconds)
+
+        try:
+            platform = Platform.getPlatformByName("CUDA")
+            platform.setPropertyDefaultValue("Precision", "mixed")  # or 'single', 'double'
+            print("Using CUDA platform for GPU execution.")
+        except Exception:
+            print("CUDA not available — falling back to CPU.")
+            platform = Platform.getPlatformByName("CPU")
         
         if BuildSimulation.type_of_simulation(self) == "AMB":
             system = self.amb_topology.createSystem(nonbondedMethod=app.PME, nonbondedCutoff=self.nonbondedcutoff*nanometers, constraints=app.HBonds)
             system.addForce(barostat)
-            simulation = app.Simulation(self.amb_topology.topology, system, integrator)
+            simulation = app.Simulation(self.amb_topology.topology, system, integrator, platform)
         
         if BuildSimulation.type_of_simulation(self) == "ANI":
             system = self.potential.createSystem(self.ani_topology, nonbondedMethod=app.PME, nonbondedCutoff=self.nonbondedcutoff*unit.nanometers, constraints=app.HBonds)
@@ -755,7 +779,7 @@ class BuildSimulation():
             #system = self.restrain_heavy_atoms(system, self.gro_topology.topology, self.gro_coordinates.positions)
             #print("heavy atoms restrained")
             system.addForce(barostat)
-            simulation = app.Simulation(self.gro_topology.topology, system, integrator)
+            simulation = app.Simulation(self.gro_topology.topology, system, integrator, platform)
 
         # We set the box vectors with the output from the the previous simulation
         #if self.minimized_only == False:       
@@ -869,10 +893,18 @@ class BuildSimulation():
         
         # Set up integrator
         integrator = LangevinIntegrator(temp*kelvin, self.friction_coeff/picoseconds, self.timestep*femtoseconds)
+
+        try:
+            platform = Platform.getPlatformByName("CUDA")
+            platform.setPropertyDefaultValue("Precision", "mixed")  # or 'single', 'double'
+            print("Using CUDA platform for GPU execution.")
+        except Exception:
+            print("CUDA not available — falling back to CPU.")
+            platform = Platform.getPlatformByName("CPU")
         
         if BuildSimulation.type_of_simulation(self) == "AMB":
             system = self.amb_topology.createSystem(nonbondedMethod=app.PME, nonbondedCutoff=self.nonbondedcutoff*nanometers, constraints=app.HBonds)
-            simulation = app.Simulation(self.amb_topology.topology, system, integrator)
+            simulation = app.Simulation(self.amb_topology.topology, system, integrator, platform)
         
         if BuildSimulation.type_of_simulation(self) == "ANI":
             system = self.potential.createSystem(self.ani_topology, nonbondedMethod=app.PME, nonbondedCutoff=self.nonbondedcutoff*nanometers, constraints=app.HBonds)
@@ -883,7 +915,7 @@ class BuildSimulation():
             system = self.gro_topology.createSystem(nonbondedMethod=app.PME, nonbondedCutoff=self.nonbondedcutoff*nanometers, constraints=HBonds)
             #system = self.restrain_heavy_atoms(system, self.gro_topology.topology, self.gro_coordinates.positions)
             #print("heavy atoms restrained")
-            simulation = app.Simulation(self.gro_topology.topology, system, integrator)
+            simulation = app.Simulation(self.gro_topology.topology, system, integrator, platform)
         
         # Update positional info
         simulation.context.setPositions(xyz)
@@ -1004,13 +1036,21 @@ class BuildSimulation():
         
         # Set up integrator
         integrator = LangevinIntegrator(start_temp*kelvin, self.friction_coeff/picoseconds, self.timestep*femtoseconds)
+
+        try:
+            platform = Platform.getPlatformByName("CUDA")
+            platform.setPropertyDefaultValue("Precision", "mixed")  # or 'single', 'double'
+            print("Using CUDA platform for GPU execution.")
+        except Exception:
+            print("CUDA not available — falling back to CPU.")
+            platform = Platform.getPlatformByName("CPU")
         
         if BuildSimulation.type_of_simulation(self) == "AMB":
             system = self.amb_topology.createSystem(nonbondedMethod=app.PME, nonbondedCutoff=self.nonbondedcutoff*nanometers, constraints=app.HBonds)
             if ensemble == "NPT":
                 barostat = MonteCarloBarostat((pressure*atmosphere), ((start_temp if heating==True else max_temp)*kelvin))
                 system.addForce(barostat)
-            simulation = app.Simulation(self.amb_topology.topology, system, integrator)
+            simulation = app.Simulation(self.amb_topology.topology, system, integrator, platform)
         
         if BuildSimulation.type_of_simulation(self) == "ANI":
             system = self.potential.createSystem(self.ani_topology, nonbondedMethod=app.PME, nonbondedCutoff=self.nonbondedcutoff*nanometers, constraints=app.HBonds)
@@ -1022,7 +1062,7 @@ class BuildSimulation():
             if ensemble == "NPT":
                 barostat = MonteCarloBarostat((pressure*atmosphere), ((start_temp if heating==True else max_temp)*kelvin))
                 system.addForce(barostat)
-            simulation = app.Simulation(self.gro_topology.topology, system, integrator)
+            simulation = app.Simulation(self.gro_topology.topology, system, integrator, platform)
 
         # Update the xyz of each atom
         simulation.context.setPeriodicBoxVectors(vx, vy, vz)
@@ -1532,7 +1572,7 @@ class BuildSimulation():
             The PNG file containing the plot will be saved in the same directory as the data file with
             the same name, but with the extension changed to ".png".
         """
-        png_file_name = (data_file.split(".")[0]) + ".png"
+        png_file_name = data_file.rsplit(".", 1)[0] + ".png"
         
         data_file = data_file
         df = pd.read_csv(data_file, delimiter=',')
