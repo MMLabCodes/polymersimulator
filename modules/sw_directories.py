@@ -290,6 +290,27 @@ class PolySimManage:
             print("Files not found. Check name of molecule/system and if files have been generated.")
             return(None)
 
+    def load_itp_filepath(self, system_name=None):
+        itp_file_path = None
+        if system_name == None:
+            print("Please provide a system name.")
+            return(None)
+        for root, dirs, files in os.walk(self.systems_dir):
+            dirs[:] = [d for d in dirs if d != 'depreceated']
+            # Check each file in the current directory
+            for file in files:
+                # Check if the file has a .pdb extension
+                #if file.endswith(".prmtop") and system_name in file: 
+                if file == (system_name + ".itp"):
+                    # Construct the full path to the .pdb file
+                    itp_file_path = os.path.join(root, file)
+                
+        if itp_file_path is not None):
+            return(itp_file_path)
+        else:
+            print("Files not found. Check name of molecule/system and if files have been generated.")
+            return(None)
+    
     def load_gromacs_filepaths(self, system_name=None):
         top_file_path = None
         gro_file_path = None
