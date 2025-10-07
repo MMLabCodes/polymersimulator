@@ -305,7 +305,7 @@ class PolySimManage:
                     # Construct the full path to the .pdb file
                     itp_file_path = os.path.join(root, file)
                 
-        if itp_file_path is not None):
+        if itp_file_path is not None:
             return(itp_file_path)
         else:
             print("Files not found. Check name of molecule/system and if files have been generated.")
