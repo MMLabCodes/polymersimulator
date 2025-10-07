@@ -599,7 +599,7 @@ class BuildSimulation():
 
         if BuildSimulation.type_of_simulation(self) == "GRO":
             system = self.gro_topology.createSystem(nonbondedMethod=app.PME, nonbondedCutoff=self.nonbondedcutoff*nanometers, constraints=HBonds)
-            simulation = app.Simulation(self.gro_topology.topology, system, integrator. platform)
+            simulation = app.Simulation(self.gro_topology.topology, system, integrator, platform)
 
         # Update the xyz of each atom
         simulation.context.setPeriodicBoxVectors(vx, vy, vz)
