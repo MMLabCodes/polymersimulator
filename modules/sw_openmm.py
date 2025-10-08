@@ -1088,19 +1088,22 @@ class BuildSimulation():
         simulation.reporters.append(dataWriter.stateDataReporter)
 
         if heating:
-            incremental_temps = np.arange(start_temp, max_temp + quench_rate, quench_rate).tolist()
+            if max_temp <= start_temp:
+                raise ValueError(f"Heating selected, but max_temp ({max_temp}) <= start_temp ({start_temp})")
+            incremental_temps = np.arange(start_temp, max_temp + quench_rate, abs(quench_rate)).tolist()
         else:
-            incremental_temps = np.arange(start_temp, max_temp - quench_rate, -quench_rate).tolist()
+            if start_temp <= max_temp:
+                raise ValueError(f"Cooling selected, but start_temp ({start_temp}) <= max_temp ({max_temp})")
+            incremental_temps = np.arange(start_temp, max_temp - abs(quench_rate), -abs(quench_rate)).tolist()
 
-        
-        #incremental_temps = np.arange(start_temp, max_temp + quench_rate, quench_rate).tolist()
-     
-        if heating is True:
-            pass # List will be low to high
-        if heating is False:
-            incremental_temps.reverse() # List now high to low for cooling
-         
-        steps_at_increment = int(total_steps/len(incremental_temps))
+        # Sanity check
+        if len(incremental_temps) == 0:
+            raise ValueError(
+                f"No temperature increments generated! "
+                f"Check start_temp={start_temp}, max_temp={max_temp}, quench_rate={quench_rate}"
+            )
+
+        steps_at_increment = int(total_steps / len(incremental_temps))
 
         for i in range(len(incremental_temps)):
             integrator.setTemperature(incremental_temps[i])
