@@ -2501,7 +2501,7 @@ class BuildAmberSystems(BuildSystems):
             f.writelines(file_content)
 
         try:
-            result = subprocess.run(["polyply", "gen_coords", "-p", system_top, "-o", system_gro, "-dens", str(dens)], capture_output=True, text=True)
+            result = subprocess.run(["polyply", "gen_coords", "-p", system_top, "-o", system_gro, "-dens", str(dens)], encoding="utf-8", capture_output=True, text=True)
 
             print(f""" 
             Return code: {result.returncode}
