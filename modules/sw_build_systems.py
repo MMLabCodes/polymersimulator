@@ -477,13 +477,17 @@ class BuildAmberSystems(BuildSystems):
             return(None)
 
         if forcefield == None:
-            forcefield = "GAFF"
+            print(f"""Forcefields supported are: GAFF, GAFF2
+            
+            Please provide a forcefield argument.""")   
+            return()
         else:
             forcefield = forcefield
-
         if charge_model == None:
-            print("Charge models supported are: bcc, abcg2")
-            charge_model = "bcc"
+            print(f"""Charge models supported are: bcc, abcg2
+            
+            Please provide a charge model argument.""")
+            return()
         else:
             charge_model = charge_model
 
