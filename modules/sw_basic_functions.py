@@ -1,5 +1,13 @@
 from rdkit import Chem
-from rdkit.Chem import Draw, AllChem
+from rdkit.Chem import AllChem
+
+# Optional: safely ignore Draw import if system libraries are missing
+try:
+    from rdkit.Chem import Draw
+except ImportError:
+    Draw = None
+    print("Warning: RDKit Draw module not available. Continuing without drawing support.")
+    
 import math
 import os
 
