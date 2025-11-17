@@ -81,13 +81,15 @@ class BuildSystems():
             Example:
             
             pdb_file = builder.SmilesToPDB_GenResCode(smiles="CC", name="ethane")""")
+            return()
             
         forbidden_codes = ["AAA", "BBB", "CCC", "UNL", "ALA", "ARG", "ASN", "ASP", "ASX", "CYS", "GLU", "GLN", "GLX", "HIS", "ILE", "LEU", "LYS", "MET", "PHE", "PRO", "SER", "THR", "SEC", "TRP", "TYR", "VAL"]
         # Load existing residue codes from the CSV file
         residue_codes = self.load_residue_codes(self.manager.residue_code_csv)
         # Check if the name or smiles is already in the database
         existing_entry = self.find_existing_entry(residue_codes, name, smiles)
-        if existing_entry and force_duplicate==False:
+        print(existing_entry)
+        if existing_entry is not None and not force_duplicate:
             # Use existing residue code
             residue_code = existing_entry[2]  # Assuming code is the third column
         else:
