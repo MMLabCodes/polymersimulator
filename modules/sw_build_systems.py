@@ -64,7 +64,7 @@ class BuildSystems():
         with open(output_file, "w") as f:
             f.write(pdb_string)
 
-    def SmilesToPDB_GenResCode(self, smiles=smiles, name=name, force_duplicate=False):
+    def SmilesToPDB_GenResCode(self, smiles=None, name=None, force_duplicate=False):
         """
         Converts a SMILES string to a PDB file and generates a residue code if not found.
 
@@ -75,6 +75,13 @@ class BuildSystems():
         Returns:
             None: Writes the PDB file and updates the residue code CSV.
         """
+        if smiles is None and name is None:
+            raise ValueError("""Please provide both a SMILES and a name.
+            
+            Example:
+            
+            pdb_file = builder.SmilesToPDB_GenResCode(smiles="CC", name="ethane")""")
+            
         forbidden_codes = ["AAA", "BBB", "CCC", "UNL", "ALA", "ARG", "ASN", "ASP", "ASX", "CYS", "GLU", "GLN", "GLX", "HIS", "ILE", "LEU", "LYS", "MET", "PHE", "PRO", "SER", "THR", "SEC", "TRP", "TYR", "VAL"]
         # Load existing residue codes from the CSV file
         residue_codes = self.load_residue_codes(self.manager.residue_code_csv)
