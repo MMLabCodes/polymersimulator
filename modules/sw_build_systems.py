@@ -95,6 +95,12 @@ class BuildSystems():
             residue_code = self.generate_unique_residue_code(residue_codes, forbidden_codes)
             # Update the CSV file with the new entry
             self.update_residue_codes_csv(name, smiles, residue_code, self.manager.residue_code_csv)
+            print(f"""Updated residue code database: {self.manager.residue_code_csv}
+
+            Name: {name}
+            SMILES: {smiles}
+            Residue code: {residue_code}""")
+            
         # Replace default "UNL" codes in the PDB content - NOTE, "UNL" is also a forbidden code as it is the default code.
         pdb_filepath = os.path.join(self.manager.pdb_file_dir, (name + ".pdb"))
         self.SmilesToPDB(smiles, pdb_filepath)    
