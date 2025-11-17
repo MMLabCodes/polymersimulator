@@ -17,11 +17,17 @@ class benchmark_charges():
     def __init__(self, manager=None, molecule_name=None, smiles=None):
         self.molecule_name = molecule_name
         self.manager = manager
+        self.benchmarking_dir = os.path.join(self.manager.molecules_dir, molecule_name, "charge_benchmarking")
         self.builder = BuildAmberSystems(self.manager)
         self.pdb_file = self.manager.load_pdb_filepath(molecule_name)
         self.forcefields = ["GAFF", "GAFF2"]
-        self.charge_models = ["bcc", "mul", "gas"]#, "abcg2"]
-        self.charge_paths = []
+        self.charge_models = ["bcc"]#, "mul", "gas"]#, "abcg2"]
+        self.charge_paths = [
+            os.path.join(self.benchmarking_dir, f)
+            for f in os.listdir(self.benchmarking_dir)
+            if os.path.isfile(os.path.join(self.benchmarking_dir, f))
+            and not f.lower().endswith(".png")]
+
         self.base_labels = None
         self.mbis_script_path = "/home/dan/polymersimulator/bin/calculate_mbis.sh"
         self.naglmbis_dir = "/home/dan/polymersimulator/naglmbis"
@@ -46,7 +52,6 @@ class benchmark_charges():
             {e}""")
             return()
 
-        self.benchmarking_dir = os.path.join(self.manager.molecules_dir, molecule_name, "charge_benchmarking")
         if not os.path.exists(self.benchmarking_dir):
             os.makedirs(self.benchmarking_dir)
 
