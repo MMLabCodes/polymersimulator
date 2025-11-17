@@ -89,14 +89,14 @@ class BuildSystems():
         # Check if the name or smiles is already in the database
         existing_entry = self.find_existing_entry(residue_codes, name, smiles)
         print(existing_entry)
-        if existing_entry is not None and not force_duplicate:
+        if existing_entry is not None and force_duplicate == False:
             # Use existing residue code
             residue_code = existing_entry[2]  # Assuming code is the third column
         else:
             # Generate a unique 3-letter residue code excluding forbidden codes
             residue_code = self.generate_unique_residue_code(residue_codes, forbidden_codes)
             # Update the CSV file with the new entry
-            self.update_residue_codes_csv(name, smiles, residue_code, self.manager.residue_code_csv)
+            self.update_residue_codes_csv(name=name, smiles=smiles, residue_code=residue_code, residue_code_csv=self.manager.residue_code_csv, force_duplicate=force_duplicate)
             print(f"""Updated residue code database: {self.manager.residue_code_csv}
 
             Name: {name}
@@ -228,7 +228,7 @@ class BuildSystems():
         print("Mainchain code assigned: ", mainchain_code)
         print("Tail code assigned: ", tail_code)
     
-    def update_residue_codes_csv(self, name, smiles, residue_code, residue_code_csv):
+    def update_residue_codes_csv(self, name=None, smiles=None, residue_code=None, residue_code_csv=None, force_duplicate=False):
         """
         Updates the CSV file with a new residue code entry.
 
@@ -245,7 +245,7 @@ class BuildSystems():
         residue_codes = self.load_residue_codes(residue_code_csv)
         existing_entry = self.find_existing_entry(residue_codes, name, smiles)
 
-        if not existing_entry:
+        if not existing_entry or force_duplicate == True:
             with open(residue_code_csv, "a", newline="") as csv_file:
                 writer = csv.writer(csv_file)
 
