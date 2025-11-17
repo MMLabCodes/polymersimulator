@@ -177,7 +177,7 @@ class BuildSystems():
 
         return new_code
 
-    def GenRescode_4_PolyUnits(self, name=None):
+    def GenRescode_4_PolyUnits(self, name=None, force_duplicate=False):
         """
         Generates residue codes for polymeric units (e.g., trimers) and updates the CSV.
 
@@ -222,9 +222,9 @@ class BuildSystems():
         mainchain_smiles = "m" + residue_smiles
         tail_smiles = "t" + residue_smiles
     
-        self.update_residue_codes_csv(head_name, head_smiles, head_code, self.manager.residue_code_csv)
-        self.update_residue_codes_csv(mainchain_name, mainchain_smiles, mainchain_code, self.manager.residue_code_csv)
-        self.update_residue_codes_csv(tail_name, tail_smiles, tail_code, self.manager.residue_code_csv)
+        self.update_residue_codes_csv(head_name, head_smiles, head_code, self.manager.residue_code_csv, force_duplicate=force_duplicate)
+        self.update_residue_codes_csv(mainchain_name, mainchain_smiles, mainchain_code, self.manager.residue_code_csv, force_duplicate=force_duplicate)
+        self.update_residue_codes_csv(tail_name, tail_smiles, tail_code, self.manager.residue_code_csv, force_duplicate=force_duplicate)
         print("Head code assigned: ", head_code)
         print("Mainchain code assigned: ", mainchain_code)
         print("Tail code assigned: ", tail_code)
@@ -599,8 +599,11 @@ class BuildAmberSystems(BuildSystems):
     
         # Check if the required files exist
         segment_files = [head_file, mainchain_file, tail_file]
-        for file_path in segment_files:
-            if os.path.exists(os.path.join(molecule_dir, file_path)):
+        print(segment_files)
+        for file in segment_files:
+            filepath = os.path.join(molecule_dir, file)
+            print(filepath)
+            if os.path.exists(filepath):
                 pass
             else:
                 print("Please prepare files defining each segment of the trimer. Head, mainchain and tail. Call build_systems.prepin_help() for more information.")
@@ -618,6 +621,11 @@ class BuildAmberSystems(BuildSystems):
         mainchain_command = "prepgen -i " + ac_name + " -o " + mainchain_prepin_file + " -f prepi -m " + mainchain_file + " -rn " + mainchain_rescode + " -rf " + mainchain_rescode + ".res"
         tail_command = "prepgen -i " + ac_name + " -o " + tail_prepin_file + " -f prepi -m " + tail_file + " -rn " + tail_rescode + " -rf " + tail_rescode + ".res"
         commands = [head_command, mainchain_command, tail_command]
+        print(f"""COMMANDS:
+
+        {commands}
+
+        """)
         os.chdir(molecule_dir)
         for command in commands:
             try:
