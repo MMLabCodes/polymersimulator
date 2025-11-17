@@ -64,7 +64,7 @@ class BuildSystems():
         with open(output_file, "w") as f:
             f.write(pdb_string)
 
-    def SmilesToPDB_GenResCode(self, smiles, name):
+    def SmilesToPDB_GenResCode(self, smiles=smiles, name=name, force_duplicate=False):
         """
         Converts a SMILES string to a PDB file and generates a residue code if not found.
 
@@ -80,7 +80,7 @@ class BuildSystems():
         residue_codes = self.load_residue_codes(self.manager.residue_code_csv)
         # Check if the name or smiles is already in the database
         existing_entry = self.find_existing_entry(residue_codes, name, smiles)
-        if existing_entry:
+        if existing_entry and force_duplicate==False:
             # Use existing residue code
             residue_code = existing_entry[2]  # Assuming code is the third column
         else:
@@ -773,7 +773,7 @@ class BuildAmberSystems(BuildSystems):
         with open(original_pdb_file, 'w') as outfile:
             outfile.writelines(updated_lines)
     
-    def gen_polymer_pdb_and_params(self, base_name=None, number_of_units=None, box_radius=None, infinite=None):
+    def gen_polymer_pdb_and_params(self, base_name=None, number_of_units=None, box_radius=None, infinite=None, forcefield=None):
         """
         Generates a polymer PDB file using `tleap` based on the specified molecule and number of units.
 
@@ -803,6 +803,11 @@ class BuildAmberSystems(BuildSystems):
             dirs = DirectoryPaths('path/to/main/project/directory')
             gen_polymer_pdb(dirs, "3HB_trimer", 10)
         """
+        if forcefield is None:
+            print(f"""Please provide a forcefield argument.
+
+            Forcefields supported are: GAFF, GAFF2""")
+            return()
         if base_name is None or number_of_units is None:
             print("Please provide a polymer base_name and polymer length.")
             return
@@ -855,7 +860,7 @@ class BuildAmberSystems(BuildSystems):
         file_content = f"""loadamberprep {head_prepi_filepath}
              loadamberprep {mainchain_prepi_filepath}
              loadamberprep {tail_prepi_filepath}
-             source leaprc.gaff
+             source leaprc.{forcefield}
 
              list
 
