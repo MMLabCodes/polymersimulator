@@ -229,7 +229,7 @@ class BuildSystems():
         print("Mainchain code assigned: ", mainchain_code)
         print("Tail code assigned: ", tail_code)
     
-    def update_residue_codes_csv(self, name=None, smiles=None, residue_code=None, residue_code_csv=None):
+    def update_residue_codes_csv(self, name=None, smiles=None, residue_code=None, residue_code_csv=None, force_duplicate=False):
         """
         Updates the CSV file with a new residue code entry.
 
@@ -247,7 +247,7 @@ class BuildSystems():
         existing_entry = self.find_existing_entry(residue_codes, name, smiles)
         print(existing_entry)
 
-        if not existing_entry:
+        if not existing_entry or force_duplicate == True:
             with open(residue_code_csv, "a", newline="") as csv_file:
                 writer = csv.writer(csv_file)
 
