@@ -177,7 +177,7 @@ class BuildSystems():
 
         return new_code
 
-    def GenRescode_4_PolyUnits(self, name):
+    def GenRescode_4_PolyUnits(self, name=None):
         """
         Generates residue codes for polymeric units (e.g., trimers) and updates the CSV.
 
@@ -198,7 +198,8 @@ class BuildSystems():
     
         # Check if the name or smiles is already in the database
         existing_entry = self.find_existing_entry(residue_codes, name)
-        if existing_entry:
+        print(existing_entry)
+        if existing_entry is not None:
             # Use existing residue code
             residue_code = existing_entry[2]  # Assuming code is the third column  
             residue_smiles = existing_entry[1] # Assuming SMILES is the second column
@@ -228,7 +229,7 @@ class BuildSystems():
         print("Mainchain code assigned: ", mainchain_code)
         print("Tail code assigned: ", tail_code)
     
-    def update_residue_codes_csv(self, name=None, smiles=None, residue_code=None, residue_code_csv=None, force_duplicate=False):
+    def update_residue_codes_csv(self, name=None, smiles=None, residue_code=None, residue_code_csv=None):
         """
         Updates the CSV file with a new residue code entry.
 
@@ -244,8 +245,9 @@ class BuildSystems():
         # Update the CSV file with the new entry if it doesn't exist
         residue_codes = self.load_residue_codes(residue_code_csv)
         existing_entry = self.find_existing_entry(residue_codes, name, smiles)
+        print(existing_entry)
 
-        if not existing_entry or force_duplicate == True:
+        if not existing_entry:
             with open(residue_code_csv, "a", newline="") as csv_file:
                 writer = csv.writer(csv_file)
 
@@ -506,9 +508,9 @@ class BuildAmberSystems(BuildSystems):
         else:
             charge_model = charge_model
 
-        
         # Create a new directory for param files for the molecule and copy pdb there
         try:
+            param_mol_dir = os.path.join(self.manager.molecules_dir, molecule_name)
             pdb_filepath = os.path.join(self.manager.pdb_file_dir, (molecule_name + ".pdb"))
             self.mod_pdb_file(pdb_filepath)
             if not os.path.exists(param_mol_dir):
