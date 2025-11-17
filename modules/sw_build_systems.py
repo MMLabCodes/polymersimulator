@@ -75,7 +75,7 @@ class BuildSystems():
         Returns:
             None: Writes the PDB file and updates the residue code CSV.
         """
-        if smiles is None and name is None:
+        if smiles is None or name is None:
             raise ValueError("""Please provide both a SMILES and a name.
             
             Example:
