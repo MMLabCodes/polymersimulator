@@ -31,7 +31,7 @@ import pwlf
 import warnings
 warnings.filterwarnings("ignore", message="DCDReader currently makes independent timesteps")
 
-def initialise_poly_analysis(manager=None, system_name=None, base_molecule_name=None, poly_len=None, sim_stage_name=None, sim_index=None, sim_type=None):
+def initialise_poly_analysis(manager=None, system_name=None, polymer_name=None, poly_len=None, sim_stage_name=None, sim_index=None, sim_type=None):
     """
     Initializes polymer analysis by setting up a molecular dynamics universe.
     
@@ -55,7 +55,7 @@ def initialise_poly_analysis(manager=None, system_name=None, base_molecule_name=
         print("Please provide a simulation stage name - will be output filename tag assigned to specific stage of simulation.")
         return()
     sim_avail = manager.simulations_avail(system_name)
-    masterclass = master_poly_anal(manager, system_name, base_molecule_name, sim_avail[sim_index], poly_len, sim_type)
+    masterclass = master_poly_anal(manager, system_name, polymer_name, sim_avail[sim_index], poly_len, sim_type)
     return poly_Universe(masterclass, sim_stage_name, '.dcd')
 
 def initialise_bio_oil_analysis(manager, system_name, sim_index=0, sim_step=None):
@@ -169,46 +169,44 @@ class master_poly_anal(initialise):
         self.polymer_code = base_molecule_name.split("_")[0]
         self.system_name = system_name
         self.base_molecule_name = base_molecule_name
+        self.simulation_directory = simulation_directory
+        self.simulation_files = self.group_files()
+        self.min_filepath = os.path.join(self.simulation_directory, self.simulation_files["min"][0])
+        self.sim_type = sim_type
+        
         if sim_type == "AMB":
             self.topology_file = self.manager.load_amber_filepaths(system_name)[0]
         if sim_type == "GRO":
-            self.gro_top = self.manager.load_gromacs_filepaths(system_name)[0]
-            self.gro_itp = self.manager.load_itp_filepath(system_name)
-            self.gro_gro = self.manager.load_gro_filepath(system_name)
-
-            self.temp_top = os.path.join(self.manager.systems_dir, system_name, "topol.tpr")
-
-            cmd = ["gmx", "grompp", "-f", "dummy.mdp", "-p", self.gro_top, "-c", self.gro_gro, "-o", self.temp_top]
-            result = subprocess.run(cmd, capture_output=True, text=True)
-            if result.returncode != 0:
-                print(f"""GROMACS grompp failed:
-
-                {result.stderr}""")
-   
-            #self.topology_file = self.manager.load_gromacs_filepaths(system_name)[0]
-            self.topology_file = self.temp_top
+            #self.topology_file = self.manager.load_gro_filepath(system_name) # have to use pdb as top due to fucking stupid no segid preservation in .gro file
+            self.topology_file = self.min_filepath
             
-        self.simulation_directory = simulation_directory
 
         # Create necessary directories if they don't exist
         for dir_name in ["extracted_poly_coords", "poly_DFT_inputs", "poly_DFT_outputs"]:
             dir_path = os.path.join(self.simulation_directory, dir_name)
             os.makedirs(dir_path, exist_ok=True)
 
-        self.simulation_files = self.group_files()
-        self.min_filepath = os.path.join(self.simulation_directory, self.simulation_files["min"][0])
         self.base_pdb = self.manager.load_pdb_filepath(base_molecule_name)
         self.base_poly_vol = estimated_volume(self.base_pdb)
 
         # Handle polymer length-dependent attributes
         if poly_length is not None:
             self.poly_length = poly_length
-            num_polymers, self.poly_sel_dict, self.residue_codes = self.calculate_polymers_and_assign_residue_codes(
-                self.min_filepath, self.poly_length
-            )
-            self.number_of_polymers = len(self.poly_sel_dict)
-            self.system_vol = self.base_poly_vol * self.number_of_polymers
+
+            if sim_type == "AMB":
+                # Use the existing residue-number-based workflow
+                num_polymers, self.poly_sel_dict, self.residue_codes = self.calculate_polymers_and_assign_residue_codes(self.min_filepath, self.poly_length, "AMB")
+                self.number_of_polymers = len(self.poly_sel_dict)
+                self.system_vol = self.base_poly_vol * self.number_of_polymers
+
+            elif sim_type == "GRO":
+                
+                num_polymers, self.poly_sel_dict, self.residue_codes = self.calculate_polymers_and_assign_residue_codes(self.min_filepath, self.poly_length, "GRO")
+                self.number_of_polymers = len(self.poly_sel_dict)
+                self.system_vol = self.base_poly_vol * self.number_of_polymers
+
         else:
+            # poly_length is None, fallback to just extracting residue codes
             self.poly_length = None
             _, self.residue_codes = self.extract_rescodes_and_resnums(self.min_filepath)
             self.system_vol = None
@@ -232,8 +230,11 @@ class master_poly_anal(initialise):
 
         with open(pdb_file_path, 'r') as pdb_file:
             for line in pdb_file:
+                if line.startswith("TER"):
+                    continue
                 if line.startswith(("ATOM", "HETATM")):
                     residue_number = int(line[22:26].strip())  # Extract residue number
+                    #print(residue_number)
                     residue_code = line[17:20].strip()  # Extract residue code
 
                     # Update the largest residue number
@@ -244,7 +245,7 @@ class master_poly_anal(initialise):
 
         return largest_residue_number, unique_residue_codes
 
-    def calculate_polymers_and_assign_residue_codes(self, pdb_file_path, poly_length):
+    def calculate_polymers_and_assign_residue_codes(self, pdb_file_path, poly_length, sim_type):
         """
         Assigns residue codes to polymers and determines polymer count.
 
@@ -258,16 +259,54 @@ class master_poly_anal(initialise):
                 - polymers_dict (dict): Dictionary mapping polymer names to residue indices.
                 - unique_residue_codes (set): Set of unique residue codes.
         """
-        largest_residue_number, unique_residue_codes = self.extract_rescodes_and_resnums(pdb_file_path)
-        num_polymers = largest_residue_number // poly_length
+        if sim_type == "AMB":
+            largest_residue_number, unique_residue_codes = self.extract_rescodes_and_resnums(pdb_file_path)
+            num_polymers = largest_residue_number // poly_length
+            # Assign residue indices to polymers
+            polymers_dict = {
+                f'Polymer_{i + 1}': list(range(i * poly_length + 1, (i + 1) * poly_length + 1))
+                for i in range(num_polymers)}
+        if sim_type == "GRO":
+            unique_segments, unique_residue_codes = self.extract_segments_and_rescodes(pdb_file_path)
+            num_polymers = len(unique_segments)
+            
+            polymers_dict = {
+                f'Polymer_{i + 1}': unique_segments[i]
+                for i in range(num_polymers)}
+            
+        return num_polymers, polymers_dict, unique_residue_codes  
 
-        # Assign residue indices to polymers
-        polymers_dict = {
-            f'Polymer_{i + 1}': list(range(i * poly_length + 1, (i + 1) * poly_length + 1))
-            for i in range(num_polymers)
-        }
+    def extract_segments_and_rescodes(self, pdb_file_path):
+        """
+        Extract unique segment IDs and residue codes from a PDB file.
 
-        return num_polymers, polymers_dict, unique_residue_codes   
+        Args:
+            pdb_file_path (str): Path to the PDB file.
+
+        Returns:
+            tuple: (unique_segments, segment_residue_codes)
+                - unique_segments (list): Sorted list of segment IDs (A, B, C, ...)
+                - segment_residue_codes (dict): Maps segment ID to list of (resid, rescode)
+        """
+        unique_segments = set()
+        unique_residue_codes = set()
+
+        with open(pdb_file_path, 'r') as pdb_file:
+            for line in pdb_file:
+                if line.startswith("TER"):
+                    continue
+                if line.startswith(("ATOM", "HETATM")):
+                    segid = line[21:22].strip()        # Segment ID (columns 73-76)
+                    
+                    print(f"SEGID is: {segid}")
+
+                    resid = int(line[22:26].strip())   # Residue number
+                    residue_code = line[17:20].strip()      # Residue code
+
+                    unique_segments.add(segid)
+                    unique_residue_codes.add(residue_code)
+
+        return sorted(unique_segments), unique_residue_codes
 
 class Universe:
     """
@@ -384,11 +423,15 @@ class poly_Universe(Universe):
             MDAnalysis.AtomGroup: Selected atoms based on polymer selection criteria.
         """
         first_polymer_indices = self.masterclass.poly_sel_dict[polymer_name]
-
+        
         # Construct the selection string
-        selection_string = ("not " if select_rest else "") + "resid " + " ".join(map(str, first_polymer_indices))
-        return self.universe.select_atoms(selection_string)
-
+        if self.masterclass.sim_type == "AMB":
+            selection_string = ("not " if select_rest else "") + "resid " + " ".join(map(str, first_polymer_indices))
+            return self.universe.select_atoms(selection_string)
+        if self.masterclass.sim_type == "GRO":
+            selection_string = ("not " if select_rest else "") + "segid " + " ".join(map(str, first_polymer_indices))
+            return self.universe.select_atoms(selection_string)
+            
     def select_backbone(self, polymer_name):
         """
         Selects the polymer backbone based on predefined SMARTS patterns.
