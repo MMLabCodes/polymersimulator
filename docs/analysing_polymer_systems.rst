@@ -73,7 +73,7 @@ An example is shown below (although, bear in mind, there may be files present th
 
 It is worth explaining some of the files inside the actual simulation folder in a bit more detail:
 
-.. image:: images/simualtion_files.PNG
+.. image:: images/simulation_files.PNG
 
 There are are different types of files:
 
@@ -103,19 +103,35 @@ Each of these arguments is explained in the table below:
    * - **Argument**
      - **Description**
    * - ``manager``
-     - Manager object. EXAMPLE: pre-intialised manager object. TYPE: python object
+     - Manager object. 
+        EXAMPLE: pre-intialised manager object. 
+        TYPE: python object
    * - ``system_name``
-     - Name of the system. EXAMPLE: "3HB_10_polymer_25_amorph". TYPE: string
+     - Name of the system. 
+        EXAMPLE: "3HB_10_polymer_25_amorph". 
+        TYPE: string
    * - ``polymer_name``
-     - Name of the polymer. EXAMPLE: "3HB_10_polymer". TYPE: string
+     - Name of the polymer. 
+        EXAMPLE: "3HB_10_polymer". 
+        TYPE: string
    * - ``poly_len``
-     - Length of the polyer. EXAMPLE: 10 . TYPE: integer
+     - Length of the polyer. 
+        EXAMPLE: 10 . 
+        TYPE: integer
    * - ``sim_stage_name``
-     - Name of the simulation stage to be analysed. EXAMPLE: "cooling_NPT_cool". TYPE: string
+     - Name of the simulation stage to be analysed. 
+        EXAMPLE: "cooling_NPT_cool". 
+        TYPE: string
    * - ``sim_type``
-     - Type of simulation files parsed to simulation engine (i.e. amber or gromacs files). EXAMPLE: "GRO". TYPE: string. NOTE: types currently supported are "AMB" and "GRO"
+     - Type of simulation files parsed to simulation engine (i.e. amber or gromacs files). 
+        EXAMPLE: "GRO". 
+        TYPE: string. 
+        NOTE: types currently supported are "AMB" and "GRO"
    * - ``sim_index``
-     - The simulation folder you want to access. EXAMPLE: 0 . TYPE: integer. NOTE: this is useful when you have replica universes, you can utilise the same other arugments but pass 0,1,2,... as an argument here to analyse a different instance of the same simulation.
+     - The simulation folder you want to access. 
+        EXAMPLE: 0 . 
+        TYPE: integer. 
+        NOTE: this is useful when you have replica universes, you can utilise the same other arugments but pass 0,1,2,... as an argument here to analyse a different instance of the same simulation.
 
 So for the exmaple system, the section I want to analyse is the production run which contains the "cooling_NPT_cool" tag (if you want to analyse another section of the simulation, just pass a different file tag, i.e. *"NVT_annealing"*) so the arguments are as follows:
 
