@@ -103,35 +103,55 @@ Each of these arguments is explained in the table below:
    * - **Argument**
      - **Description**
    * - ``manager``
-     - Manager object. 
-        EXAMPLE: pre-intialised manager object. 
-        TYPE: python object
+     - Manager object.
+       
+       EXAMPLE: pre-initialised manager object.
+       
+       TYPE: python object
    * - ``system_name``
-     - Name of the system. 
-        EXAMPLE: "3HB_10_polymer_25_amorph". 
-        TYPE: string
+     - Name of the system.
+       
+       EXAMPLE: "3HB_10_polymer_25_amorph".
+       
+       TYPE: string
    * - ``polymer_name``
-     - Name of the polymer. 
-        EXAMPLE: "3HB_10_polymer". 
-        TYPE: string
+     - Name of the polymer.
+       
+       EXAMPLE: "3HB_10_polymer".
+       
+       TYPE: string
    * - ``poly_len``
-     - Length of the polyer. 
-        EXAMPLE: 10 . 
-        TYPE: integer
+     - Length of the polymer.
+       
+       EXAMPLE: 10.
+       
+       TYPE: integer
    * - ``sim_stage_name``
-     - Name of the simulation stage to be analysed. 
-        EXAMPLE: "cooling_NPT_cool". 
-        TYPE: string
+     - Name of the simulation stage to be analysed.
+       
+       EXAMPLE: "cooling_NPT_cool".
+       
+       TYPE: string
    * - ``sim_type``
-     - Type of simulation files parsed to simulation engine (i.e. amber or gromacs files). 
-        EXAMPLE: "GRO". 
-        TYPE: string. 
-        NOTE: types currently supported are "AMB" and "GRO"
+     - Type of simulation files parsed to the simulation engine
+       (i.e. amber or gromacs files).
+       
+       EXAMPLE: "GRO".
+       
+       TYPE: string
+       
+       NOTE: types currently supported are "AMB" and "GRO"
    * - ``sim_index``
-     - The simulation folder you want to access. 
-        EXAMPLE: 0 . 
-        TYPE: integer. 
-        NOTE: this is useful when you have replica universes, you can utilise the same other arugments but pass 0,1,2,... as an argument here to analyse a different instance of the same simulation.
+     - The simulation folder you want to access.
+       
+       EXAMPLE: 0.
+       
+       TYPE: integer
+       
+       NOTE: Useful when you have replica universes; you can use the
+       same other arguments but pass 0, 1, 2, ... here to analyse
+       different instances of the same simulation.
+
 
 So for the exmaple system, the section I want to analyse is the production run which contains the "cooling_NPT_cool" tag (if you want to analyse another section of the simulation, just pass a different file tag, i.e. *"NVT_annealing"*) so the arguments are as follows:
 
@@ -149,10 +169,101 @@ And the line of code looks like this:
 
    universe = initialise_poly_analysis(manager=manager, system_name="3HB_10_polymer_25_amorph", polymer_name="3HB_10_polymer", poly_len=10, sim_stage_name="cooling_NPT_cool", sim_type="GRO", sim_index=0)
 
-   
+3: Attributes of a Polymer universe object
+------------------------------------------
 
+The returned **universe** object has multiple attributes and these attributes are specific to the selected simualtion. These are shown in the table below.
 
+.. list-table:: Attributes of a Polymer Universe Object
+   :header-rows: 1
+   :widths: 25 75
 
+   * - **Attribute**
+     - **Description**
+   * - ``data``
+     - Returns a pandas dataframe of the data from the specific stage selected to be analysed.
+   * - ``data_file``
+     - Path to the datafile that is used for the pandas dataframe.
+   * - ``output_filename``
+     - The base filename assigned to any files generated during analysis.
+   * - ``sim_stage``
+     - The stage of the simulation being analysed.
+   * - ``topology``
+     - Path to the topology file used to generate the MDAnalysis universe.
+   * - ``traj_format``
+     - Format of the trajectory file.
+   * - ``trajectory``
+     - Path to the trajectory file used to generate the MDAnalysis universe.
+   * - ``universe``
+     - MDAnalysis universe object.
+   * - ``select_polymer``
+     - Built in method to select individual polymers from the universe.
+   * - ``select_backbone``
+     - Built in method to select individual polymer backbones from the universe.
+   * - ``masterclass``
+     - An attribute that contains many more attributes (see below....).
+
+All of these attributes can be accessed as follows:
+
+.. code-block:: python
+
+   universe.attribute
+
+Whilst that list of attributes is specific to a specific instance of a simulation, you will notice the **universe.masterclass** attribute. This has its own set of attributes, that are unique to the system being analysed but are the same across all instances of replica simulations (hence, the existence of this extra nested class). The attributes for this are listed below.
+
+.. note::
+   Its a straight up lie that all of these attributes are non-specific to the simulation being analysed and are general to the system. This is the case for most of them, but some of the attributes will return items specific to the specific simulation instance - either way, it works and does actually make sense so don't think too hard!
+
+.. list-table:: Attributes of ``universe.masterclass``
+   :header-rows: 1
+   :widths: 30 70
+
+   * - **Attribute**
+     - **Description**
+   * - ``base_molecule_name``
+     - Name of the base polymer.
+   * - ``base_pdb``
+     - Path to the pdb file of the base polymer.
+   * - ``base_poly_vol``
+     - Volume of the base polymer.
+   * - ``calculate_polymers_and_assign_residue_codes``
+     - TODO: description.
+   * - ``extract_rescodes_and_resnums``
+     - TODO: description.
+   * - ``group_files``
+     - Built in method that groups simulation stage files.
+   * - ``manager``
+     - Manger object.
+   * - ``min_filepath``
+     - Path to minimized structure that is generated at the beggining of the simulation.
+   * - ``number_of_polymers``
+     - Number of polymers in the simulation.
+   * - ``poly_length``
+     - Length of polymers in the simulation.
+   * - ``poly_sel_dict``
+     - Dictionary of polymer names you can select.
+   * - ``polymer_code``
+     - Prefix of the polymer name.
+   * - ``residue_codes``
+     - Residues codes found within the simulation.
+   * - ``simulation_directory``
+     - Path to the simualtion directory.
+   * - ``simulation_files``
+     - All files found in the simulation directory.
+   * - ``simulation_stages``
+     - List of potential simualtion stages that can be analysed.
+   * - ``system_name``
+     - Name of the system.
+   * - ``system_vol``
+     - Approximate volume of all atoms within the system.
+   * - ``topology_file``
+     - Path to the topology file used in the simulation.
+
+All of these attributes can be accessed as follows:
+
+.. code-block:: python
+
+   universe.masterclass.attribute
 
 
    
