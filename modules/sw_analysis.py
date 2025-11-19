@@ -31,7 +31,7 @@ import pwlf
 import warnings
 warnings.filterwarnings("ignore", message="DCDReader currently makes independent timesteps")
 
-def initialise_poly_analysis(manager, system_name, base_molecule_name, poly_len=10, sim_stage_name=None, sim_index=0):
+def initialise_poly_analysis(manager=None, system_name=None, base_molecule_name=None, poly_len=None, sim_stage_name=None, sim_index=None, sim_type=None):
     """
     Initializes polymer analysis by setting up a molecular dynamics universe.
     
@@ -55,7 +55,7 @@ def initialise_poly_analysis(manager, system_name, base_molecule_name, poly_len=
         print("Please provide a simulation stage name - will be output filename tag assigned to specific stage of simulation.")
         return()
     sim_avail = manager.simulations_avail(system_name)
-    masterclass = master_poly_anal(manager, system_name, base_molecule_name, sim_avail[sim_index], poly_len)
+    masterclass = master_poly_anal(manager, system_name, base_molecule_name, sim_avail[sim_index], poly_len, sim_type)
     return poly_Universe(masterclass, sim_stage_name, '.dcd')
 
 def initialise_bio_oil_analysis(manager, system_name, sim_index=0, sim_step=None):
@@ -98,7 +98,7 @@ class initialise:
             Dictionary mapping simulation steps to lists of corresponding files.
         """
         grouped_files = defaultdict(list)
-        sim_step_strings = ["1_atm", "temp_ramp_heat", "temp_ramp_cool", "min", "prod", "cooling_NPT_cool", "anneal"]
+        sim_step_strings = ["1_atm", "temp_ramp_heat", "temp_ramp_cool", "min", "prod", "cooling_NPT_cool", "anneal", "cooling_NPT_heat"]
 
         for file in os.listdir(self.simulation_directory):
             if file.endswith(('.txt', '.dcd', '.pdb')):
@@ -154,7 +154,7 @@ class master_poly_anal(initialise):
         simulation_stages (list): List of simulation stages.
     """
 
-    def __init__(self, manager, system_name, base_molecule_name, simulation_directory, poly_length=None):
+    def __init__(self, manager, system_name, base_molecule_name, simulation_directory, poly_length=None, sim_type=None):
         """
         Initializes the master_poly_anal class.
 
@@ -169,7 +169,25 @@ class master_poly_anal(initialise):
         self.polymer_code = base_molecule_name.split("_")[0]
         self.system_name = system_name
         self.base_molecule_name = base_molecule_name
-        self.topology_file = self.manager.load_amber_filepaths(system_name)[0]
+        if sim_type == "AMB":
+            self.topology_file = self.manager.load_amber_filepaths(system_name)[0]
+        if sim_type == "GRO":
+            self.gro_top = self.manager.load_gromacs_filepaths(system_name)[0]
+            self.gro_itp = self.manager.load_itp_filepath(system_name)
+            self.gro_gro = self.manager.load_gro_filepath(system_name)
+
+            self.temp_top = os.path.join(self.manager.systems_dir, system_name, "topol.tpr")
+
+            cmd = ["gmx", "grompp", "-f", "dummy.mdp", "-p", self.gro_top, "-c", self.gro_gro, "-o", self.temp_top]
+            result = subprocess.run(cmd, capture_output=True, text=True)
+            if result.returncode != 0:
+                print(f"""GROMACS grompp failed:
+
+                {result.stderr}""")
+   
+            #self.topology_file = self.manager.load_gromacs_filepaths(system_name)[0]
+            self.topology_file = self.temp_top
+            
         self.simulation_directory = simulation_directory
 
         # Create necessary directories if they don't exist
