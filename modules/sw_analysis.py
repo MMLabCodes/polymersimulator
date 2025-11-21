@@ -298,7 +298,7 @@ class master_poly_anal(initialise):
                 if line.startswith(("ATOM", "HETATM")):
                     segid = line[21:22].strip()        # Segment ID (columns 73-76)
                     
-                    print(f"SEGID is: {segid}")
+                    #print(f"SEGID is: {segid}")
 
                     resid = int(line[22:26].strip())   # Residue number
                     residue_code = line[17:20].strip()      # Residue code
