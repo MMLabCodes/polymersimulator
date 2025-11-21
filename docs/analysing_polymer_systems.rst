@@ -265,6 +265,92 @@ All of these attributes can be accessed as follows:
 
    universe.masterclass.attribute
 
+.. _polymer-selection:
+
+4: Selecting Individual Polymers
+--------------------------------
+
+Another important part of the analysis is being able to select individual polymers. When the universe is intialised, a dictionary is created called the **poly_sel_dict** and can be accessed for any given universe as so.
+
+.. code-block:: python
+
+   universe.masterclass.poly_sel_dict
+
+This will return a dictionary with certain identifiers that are parsed to a class method to select polymers. These identifiers will differ depending on whether a GROMACS or AMBER topology was used to intialise the universe. 
+
+For example, if a **GROMACS** topology was used the dictionary will look like this:
+
+.. code-block:: python
+
+   {'Polymer_1': 'A',
+    'Polymer_2': 'B',
+    'Polymer_3': 'C',
+    ...}
+
+But if an **AMBER** topology was used, it will look like this:
+
+.. code-block:: python
+
+   {'Polymer_1': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    'Polymer_2': [11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
+    'Polymer_3': [21, 22, 23, 24, 25, 26, 27, 28, 29, 30],
+    ...}
+
+The table below shows what these identifiers for each polymer are in terms of MDAnalysis atom selection syntax.
+
+.. list-table:: **Polymer identifier codes**
+   :header-rows: 1
+   :widths: 20 20
+
+   * - **Topology Type**
+     - **Selection Method**
+   * - Amber
+     - Resids (all resids of monomers in a polymer)
+   * - Gromacs
+     - Segids (segid of a polymer)
+
+This is useful to know but it is not actually important. To select a polymer, there is a class method which can be accessed as a **universe** attribute called **select_polymer**. To select a polymer atom group, the only argument is "Polymer_x". For example,
+
+.. code-block:: python
+
+   polymer = universe.select_polymer("Polymer_1")
+   print(polymer)
+
+Printing this variable will return the same information as if you were 'printing' an madanalysis universe.
+
+5: Analysis class
+-----------------
+
+The **universe** object has been covered, so it is time to get into some nitty-gritty analysis methods. 
+
+For this there is a seperate class called **Analysis**, this doesn't need to be initialised and acts as a sort of 'library' where various predefined methods can be accessed (or added to!).
+
+These functions can be called as so:
+
+.. code-block::python
+
+   Analysis.some_analysis_method
+
+A list of accesible methods from this **Analysis** class is in progress below.
+
+.. list-table:: **Analysis methods found in the Analysis class**
+   :header-rows: 1
+   :widths: 20 20
+
+   * - **Analysis method**
+     - **How to access it**
+     - **Function**
+     - **Arguments**
+   * - Method 1
+     - Attribute
+     - Function
+     - Arguments
+
+5.1: ROG of a single polymer
+----------------------------
+
+See :ref:`This <polymer-selection>'
+
 
    
 
