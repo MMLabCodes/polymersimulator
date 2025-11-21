@@ -69,11 +69,11 @@ An example is shown below (although, bear in mind, there may be files present th
 - Highlighted in orange is a folder for a specific simulation and contains data files, trajectories and some output graphs. 
 - Highlithed in yellow is the location of this file within the polymersimulator file structure.
 
-.. image:: images/simulation_folder.PNG
+.. image:: images/simulation_folder.png
 
 It is worth explaining some of the files inside the actual simulation folder in a bit more detail:
 
-.. image:: images/simulation_files.PNG
+.. image:: images/simulation_files.png
 
 There are are different types of files:
 
