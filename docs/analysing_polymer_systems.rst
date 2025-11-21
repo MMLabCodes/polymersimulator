@@ -327,7 +327,7 @@ For this there is a seperate class called **Analysis**, this doesn't need to be 
 
 These functions can be called as so:
 
-.. code-block::python
+.. code-block:: python
 
    Analysis.some_analysis_method
 
@@ -349,7 +349,18 @@ A list of accesible methods from this **Analysis** class is in progress below.
 5.1: ROG of a single polymer
 ----------------------------
 
-See :ref:`This <polymer-selection>` for details.
+To calculate the radius of gyration of a single polymer, an atom group of a polymer needs to be defined first - see :ref:`section 4 <polymer-selection>` for details. Below is an example of how to select the first polymer within a system.
+
+.. code-block:: python
+
+   polymer_1 = universe.select_polymer("Polymer_1")
+
+Once a polymer has been selected it can be passed to the **plot_ROG** method built into the analysis class.
+
+.. code-block:: python
+
+   rog_data = Analysis.plot_ROG(universe, polymer_1)
+
 
 
    
