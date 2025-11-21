@@ -349,7 +349,7 @@ A list of accesible methods from this **Analysis** class is in progress below.
 5.1: ROG of a single polymer
 ----------------------------
 
-See :ref:`This <polymer-selection>`
+See :ref:`This <polymer-selection>` for details.
 
 
    
