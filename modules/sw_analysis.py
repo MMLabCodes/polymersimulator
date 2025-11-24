@@ -751,7 +751,7 @@ class Analysis:
         return all_binned_temperatures, all_binned_volumes
 
     @staticmethod
-    def plot_ROG(universe_object=None, atom_group=None, plot=False, graph_filename=None, graph_title=None):
+    def plot_ROG(universe_object=None, atom_group=None, atom_group_name=None, plot=False, graph_filename=None, graph_title=None):
         if universe_object is None or atom_group is None:
             print(f"""
             Please provide a universe object and atom group as arguments.
@@ -768,9 +768,9 @@ class Analysis:
             """)
             
         if graph_filename == None:
-            graph_filename = "_ROG_graph"
+            graph_filename = f"_{atom_group_name}_ROG_graph"
         if graph_title == None:
-            graph_title = "ROG_graph"
+            graph_title = f"{atom_group_name}_ROG_graph"
         
         # universe = mdanalysis univers
         # atom_group = mdanalysis atom group
@@ -788,6 +788,7 @@ class Analysis:
             plt.ylim(bottom=0)
             plt.ylim(top=20)
             plt.title(graph_title)
+            
             if hasattr(universe_object, "output_filename"):
                 # Default path is just used generally and not part of another analysis
                 graph_filepath = universe_object.output_filename + graph_filename
@@ -809,6 +810,50 @@ class Analysis:
             avg_rogs.append(rog_anal[0])
 
         return(avg_rogs)
+
+    @staticmethod
+    def plot_ROG_all_polymers(universe_object=None):
+        if universe_object is None:
+            print(f"""
+            Please provide a universe object as an argument.
+
+            EXAMPLE:
+
+            avg_rogs, rog_values = Analysis.plot_ROG_all_polymers(universe_object=universe_object)
+
+            """)
+        graph_title = universe_object.masterclass.system_name + "_" + universe_object.sim_stage + "_ROG_all"
+        avg_rogs = []
+        all_rogs = []
+        keys = []
+        for key, value in universe.masterclass.poly_sel_dict.items():
+            atom_group = universe_object.select_polymer(key)
+            avg_rog, rog_values = Analysis.plot_ROG(universe_object=universe_object, atom_group=atom_group, atom_group_name=key, plot=False)
+            avg_rogs.append(avg_rog)
+            all_rogs.append(rog_values)
+            keys.append(keys)
+
+        fig, ax = plt.subplots(figsize=(10, 6))
+
+        for key, rog_values in zip(keys, all_rogs):
+            ax.plot(rog_values, label=f"{key}")
+
+        ax.set_title(graph_title)
+        ax.set_xlabel("Frame")
+        ax.set_ylabel("Radius of Gyration (Å)")
+        ax.legend()
+        plt.tight_layout()
+        plt.show()
+
+        return avg_rogs, all_rogs       
+
+        
+
+        return(avg_rogs, all_rogs)
+            
+            
+            
+        
 
     @staticmethod
     def calc_end_to_end_dist(atom_group):
