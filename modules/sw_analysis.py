@@ -751,7 +751,22 @@ class Analysis:
         return all_binned_temperatures, all_binned_volumes
 
     @staticmethod
-    def plot_ROG(universe_object, atom_group, graph_filename=None, graph_title=None):
+    def plot_ROG(universe_object=None, atom_group=None, plot=False, graph_filename=None, graph_title=None):
+        if universe_object is None or atom_group is None:
+            print(f"""
+            Please provide a universe object and atom group as arguments.
+
+            EXAMPLE:
+
+            Analysis.plot_rog(universe_object=universe_object, atom_group=atom_group, plot=False)
+
+            If you want to plot a graph of the ROG, a few additional arguments can be passed.
+
+            EXAMPLE:
+
+            Analysis.plot_rog(universe_object=universe_object, atom_group=atom_group, plot=False
+            """)
+            
         if graph_filename == None:
             graph_filename = "_ROG_graph"
         if graph_title == None:
@@ -766,20 +781,21 @@ class Analysis:
         for ts in universe_object.universe.trajectory:
             rog.append(atom_group.radius_of_gyration())
 
-        plt.plot(rog, linewidth=0.2)
-        plt.xlabel('Time (fs)')
-        plt.ylabel(r"R$_{g}$ ($\AA$)")
-        plt.ylim(bottom=0)
-        plt.ylim(top=20)
-        plt.title(graph_title)
-        if hasattr(universe_object, "output_filename"):
-            # Default path is just used generally and not part of another analysis
-            graph_filepath = universe_object.output_filename + graph_filename
-        else:
-            # Default path is just used generally and not part of another analysis
-            graph_filepath = os.path.join(os.getcwd(), "ROG_graph")
+        if plot == True:
+            plt.plot(rog, linewidth=0.2)
+            plt.xlabel('Time (fs)')
+            plt.ylabel(r"R$_{g}$ ($\AA$)")
+            plt.ylim(bottom=0)
+            plt.ylim(top=20)
+            plt.title(graph_title)
+            if hasattr(universe_object, "output_filename"):
+                # Default path is just used generally and not part of another analysis
+                graph_filepath = universe_object.output_filename + graph_filename
+            else:
+                # Default path is just used generally and not part of another analysis
+                graph_filepath = os.path.join(os.getcwd(), "ROG_graph")
         
-        plt.savefig(graph_filepath)
+            plt.savefig(graph_filepath)
         avg_rog = sum(rog) / len(rog)
         return(avg_rog, rog)
 
