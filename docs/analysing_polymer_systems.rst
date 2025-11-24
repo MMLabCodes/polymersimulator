@@ -349,6 +349,9 @@ A list of accesible methods from this **Analysis** class is in progress below.
 5.1: ROG of a single polymer
 ----------------------------
 
+.. note::
+   For the following examples of calculating and plotting the radius of gyration of different polymers, the example simulation is a thermal cooling simulation. In some cases, these are not the best examples for these functions as the radius of gyration changes throughout the simulation. However, the usefuleness of these functions and the data plotted should be considered on a case-by-case basis. i.e. for different simulation methods and systems some data will be of more use than other data.
+
 To calculate the radius of gyration of a single polymer, an atom group of a polymer needs to be defined first - see :ref:`section 4 <polymer-selection>` for details. Below is an example of how to select the first polymer within a system.
 
 .. code-block:: python
@@ -359,7 +362,69 @@ Once a polymer has been selected it can be passed to the **plot_ROG** method bui
 
 .. code-block:: python
 
-   rog_data = Analysis.plot_ROG(universe, polymer_1)
+   avg_rog, rog_values = Analysis.plot_ROG(universe_object=universe, atom_group=polymer_1, plot=False)
+
+This will return two things:
+
+- The average value of radius of gyration 
+- A list of all radius of gyration values
+
+We can also plot a graph of this data using the same function. There are some optional arguments:
+
+- graph filename
+- graph title
+
+These are not required unless you want a specific name for the graph file or a specific title. Otherwise default (but unique) names will be asisgned to generated graphs. 
+
+.. code-block:: python
+
+   avg_rog, rog_values = Analysis.plot_ROG(universe_object=universe, atom_group=polymer_1, atom_group_name="polymer_1", plot=True, graph_filename=None, graph_title=None)
+
+This will return the same avg rog and rog value data as before, but a .png file of the graph will also be saved into the folder containing the files specific to the simulation.
+
+The graph for this example is shown below - although depending on your simulation protcol, the graph may look different.
+
+.. image:: images/rog_graph.png
+
+Further analysis can be carried out with this ROG data. It might be useful, to cross-reference it with other data output from the simulation to discern temperatures/pressure/other conditions where polymers undergo conformational changes.
+
+.. note::
+   This function - whilst in a polymer analysis guide - is a general function and any atom group can be passed to it.
+
+5.2 ROG of all polymers
+-----------------------
+
+The radius of gyration of all of the polymers within the system can also be plotted on the same graph. The function for this is called **Analysis.plot_ROG_all_polymers**.
+
+.. code-block:: python 
+
+   avg_rogs, rog_values = Analysis.plot_ROG_all_polymers(universe_object=universe_object, plot=True)
+
+This is simply a looped version of the function that plots the ROG for a single polymer, but it plots all the ROGs in the same graph. 
+
+.. image:: images/rog_all_polymer.png
+
+5.4 Fluctuations in ROG of a single polymer
+-------------------------------------------
+
+The absolute difference in the ROG of a single polymer can also be plotted. The function requires the same arguments as plotting the ROG of a single polymer.
+
+.. code-block:: python
+
+   rog_fluctuations = Analysis.plot_ROG_diff(universe_object=universe, atom_group=polymer_1, atom_group_name="polymer_1", plot=True, graph_filename=None, graph_title=None)
+
+The only output of this function a list of fluctuations between each datapoint.
+
+.. image:: images/rog_diff.png
+
+5.5 Mean fluctuations in ROG of all polymers
+--------------------------------------------
+
+Not currently working
+
+
+
+
 
 
 
