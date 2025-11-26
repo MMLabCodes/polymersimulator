@@ -100,7 +100,8 @@ class benchmark_charges():
             print("stderr:\n", e.stderr)
         self.charge_paths.append(filename)
         
-    def extract_mol2_charges(self, filename):
+    @staticmethod    
+    def extract_mol2_charges(filename):
         atom_labels = []
         charges = []
         with open(filename, 'r') as f:
@@ -124,7 +125,8 @@ class benchmark_charges():
                             pass
         return atom_labels, charges   
 
-    def extract_nagl_charges(self, filename):
+    @staticmethod
+    def extract_nagl_charges(filename):
         """
         Extract charges from the NAGL .nagl file.
 
@@ -145,7 +147,8 @@ class benchmark_charges():
                         pass
         return charges
 
-    def extract_naglmbis_charges(self, filename):
+    @staticmethod
+    def extract_naglmbis_charges(filename):
         """
         Extract charges from a NAGL-MBIS .txt file (one charge per line).
 
