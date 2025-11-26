@@ -5,12 +5,18 @@ from openff.toolkit.topology import Molecule
 from openff.units import unit
 from openff.toolkit.utils.toolkits import NAGLToolkitWrapper
 
+from rdkit import Chem
+from openff.toolkit import Molecule
+
+import subprocess
+
 import warnings
 warnings.filterwarnings("ignore", category=UserWarning, module="naglmbis.utils")
 
 import matplotlib.pyplot as plt
 import itertools
 import os as os
+import csv
 
 class benchmark_charges():
 
@@ -26,7 +32,8 @@ class benchmark_charges():
             os.path.join(self.benchmarking_dir, f)
             for f in os.listdir(self.benchmarking_dir)
             if os.path.isfile(os.path.join(self.benchmarking_dir, f))
-            and not f.lower().endswith(".png")]
+            and not f.lower().endswith((".png", ".csv"))
+        ]
 
         self.base_labels = None
         self.mbis_script_path = "/home/dan/polymersimulator/bin/calculate_mbis.sh"
@@ -62,16 +69,25 @@ class benchmark_charges():
                 self.builder.parameterize_mol(molecule_name=self.molecule_name, forcefield=self.forcefields[i], charge_model=self.charge_models[j], benchmarking_charges=True, benchmark_output=benchmark_output)
                 self.charge_paths.append(f"{benchmark_output}.mol2")
 
-    def calculate_nagl_charge(self):
+    def calculate_nagl_charge(self, mol2_file=None):
         if self.pdb_file is None or self.smiles is None:
             print(f"""pdb_file = {self.pdb_file}
             smiles = {self.smiles}
 
             please ensure both a pdb file and the smiles exist for {self.molecule_name}.")
             """)
-            
-        # Load molecule from pdb and smiles
-        mol = Molecule.from_pdb_and_smiles(self.pdb_file, self.smiles, allow_undefined_stereo=True)
+
+        if mol2_file is not None:
+            try:
+                subprocess.run(["obabel", mol2_file, "-O", "output.sdf"])
+                mol = Molecule.from_file("output.sdf")
+            except Exception as e:
+                print(f"""Error was:
+
+                {e}""")
+        else:
+            # Load molecule from pdb and smiles
+            mol = Molecule.from_pdb_and_smiles(self.pdb_file, self.smiles, allow_undefined_stereo=True)
 
         # Initialize Nagl
         nagl = NAGLToolkitWrapper()
@@ -192,6 +208,7 @@ class benchmark_charges():
         marker_cycle = itertools.cycle(['o', 's', 'd', '^', 'v', '<', '>', 'p', '*', 'h', 'H', '+', 'x'])
         line_width = 1.0
 
+        self.charge_paths.sort(key=lambda f: f.rsplit('.', 1)[-1].lower())
         for infile in self.charge_paths:
             print(infile)
             marker_style = next(marker_cycle)
@@ -239,4 +256,65 @@ class benchmark_charges():
         if show_plot==True:
             plt.show()
         plt.close()
-        print(f"Plot saved to {output_file}")       
+        print(f"Plot saved to {output_file}")   
+
+    def save_charges_to_csv(self):
+        """
+        Extract all charge data from parsed files and save into a single CSV.
+        Each row = one atom for one charge method.
+        """
+        import csv
+
+        output_csv = os.path.join(
+            self.benchmarking_dir,
+            f"{self.molecule_name}_charges.csv"
+        )
+
+        rows = []  # collected output rows
+
+        # Sort input files by extension
+        self.charge_paths.sort(key=lambda f: f.rsplit('.', 1)[-1].lower())
+
+        for infile in self.charge_paths:
+            method_name = os.path.splitext(os.path.basename(infile))[0]
+
+            if infile.endswith(".mol2"):
+                labels, charges = self.extract_mol2_charges(infile)
+            elif infile.endswith(".mol"):
+                labels, charges = extract_mol_charges(infile)
+            elif infile.endswith(".out"):
+                charges = extract_orca_charges(infile, charge_type='MULLIKEN')
+                labels = self.base_labels
+            elif infile.endswith(".nagl"):
+                charges = self.extract_nagl_charges(infile)
+                labels = self.base_labels
+            elif infile.endswith(".mbis"):
+                charges = self.extract_naglmbis_charges(infile)
+                labels = self.base_labels
+            else:
+                print(f"Skipping unsupported format: {infile}")
+                continue
+
+            if labels is None or charges is None:
+                print(f"Skipping {infile}: missing labels or charges")
+                continue
+
+            # Store each atom as a row
+            for idx, (label, charge) in enumerate(zip(labels, charges)):
+                rows.append({
+                    "atom_index": idx,
+                    "atom_label": label,
+                    "method": method_name,
+                    "charge": charge
+                })
+
+        # Write CSV
+        with open(output_csv, "w", newline="") as f:
+            writer = csv.DictWriter(
+                f,
+                fieldnames=["atom_index", "atom_label", "method", "charge"]
+            )
+            writer.writeheader()
+            writer.writerows(rows)
+
+        print(f"✅ Charge data saved to: {output_csv}")
