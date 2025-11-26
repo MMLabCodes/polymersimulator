@@ -31,8 +31,6 @@ Contents
    simulating_phas
    simulating_phas_example_script
    analysing_polymer_systems
-   packagecontents
-   module_guides
    modules
    errors
    usage
