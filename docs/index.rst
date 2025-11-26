@@ -3,7 +3,7 @@ Polymer Simulator Documentation
 
 Welcome to the **Polymer Simulator** documentation!
 
-This site will guide you through everything you need to know about installing, using, and contributing to the project. Whether you're just getting started or diving into advanced usage, you’ll find detailed explanations and examples here.
+This site  will guide you through everything you need to know about installing, using, and contributing to the project. Whether you're just getting started or diving into advanced usage, you’ll find detailed explanations and examples here.
 
 What you’ll find inside:
 ------------------------
