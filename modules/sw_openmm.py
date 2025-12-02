@@ -19,7 +19,7 @@ from openmm import *
 from openmm.app import *
 from openmm.unit import *
 from openmm.app.topology import *
-#from openmmml import MLPotential
+from openmmml import MLPotential
 
 from openbabel import openbabel, pybel
 
@@ -480,7 +480,7 @@ class BuildSimulation():
             simulation.context.setPositions(self.amb_coordinates.positions)
             
         if BuildSimulation.type_of_simulation(self) == "ANI":
-            system = self.potential.createSystem(self.ani_topology, nonbondedMethod=app.PME, nonbondedCutoff=self.nonbondedcutoff*unit.nanometers, constraints=app.HBonds)
+            system = self.potential.createSystem(self.ani_topology, nonbondedMethod=app.PME, nonbondedCutoff=self.nonbondedcutoff*nanometers, constraints=app.HBonds)
             platform = PLatform.getPlatformByName('CUDA')
             simulation = app.Simulation(self.ani_topology, system, integrator, platform)
             simulation.context.setPositions(self.ani_coordinates)
@@ -832,6 +832,154 @@ class BuildSimulation():
     def basic_NPT_help(cls):
         """Display help information for the equilibrate method."""
         print(cls.basic_NPT.__doc__) 
+
+    def basic_aNPT(self, simulation, total_steps=None, temp=None, pressure=None,
+                   filename=None, save_restart=False, restart_name=None,
+                   verbose=True):
+        """
+        Anisotropic NPT equilibration using MonteCarloAnisotropicBarostat.
+        """
+
+        equili_start_time = time.time()
+
+        # Handle filename
+        if filename is None:
+            filename = "_anisotropic_NPT_"
+        if filename is not None:
+            filename = f"_{filename}_"
+
+        # Defaults
+        if total_steps is None:
+            total_steps = self.total_steps
+        if temp is None:
+            temp = self.temp
+        if pressure is None:
+            pressure = self.pressure
+
+        if verbose:
+            print(f"""Anisotropic NPT information
+                - Total steps: {total_steps}
+                - Total simulation time: {(total_steps * self.timestep):.0f} fs
+                - Temperature: {temp} K
+                - Pressure: {pressure} atm (anisotropic)
+            """)
+
+        # Get current system state
+        state = simulation.context.getState(getPositions=True, getEnergy=True)
+        xyz = state.getPositions()
+        vx, vy, vz = state.getPeriodicBoxVectors()
+
+        # ■■■ ANISOTROPIC BAROSTAT ■■■
+        # three pressures xyz, three booleans xyz
+        barostat = MonteCarloAnisotropicBarostat(Vec3(pressure*atmosphere, pressure*atmosphere, pressure*atmosphere*5) * bar,
+    temp * kelvin,
+    False, False, True,
+    25
+)
+        
+        # Integrator
+        integrator = LangevinIntegrator(
+            temp * kelvin,
+            self.friction_coeff / picoseconds,
+            self.timestep * femtoseconds
+        )
+
+        # Platform
+        try:
+            platform = Platform.getPlatformByName("CUDA")
+            platform.setPropertyDefaultValue("Precision", "mixed")
+            print("Using CUDA platform.")
+        except Exception:
+            print("CUDA not available — using CPU.")
+            platform = Platform.getPlatformByName("CPU")
+
+        # ■■■ BUILD SYSTEM ■■■
+        sim_type = BuildSimulation.type_of_simulation(self)
+
+        if sim_type == "AMB":
+            system = self.amb_topology.createSystem(
+                nonbondedMethod=app.PME,
+                nonbondedCutoff=self.nonbondedcutoff * nanometers,
+                constraints=app.HBonds
+            )
+            system.addForce(barostat)
+            simulation = app.Simulation(self.amb_topology.topology, system, integrator, platform)
+
+        elif sim_type == "ANI":
+            system = self.potential.createSystem(
+                self.ani_topology,
+                nonbondedMethod=app.PME,
+                nonbondedCutoff=self.nonbondedcutoff * nanometers,
+                constraints=app.HBonds
+            )
+            system.addForce(barostat)
+            simulation = app.Simulation(self.ani_topology, system, integrator, platform)
+
+        elif sim_type == "GRO":
+            system = self.gro_topology.createSystem(
+                nonbondedMethod=app.PME,
+                nonbondedCutoff=self.nonbondedcutoff * nanometers,
+                constraints=app.HBonds
+            )
+            system.addForce(barostat)
+            simulation = app.Simulation(self.gro_topology.topology, system, integrator, platform)
+
+        # Set previous box vectors and positions
+        simulation.context.setPeriodicBoxVectors(vx, vy, vz)
+        simulation.context.setPositions(xyz)
+        simulation.context.setVelocitiesToTemperature(temp * kelvin)
+
+        # ■■■ REPORTERS ■■■
+        if self.savepdb_traj:
+            pdb_path = os.path.join(
+                self.output_dir,
+                f"{self.filename}_{pressure}{filename}{self.timestamp}.pdb"
+            )
+            simulation.reporters.append(app.PDBReporter(pdb_path, self.reporter_freq))
+
+        # DCD trajectory
+        dcd_root = os.path.join(
+            self.output_dir,
+            f"{self.filename}_{pressure}{filename}{self.timestamp}"
+        )
+        dcdWriter = DcdWriter(dcd_root, self.reporter_freq)
+        simulation.reporters.append(dcdWriter.dcdReporter)
+
+        # Data writer
+        data_root = os.path.join(
+            self.output_dir,
+            f"{self.filename}_{pressure}{filename}{self.timestamp}"
+        )
+        dataWriter = DataWriter(data_root, self.reporter_freq, total_steps)
+        simulation.reporters.append(dataWriter.stateDataReporter)
+
+        # ■■■ RUN SIMULATION ■■■
+        simulation.step(total_steps)
+
+        # Log timing and parameters
+        equili_end_time = time.time()
+        time_taken = equili_end_time - equili_start_time
+
+        self.log_info['Basic_NPT']['Time taken'] = time_taken
+        self.log_info['Basic_NPT']['Simulation time'] = total_steps * self.timestep
+        self.log_info['Basic_NPT']['Temperature'] = temp
+        self.log_info['Basic_NPT']['Pressure'] = pressure
+        self.log_info['Basic_NPT']['Timestep'] = self.timestep
+
+        # Final PDB
+        self.final_pdbname = os.path.join(
+            self.output_dir,
+            f"final_{filename}{self.filename}_{pressure}_atm.pdb"
+        )
+        with open(self.final_pdbname, 'w') as output:
+            PDBFile.writeFile(simulation.topology, state.getPositions(), output)
+
+        # Restart file
+        if save_restart:
+            self.save_rst(simulation, restart_name=restart_name)
+
+        return simulation, (data_root + ".txt")
+
         
     def basic_NVT(self, simulation, total_steps=None, temp=None, filename=None, save_restart=False, restart_name=None, check_acrylate=False, verbose=True):
         """
