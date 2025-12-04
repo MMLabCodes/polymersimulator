@@ -417,7 +417,10 @@ class BuildSimulation():
         """
         self.manager = manager
         self.filename = filename
-        self.output_dir = os.path.join(self.manager.systems_dir, self.filename, self.timestamp)
+        self.system_file = os.path.join(self.manager.systems_dir, self.filename)
+        if not os.path.exists(self.system_file):
+            os.makesdirs(self.system_file)
+        self.output_dir = os.path.join(self.system_file, self.timestamp)
         if not os.path.exists(self.output_dir):
             os.makedirs(self.output_dir)
         self.log_info = {'Minimization': {'Temperature':None,'Time taken': None},
